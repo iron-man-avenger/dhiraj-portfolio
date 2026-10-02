@@ -125,14 +125,14 @@ export const Hero: React.FC<HeroProps> = ({ onOpenArcade }) => {
               <span>Azure OpenAI Category</span>
             </div>
 
-            {/* Headline */}
+            {/* Headline - Style 2: Human & Craft-Driven */}
             <h1 className="text-4xl sm:text-5xl lg:text-[56px] font-extrabold text-charcoal tracking-tight leading-[1.08] font-sans">
-              Building self-correcting multi-agent systems & vision AI.
+              Engineering intelligent agents that think, verify, and endure.
             </h1>
 
-            {/* Subtitle / Intro - Natural, confident and distinct from project bullets */}
+            {/* Subtitle / Intro - Style 2: Human & Craft-Driven */}
             <p className="text-base sm:text-lg text-charcoal-muted font-normal leading-relaxed max-w-xl">
-              I’m <span className="font-semibold text-charcoal">{personalInfo.name}</span>, an AI Engineer based in {personalInfo.location}. I specialize in autonomous multi-agent systems and vision AI, engineering deterministic reliability and resilient orchestration for real-world production.
+              I’m <span className="font-semibold text-charcoal">{personalInfo.name}</span>. I bridge the gap between stochastic AI models and rock-solid deterministic software—building resilient agent swarms and computer vision systems.
             </p>
 
             {/* Clean Action Buttons */}

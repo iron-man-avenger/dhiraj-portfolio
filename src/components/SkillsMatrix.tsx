@@ -8,8 +8,9 @@ export const SkillsMatrix: React.FC = () => {
         
         {/* Header */}
         <div className="mb-16">
-          <span className="text-xs font-mono font-bold uppercase tracking-widest text-amber-dark block mb-2">
-            Technical Stack
+          <span className="text-xs font-mono font-bold uppercase tracking-widest text-amber-dark flex items-center gap-2 mb-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber" />
+            <span>Technical Stack</span>
           </span>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-charcoal tracking-tight font-sans">
             Production Skills & Architectural Domains
@@ -19,41 +20,51 @@ export const SkillsMatrix: React.FC = () => {
           </p>
         </div>
 
-        {/* Clean, Editorial Skills Directory (No Box Clutter) */}
+        {/* Clean, Editorial Skills Directory with Primary Amber Depth */}
         <div className="divide-y divide-[#E3DACD]/70 border-y border-[#E3DACD]/70">
           {skillCategories.map((category) => (
             <div 
               key={category.title}
               className="py-8 grid grid-cols-1 lg:grid-cols-12 gap-6 items-baseline transition-colors hover:bg-black/[0.01]"
             >
-              {/* Category Name & Scope (4 cols) */}
+              {/* Category Name & Scope (4 cols) with Amber Marker */}
               <div className="lg:col-span-4">
-                <h3 className="text-base font-bold text-charcoal font-sans">
-                  {category.title}
+                <h3 className="text-base font-bold text-charcoal font-sans flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber" />
+                  <span>{category.title}</span>
                 </h3>
-                <p className="text-xs text-charcoal-muted font-mono mt-1">
+                <p className="text-xs text-charcoal-muted font-mono mt-1 pl-3.5">
                   {category.description}
                 </p>
               </div>
 
-              {/* Skills List with Inline Highlights (8 cols) */}
+              {/* Skills List with Primary Accents on Expert Technologies (8 cols) */}
               <div className="lg:col-span-8 flex flex-wrap gap-2.5">
-                {category.skills.map((skill) => (
-                  <div
-                    key={skill.name}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-[#E3DACD] text-xs font-mono text-charcoal hover:border-amber transition-colors shadow-2xs group"
-                  >
-                    <span className="font-semibold">{skill.name}</span>
-                    {skill.level === 'Expert' && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-amber" />
-                    )}
-                    {skill.highlight && (
-                      <span className="text-[10px] text-charcoal-muted group-hover:text-charcoal transition-colors">
-                        — {skill.highlight}
-                      </span>
-                    )}
-                  </div>
-                ))}
+                {category.skills.map((skill) => {
+                  const isExpert = skill.level === 'Expert';
+                  return (
+                    <div
+                      key={skill.name}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono transition-all shadow-2xs group ${
+                        isExpert
+                          ? 'bg-amber/[0.08] border border-amber/35 text-charcoal hover:border-amber hover:bg-amber/15'
+                          : 'bg-white/80 border border-[#E3DACD] text-charcoal hover:border-amber/50 hover:bg-white hover:text-amber-dark'
+                      }`}
+                    >
+                      <span className={`font-semibold ${isExpert ? 'text-charcoal' : ''}`}>{skill.name}</span>
+                      {isExpert && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber shrink-0" />
+                      )}
+                      {skill.highlight && (
+                        <span className={`text-[10px] transition-colors ${
+                          isExpert ? 'text-amber-dark font-medium' : 'text-charcoal-muted group-hover:text-charcoal'
+                        }`}>
+                          — {skill.highlight}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           ))}

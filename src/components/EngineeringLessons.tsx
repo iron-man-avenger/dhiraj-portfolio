@@ -9,8 +9,9 @@ export const EngineeringLessons: React.FC = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
           <div>
-            <span className="text-xs font-mono font-bold uppercase tracking-widest text-amber-dark block mb-2">
-              Engineering Mindset
+            <span className="text-xs font-mono font-bold uppercase tracking-widest text-amber-dark flex items-center gap-2 mb-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber" />
+              <span>Engineering Mindset</span>
             </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-charcoal tracking-tight font-sans">
               Production Principles & Architectural Discipline
@@ -29,7 +30,7 @@ export const EngineeringLessons: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
           
           {/* Left Column (5 cols): Case Autopsy Note */}
-          <div className="lg:col-span-5 p-8 rounded-3xl bg-[#F4EFE6] border border-[#E3DACD]">
+          <div className="lg:col-span-5 p-8 rounded-3xl bg-[#F4EFE6] border border-[#E3DACD] hover:border-amber/40 hover:shadow-glow-amber/5 transition-all duration-300">
             <span className="text-[10px] font-mono uppercase tracking-widest text-amber-dark font-bold block mb-2">
               Production Autopsy
             </span>

@@ -8,8 +8,9 @@ export const ExperienceTimeline: React.FC = () => {
         
         {/* Header */}
         <div className="mb-16">
-          <span className="text-xs font-mono font-bold uppercase tracking-widest text-amber-dark block mb-2">
-            Career & Honors
+          <span className="text-xs font-mono font-bold uppercase tracking-widest text-amber-dark flex items-center gap-2 mb-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber" />
+            <span>Career & Honors</span>
           </span>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-charcoal tracking-tight font-sans">
             Work Journey & Recognized Credentials
@@ -27,9 +28,16 @@ export const ExperienceTimeline: React.FC = () => {
               <div key={idx} className="py-8 flex flex-col gap-3">
                 <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1">
                   <div>
-                    <h3 className="text-lg font-bold text-charcoal font-sans">
-                      {exp.role}
-                    </h3>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="text-lg font-bold text-charcoal font-sans">
+                        {exp.role}
+                      </h3>
+                      {exp.period.includes('Present') && (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-amber/10 text-amber-dark border border-amber/25">
+                          Present
+                        </span>
+                      )}
+                    </div>
                     <span className="text-xs font-mono text-amber-dark font-semibold">
                       {exp.company} — {exp.location}
                     </span>
@@ -52,9 +60,16 @@ export const ExperienceTimeline: React.FC = () => {
                   ))}
                 </ul>
 
-                <div className="flex flex-wrap gap-2 pt-2 text-[11px] font-mono text-charcoal-muted">
-                  <span className="font-semibold text-charcoal">Stack:</span>
-                  {exp.skills.join(' • ')}
+                <div className="flex flex-wrap items-center gap-1.5 pt-2">
+                  <span className="text-[11px] font-mono font-bold text-charcoal mr-1">Stack:</span>
+                  {exp.skills.map((s) => (
+                    <span 
+                      key={s} 
+                      className="px-2 py-0.5 rounded-md bg-white/90 border border-[#E3DACD] text-[10px] font-mono text-charcoal hover:border-amber/50 hover:text-amber-dark transition-colors"
+                    >
+                      {s}
+                    </span>
+                  ))}
                 </div>
               </div>
             ))}
@@ -65,30 +80,53 @@ export const ExperienceTimeline: React.FC = () => {
             
             {/* Awards */}
             <div>
-              <span className="text-xs font-mono font-bold uppercase tracking-widest text-amber-dark block mb-3">
-                Recognitions
+              <span className="text-xs font-mono font-bold uppercase tracking-widest text-amber-dark flex items-center gap-2 mb-3">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber" />
+                <span>Recognitions</span>
               </span>
               <div className="space-y-4">
-                {awards.map((award, idx) => (
-                  <div key={idx} className="pb-3 border-b border-[#E3DACD]/70">
-                    <span className="text-[10px] font-mono text-charcoal-muted block">{award.year} • {award.organization}</span>
-                    <h4 className="text-sm font-bold text-charcoal font-sans mt-0.5">{award.title}</h4>
-                    <p className="text-xs text-charcoal-muted mt-1 leading-relaxed">{award.description}</p>
-                  </div>
-                ))}
+                {awards.map((award, idx) => {
+                  const isTopAward = idx === 0;
+                  return (
+                    <div 
+                      key={idx} 
+                      className={`pb-3.5 border-b border-[#E3DACD]/70 transition-all ${
+                        isTopAward 
+                          ? 'p-4 rounded-2xl bg-amber/[0.08] border border-amber/30 shadow-2xs' 
+                          : ''
+                      }`}
+                    >
+                      <span className="text-[10px] font-mono text-charcoal-muted flex items-center justify-between">
+                        <span>{award.year} • {award.organization}</span>
+                        {isTopAward && (
+                          <span className="text-amber-dark font-bold text-[10px] uppercase tracking-wider">Top Honor</span>
+                        )}
+                      </span>
+                      <h4 className="text-sm font-bold text-charcoal font-sans mt-0.5">
+                        {award.title}
+                      </h4>
+                      <p className="text-xs text-charcoal-muted mt-1 leading-relaxed">
+                        {award.description}
+                      </p>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
             {/* Certifications */}
             <div>
-              <span className="text-xs font-mono font-bold uppercase tracking-widest text-amber-dark block mb-3">
-                Certifications
+              <span className="text-xs font-mono font-bold uppercase tracking-widest text-amber-dark flex items-center gap-2 mb-3">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber" />
+                <span>Certifications</span>
               </span>
               <div className="space-y-2 text-xs font-mono">
                 {certifications.map((cert, idx) => (
                   <div key={idx} className="flex items-center justify-between py-1.5 border-b border-[#E3DACD]/50">
                     <span className="font-medium text-charcoal">{cert.name}</span>
-                    <span className="text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-bold">Active</span>
+                    <span className="text-[10px] text-amber-dark bg-amber/10 border border-amber/25 px-2 py-0.5 rounded font-mono font-bold">
+                      Active
+                    </span>
                   </div>
                 ))}
               </div>
@@ -96,12 +134,18 @@ export const ExperienceTimeline: React.FC = () => {
 
             {/* Education */}
             <div>
-              <span className="text-xs font-mono font-bold uppercase tracking-widest text-amber-dark block mb-2">
-                Education
+              <span className="text-xs font-mono font-bold uppercase tracking-widest text-amber-dark flex items-center gap-2 mb-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber" />
+                <span>Education</span>
               </span>
               <div className="text-xs">
-                <h4 className="font-bold text-charcoal font-sans">Master's in Computer Application (MCA)</h4>
-                <p className="font-mono text-charcoal-muted text-[11px] mt-0.5">Charotar University of Science & Tech • 2021–2023</p>
+                <h4 className="font-bold text-charcoal font-sans flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber" />
+                  <span>Master's in Computer Application (MCA)</span>
+                </h4>
+                <p className="font-mono text-charcoal-muted text-[11px] mt-0.5 pl-3.5">
+                  Charotar University of Science & Tech • 2021–2023
+                </p>
               </div>
             </div>
 

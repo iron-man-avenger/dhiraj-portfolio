@@ -36,8 +36,9 @@ export const ProjectsSection: React.FC = () => {
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
           <div>
-            <span className="text-xs font-mono font-bold uppercase tracking-widest text-amber-dark block mb-2">
-              Selected Works
+            <span className="text-xs font-mono font-bold uppercase tracking-widest text-amber-dark flex items-center gap-2 mb-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber" />
+              <span>Selected Works</span>
             </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-charcoal tracking-tight font-sans">
               Flagship Engineering Projects
@@ -68,7 +69,7 @@ export const ProjectsSection: React.FC = () => {
           </div>
         </div>
 
-        {/* Clean, Editorial Projects Grid (Zero Box Clutter) */}
+        {/* Clean, Editorial Projects Grid with Primary Color Accents */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {filteredProjects.map((project, idx) => (
             <motion.div
@@ -77,13 +78,15 @@ export const ProjectsSection: React.FC = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: idx * 0.05 }}
-              className="p-8 rounded-3xl bg-white/70 border border-[#E3DACD]/80 hover:bg-white hover:border-[#D5CABE] hover:shadow-elevated transition-all duration-300 flex flex-col justify-between group"
+              className="p-8 rounded-3xl bg-white/80 border border-[#E3DACD]/90 hover:bg-white hover:border-amber/40 hover:shadow-glow-amber/5 transition-all duration-300 flex flex-col justify-between group"
             >
               <div>
-                {/* Meta Top Line */}
+                {/* Meta Top Line with Primary Amber Category Pill */}
                 <div className="flex items-center justify-between text-xs font-mono text-charcoal-muted mb-4">
                   <span className="font-semibold text-charcoal">{project.company}</span>
-                  <span>{project.category}</span>
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-amber/10 text-amber-dark border border-amber/25">
+                    {project.category}
+                  </span>
                 </div>
 
                 {/* Title */}
@@ -96,24 +99,28 @@ export const ProjectsSection: React.FC = () => {
                   {project.summary}
                 </p>
 
-                {/* Clean Metrics Ticker (Inline text with subtle dot dividers, no chunky boxes) */}
+                {/* Clean Metrics Ticker with Highlighted Metric Values */}
                 <div className="pt-4 border-t border-[#EAE2D5] flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-mono mb-6">
                   {project.metrics.slice(0, 3).map((m, mIdx) => (
                     <div key={mIdx} className="flex items-center gap-1.5">
                       <span className="text-charcoal-muted">{m.label}:</span>
-                      <strong className="text-charcoal font-semibold">{m.value}</strong>
+                      <strong className="text-charcoal font-bold group-hover:text-amber-dark transition-colors">
+                        {m.value}
+                      </strong>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Action Link */}
+              {/* Action Link with Primary Accent Icon Badge */}
               <button
                 onClick={() => handleOpenModal(project)}
                 className="inline-flex items-center gap-2 text-xs font-bold text-charcoal hover:text-amber-dark transition-colors pt-2 self-start group/btn"
               >
                 <span>Examine System Architecture</span>
-                <ArrowUpRight className="w-4 h-4 text-amber transition-transform group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
+                <div className="w-5 h-5 rounded-full bg-amber/10 flex items-center justify-center text-amber-dark group-hover/btn:bg-amber group-hover/btn:text-charcoal transition-colors">
+                  <ArrowUpRight className="w-3 h-3 transition-transform group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
+                </div>
               </button>
             </motion.div>
           ))}
