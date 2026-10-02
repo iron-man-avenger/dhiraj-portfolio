@@ -22,7 +22,7 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F7F2EB] text-[#2B302C] font-sans antialiased selection:bg-[#D4A066] selection:text-[#1E2320]">
+    <div className="min-h-screen bg-[#F7F2EB] text-[#2B302C] font-sans antialiased selection:bg-[#D4A066] selection:text-[#1E2320] overflow-x-clip max-w-full">
       
       {/* Top Glass Navigation */}
       <Navbar
@@ -31,7 +31,7 @@ export function App() {
         onToggleSound={handleToggleSound}
       />
 
-      <main className="relative">
+      <main className="relative overflow-x-clip max-w-full">
         {/* Hero with Signature Interactive Bar Chart (Directly inspired by reference image) */}
         <Hero onOpenArcade={() => setIsArcadeOpen(true)} />
 
