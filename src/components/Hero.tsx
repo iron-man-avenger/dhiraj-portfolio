@@ -49,7 +49,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenArcade }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 relative">
         
         {/* Right Watermark Logo: Large-Scale & Light-Shade (Same as Shreeji reference) */}
-        <div className="absolute -right-16 sm:-right-10 md:right-[-4%] lg:right-[-2%] top-1/2 -translate-y-1/2 w-[380px] sm:w-[500px] md:w-[620px] lg:w-[720px] xl:w-[800px] aspect-square pointer-events-none select-none z-0 opacity-20 sm:opacity-25 transition-all duration-500">
+        <div className="absolute -right-24 sm:-right-20 md:right-[-8%] lg:right-[-12%] xl:right-[-15%] top-1/2 -translate-y-1/2 w-[380px] sm:w-[500px] md:w-[620px] lg:w-[720px] xl:w-[800px] aspect-square pointer-events-none select-none z-0 opacity-20 sm:opacity-25 transition-all duration-500">
           {/* Subtle Ambient Radial Lighting */}
           <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-amber/[0.15] via-[#FAF7F2]/40 to-transparent blur-3xl" />
           
