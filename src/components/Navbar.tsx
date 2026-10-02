@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Volume2, VolumeX, Gamepad2, Menu, X, ArrowUpRight } from 'lucide-react';
+import { Volume2, VolumeX, Gamepad2, Menu, X } from 'lucide-react';
 import { sounds } from '../utils/soundEffects';
 
 interface NavbarProps {
@@ -10,15 +10,15 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ onOpenArcade, soundMuted, onToggleSound }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<string>('Overview');
+  const [activeTab, setActiveTab] = useState<string>('OVERVIEW');
 
   const navLinks = [
-    { label: 'Overview', href: '#overview' },
-    { label: 'Simulator', href: '#simulator' },
-    { label: 'Projects', href: '#projects' },
-    { label: 'Stack', href: '#skills' },
-    { label: 'Craft', href: '#principles' },
-    { label: 'Journey', href: '#journey' },
+    { label: 'OVERVIEW', href: '#overview' },
+    { label: 'PROJECTS', href: '#projects' },
+    { label: 'SIMULATOR', href: '#simulator' },
+    { label: 'STACK', href: '#skills' },
+    { label: 'PRINCIPLES', href: '#principles' },
+    { label: 'JOURNEY', href: '#journey' },
   ];
 
   const handleLinkClick = (label: string) => {
@@ -30,70 +30,64 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenArcade, soundMuted, onTogg
   return (
     <header className="fixed top-4 left-0 right-0 z-50 flex justify-center px-4 sm:px-6 pointer-events-none">
       <div className="w-full max-w-7xl pointer-events-auto">
-        <nav className="glass-panel rounded-full px-3.5 sm:px-6 py-2 flex items-center justify-between shadow-elevated border border-[#E0D5C3]/90 bg-[#F7F2EB]/90 backdrop-blur-xl transition-all duration-300">
+        <nav className="bg-white/95 backdrop-blur-md rounded-2xl px-5 sm:px-7 py-3 flex items-center justify-between border border-[#E3DACD] shadow-sm transition-all duration-300">
           
-          {/* Left: Brand Monogram & Status */}
+          {/* Left: Brand Monogram Box + Name */}
           <a 
             href="#overview" 
-            onClick={() => handleLinkClick('Overview')}
-            className="flex items-center gap-2.5 group py-0.5 pl-1"
+            onClick={() => handleLinkClick('OVERVIEW')}
+            className="flex items-center gap-3 group"
           >
-            <div className="w-8 h-8 rounded-full bg-charcoal flex items-center justify-center text-amber font-extrabold font-sans text-xs tracking-wider shadow-sm transition-transform duration-300 group-hover:scale-105">
+            <div className="w-8 h-8 rounded-lg bg-[#2B302C] flex items-center justify-center text-white font-extrabold font-mono text-xs tracking-wider shadow-2xs transition-transform duration-200 group-hover:scale-105">
               DK
             </div>
-            <div className="hidden sm:flex flex-col">
-              <span className="font-bold text-charcoal text-xs tracking-tight group-hover:text-amber-dark transition-colors whitespace-nowrap">
-                Dhiraj Kumar
-              </span>
-              <span className="text-[10px] font-mono text-charcoal-muted tracking-wider uppercase flex items-center gap-1 leading-none mt-0.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                AI Engineer
-              </span>
-            </div>
+            <span className="font-extrabold text-xs sm:text-sm tracking-wider uppercase text-[#2B302C] font-sans group-hover:text-amber-dark transition-colors whitespace-nowrap">
+              DHIRAJ KUMAR
+            </span>
           </a>
 
-          {/* Center: Sleek Segmented Pill Navigation */}
-          <div className="hidden md:flex items-center gap-1 p-1 bg-white/70 rounded-full border border-[#E5DDCF]/80 shadow-inner">
-            {navLinks.map((link) => {
-              const isActive = activeTab === link.label;
-              return (
+          {/* Center: Slash-Separated Navigation Links */}
+          <div className="hidden md:flex items-center gap-2.5 lg:gap-4 text-xs font-bold uppercase tracking-wider text-[#2B302C]">
+            {navLinks.map((link, idx) => (
+              <React.Fragment key={link.label}>
+                {idx > 0 && (
+                  <span className="text-[#2B302C]/30 select-none font-normal">/</span>
+                )}
                 <a
-                  key={link.label}
                   href={link.href}
                   onClick={() => handleLinkClick(link.label)}
-                  className={`text-xs font-semibold px-3.5 py-1.5 rounded-full transition-all duration-200 whitespace-nowrap ${
-                    isActive
-                      ? 'bg-charcoal text-white shadow-sm'
-                      : 'text-charcoal-muted hover:text-charcoal hover:bg-black/[0.04]'
+                  className={`transition-colors py-1 ${
+                    activeTab === link.label 
+                      ? 'text-[#2B302C] font-extrabold' 
+                      : 'text-[#2B302C]/75 hover:text-amber-dark'
                   }`}
                 >
                   {link.label}
                 </a>
-              );
-            })}
+              </React.Fragment>
+            ))}
           </div>
 
-          {/* Right: Compact Utility Cluster */}
-          <div className="flex items-center gap-2 pr-1">
-            
+          {/* Right: Sound FX, Arcade & Outlined HIRE ME Button */}
+          <div className="flex items-center gap-2 sm:gap-3">
             {/* Audio FX Toggle */}
             <button
               onClick={() => {
                 sounds.playTap();
                 onToggleSound();
               }}
-              className={`w-8 h-8 rounded-full border transition-all duration-200 flex items-center justify-center ${
+              className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl border transition-all duration-200 flex items-center justify-center ${
                 soundMuted 
-                  ? 'border-[#E3DACD] bg-white/60 text-charcoal-muted hover:text-charcoal hover:bg-white' 
-                  : 'border-amber/60 bg-amber/15 text-charcoal shadow-sm'
+                  ? 'border-[#E3DACD] bg-white text-charcoal-muted hover:text-[#2B302C] hover:border-[#2B302C]' 
+                  : 'border-[#2B302C] bg-[#2B302C]/5 text-[#2B302C]'
               }`}
-              title={soundMuted ? "Unmute UI Audio FX" : "Mute UI Audio FX"}
+              title={soundMuted ? "Unmute Interstellar Soundtrack" : "Mute Audio FX"}
               aria-label="Sound Toggle"
             >
               {soundMuted ? (
-                <VolumeX className="w-3.5 h-3.5 text-charcoal-muted" />
+                <VolumeX className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-charcoal-muted" />
               ) : (
-                <Volume2 className="w-3.5 h-3.5 text-amber-dark" />
+                <Volume2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-dark" />
               )}
             </button>
 
@@ -103,21 +97,19 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenArcade, soundMuted, onTogg
                 sounds.playClick();
                 onOpenArcade();
               }}
-              className="px-3 py-1.5 rounded-full bg-charcoal text-amber text-xs font-bold flex items-center gap-1.5 hover:bg-charcoal-deep transition-all transform hover:scale-[1.03] shadow-sm group whitespace-nowrap"
+              className="hidden xl:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#2B302C]/30 hover:border-[#2B302C] text-[#2B302C] text-xs font-mono font-bold transition-all"
             >
-              <Gamepad2 className="w-3.5 h-3.5 text-amber group-hover:rotate-12 transition-transform" />
-              <span className="hidden sm:inline">Arcade</span>
-              <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-amber/20 text-amber font-normal">GAME</span>
+              <Gamepad2 className="w-3.5 h-3.5 text-amber-dark" />
+              <span>ARCADE</span>
             </button>
 
-            {/* Contact CTA */}
+            {/* Outlined "HIRE ME" Button */}
             <a
               href="#contact"
               onClick={() => sounds.playTap()}
-              className="px-3.5 py-1.5 rounded-full bg-amber text-charcoal-deep text-xs font-bold hover:bg-amber-light transition-all shadow-sm flex items-center gap-1 whitespace-nowrap"
+              className="px-4 sm:px-6 py-2 rounded-xl border border-[#2B302C] text-[#2B302C] text-xs font-bold uppercase tracking-wider hover:bg-[#2B302C] hover:text-white transition-all shadow-2xs whitespace-nowrap"
             >
-              <span>Contact</span>
-              <ArrowUpRight className="w-3.5 h-3.5" />
+              HIRE ME
             </a>
 
             {/* Mobile Menu Button */}
@@ -126,41 +118,52 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenArcade, soundMuted, onTogg
                 sounds.playTap();
                 setMobileMenuOpen(!mobileMenuOpen);
               }}
-              className="md:hidden p-1.5 rounded-full border border-[#E3DACD] text-charcoal hover:bg-white transition-colors ml-1"
+              className="md:hidden p-2 rounded-xl border border-[#2B302C]/30 text-[#2B302C] hover:bg-neutral-100 transition-colors ml-1"
               aria-label="Toggle Menu"
             >
               {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
             </button>
           </div>
+
         </nav>
 
         {/* Mobile Menu Drawer */}
         {mobileMenuOpen && (
           <div className="md:hidden mt-2">
-            <div className="glass-panel rounded-3xl p-4 border border-[#E3DACD] shadow-elevated bg-[#F7F2EB]/95 backdrop-blur-xl flex flex-col gap-1.5">
+            <div className="bg-white/95 backdrop-blur-xl rounded-2xl p-5 border border-[#E3DACD] shadow-elevated flex flex-col gap-2">
               {navLinks.map((link) => (
                 <a
                   key={link.label}
                   href={link.href}
                   onClick={() => handleLinkClick(link.label)}
-                  className="text-xs font-semibold text-charcoal py-2 px-3 rounded-xl hover:bg-white/80 transition-colors flex items-center justify-between"
+                  className="text-xs font-bold uppercase tracking-wider text-[#2B302C] py-2.5 px-3 rounded-xl hover:bg-neutral-100 transition-colors flex items-center justify-between"
                 >
                   <span>{link.label}</span>
-                  <span className="text-[10px] text-charcoal-muted">➜</span>
+                  <span className="text-[10px] text-[#2B302C]/40">➜</span>
                 </a>
               ))}
-              <div className="pt-2 border-t border-[#E5DDCF] flex items-center gap-2 mt-1">
+              <div className="pt-3 border-t border-[#E3DACD] flex flex-col gap-2 mt-1">
                 <button
                   onClick={() => {
                     sounds.playClick();
                     onOpenArcade();
                     setMobileMenuOpen(false);
                   }}
-                  className="flex-1 py-2 rounded-xl bg-charcoal text-amber text-xs font-bold flex items-center justify-center gap-1.5"
+                  className="w-full py-2.5 rounded-xl border border-[#2B302C]/30 text-[#2B302C] text-xs font-mono font-bold flex items-center justify-center gap-2 hover:bg-neutral-50"
                 >
-                  <Gamepad2 className="w-3.5 h-3.5" />
-                  <span>Play Arcade Game</span>
+                  <Gamepad2 className="w-4 h-4 text-amber-dark" />
+                  <span>PLAY ARCADE GAME</span>
                 </button>
+                <a
+                  href="#contact"
+                  onClick={() => {
+                    sounds.playTap();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full py-2.5 rounded-xl bg-[#2B302C] text-white text-xs font-bold uppercase tracking-wider text-center"
+                >
+                  HIRE ME
+                </a>
               </div>
             </div>
           </div>
