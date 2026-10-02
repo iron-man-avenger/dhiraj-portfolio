@@ -33,15 +33,16 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenArcade, soundMuted, onTogg
       <div className="w-full max-w-7xl pointer-events-auto">
         <nav className="bg-white/95 backdrop-blur-md rounded-2xl px-5 sm:px-7 py-3 flex items-center justify-between border border-[#E3DACD] shadow-sm transition-all duration-300">
           
-          {/* Left: Brand Monogram Box + Name */}
+          {/* Left: Brand Logo + Name (Direct, No Box) */}
           <a 
             href="#overview" 
             onClick={() => handleLinkClick('OVERVIEW')}
-            className="flex items-center gap-3 group"
+            className="flex items-center gap-2.5 sm:gap-3 group"
           >
-            <div className="w-8 h-8 rounded-lg bg-[#2B302C] p-1 flex items-center justify-center shadow-2xs transition-transform duration-200 group-hover:scale-105">
-              <DhirajLogo variant="on-dark" className="w-5 h-5" />
-            </div>
+            <DhirajLogo 
+              variant="light" 
+              className="w-7 h-7 sm:w-8 sm:h-8 transition-transform duration-200 group-hover:scale-105 shrink-0" 
+            />
             <span className="font-extrabold text-xs sm:text-sm tracking-wider uppercase text-[#2B302C] font-sans group-hover:text-amber-dark transition-colors whitespace-nowrap">
               DHIRAJ KUMAR
             </span>

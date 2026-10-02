@@ -1,23 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { 
-  ArrowRight,
-  Play,
-  Square
+  ArrowRight
 } from 'lucide-react';
-import { personalInfo, signatureChartData } from '../data/portfolioData';
-import { sounds, INTERSTELLAR_NODES } from '../utils/soundEffects';
+import { personalInfo } from '../data/portfolioData';
+import { sounds } from '../utils/soundEffects';
+import { DhirajLogo } from './DhirajLogo';
 
 interface HeroProps {
   onOpenArcade: () => void;
 }
 
-const TARGET_MOTIF = ['A', 'E', 'B', 'E', 'C', 'E', 'D', 'E'];
-
 export const Hero: React.FC<HeroProps> = ({ onOpenArcade }) => {
-  const [activeBar, setActiveBar] = useState<number | null>(2);
-  const [matchedCount, setMatchedCount] = useState<number>(0);
-  const [hasWon, setHasWon] = useState<boolean>(false);
   const [isPlayingTheme, setIsPlayingTheme] = useState(false);
   const cancelThemeRef = useRef<(() => void) | null>(null);
 
@@ -29,43 +22,6 @@ export const Hero: React.FC<HeroProps> = ({ onOpenArcade }) => {
       }
     };
   }, []);
-
-  const handleBarTrigger = (idx: number) => {
-    if (cancelThemeRef.current) {
-      cancelThemeRef.current();
-      cancelThemeRef.current = null;
-      setIsPlayingTheme(false);
-    }
-    setActiveBar(idx);
-    const node = INTERSTELLAR_NODES[idx];
-    if (node) {
-      // Interactive tune matching game (silent hover)
-      if (!hasWon) {
-        const expectedNote = TARGET_MOTIF[matchedCount];
-        if (node.note === expectedNote) {
-          const nextCount = matchedCount + 1;
-          setMatchedCount(nextCount);
-          if (nextCount === TARGET_MOTIF.length) {
-            setHasWon(true);
-            sounds.playTesseractVictory();
-          }
-        } else {
-          // If they hit 'A', start at 1, else reset
-          if (node.note === TARGET_MOTIF[0]) {
-            setMatchedCount(1);
-          } else {
-            setMatchedCount(0);
-          }
-        }
-      }
-    }
-  };
-
-  const handleResetGame = () => {
-    setMatchedCount(0);
-    setHasWon(false);
-    sounds.playTap();
-  };
 
   const handlePlayFullSuite = () => {
     if (isPlayingTheme) {
@@ -79,9 +35,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenArcade }) => {
 
     setIsPlayingTheme(true);
     const cancel = sounds.playInterstellarTheme(
-      (bIdx) => {
-        setActiveBar(bIdx);
-      },
+      () => {},
       () => {
         setIsPlayingTheme(false);
         cancelThemeRef.current = null;
@@ -90,27 +44,12 @@ export const Hero: React.FC<HeroProps> = ({ onOpenArcade }) => {
     cancelThemeRef.current = cancel;
   };
 
-  // Support sweeping touch on mobile devices
-  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (e.touches.length > 0) {
-      const touch = e.touches[0];
-      const element = document.elementFromPoint(touch.clientX, touch.clientY);
-      const barElem = element?.closest('[data-bar-index]');
-      if (barElem) {
-        const idx = Number(barElem.getAttribute('data-bar-index'));
-        if (!isNaN(idx) && idx !== activeBar) {
-          handleBarTrigger(idx);
-        }
-      }
-    }
-  };
-
   return (
-    <section id="overview" className="relative pt-28 pb-16 md:pt-36 md:pb-20 overflow-hidden">
+    <section id="overview" className="relative pt-28 pb-16 md:pt-36 md:pb-24 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
         
         {/* Top: Editorial Hero Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
           
           {/* Left Column (7 cols): Clean, Spacious Typography */}
           <div className="lg:col-span-7 flex flex-col gap-6">
@@ -133,8 +72,8 @@ export const Hero: React.FC<HeroProps> = ({ onOpenArcade }) => {
               I’m <span className="font-semibold text-charcoal">{personalInfo.name}</span>. I bridge the gap between stochastic AI models and rock-solid deterministic software—building resilient agent swarms and computer vision systems.
             </p>
 
-            {/* Clean Action Buttons */}
-            <div className="flex flex-wrap items-center gap-4 pt-2">
+            {/* Clean Action Buttons & Theme Audio Control */}
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-2">
               <a
                 href="#projects"
                 onClick={() => sounds.playClick()}
@@ -152,12 +91,26 @@ export const Hero: React.FC<HeroProps> = ({ onOpenArcade }) => {
                 <span>Agent Simulator</span>
               </a>
 
+              {/* Theme Soundtrack Audio Pill */}
+              <button
+                onClick={handlePlayFullSuite}
+                className={`px-4 py-2.5 rounded-full border text-xs font-mono font-semibold transition-all duration-200 flex items-center gap-2 shadow-2xs ${
+                  isPlayingTheme
+                    ? 'bg-amber text-charcoal border-amber shadow-glow-amber animate-pulse'
+                    : 'bg-white/80 border-[#E3DACD] text-charcoal hover:border-amber hover:text-amber-dark hover:bg-white'
+                }`}
+                title={isPlayingTheme ? "Pause Interstellar Theme" : "Play Hans Zimmer Interstellar Theme"}
+              >
+                <span className={`w-2 h-2 rounded-full ${isPlayingTheme ? 'bg-charcoal animate-ping' : 'bg-amber'}`} />
+                <span>{isPlayingTheme ? 'Playing Theme' : 'Play Theme'}</span>
+              </button>
+
               <button
                 onClick={() => {
                   sounds.playClick();
                   onOpenArcade();
                 }}
-                className="px-4 py-3 text-xs font-bold text-charcoal-muted hover:text-charcoal transition-colors flex items-center gap-1.5"
+                className="px-3.5 py-2.5 text-xs font-bold text-charcoal-muted hover:text-charcoal transition-colors flex items-center gap-1.5"
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-amber" />
                 <span>Play Mini-Game</span>
@@ -165,185 +118,22 @@ export const Hero: React.FC<HeroProps> = ({ onOpenArcade }) => {
             </div>
           </div>
 
-          {/* Right Column (5 cols): Interactive Interstellar Pipe Organ & Theme Suite */}
-          <div className="lg:col-span-5 relative w-full pt-1">
-            <div className="p-5 sm:p-6 rounded-3xl bg-[#F4EFE6]/90 border border-[#E3DACD] shadow-sm">
-              
-              {/* Header: Hans Zimmer Pipe Organ Tribute */}
-              <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#E3DACD]/70 gap-2">
-                <div>
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-amber-dark font-bold block">
-                    Hans Zimmer • First Step
-                  </span>
-                  <h3 className="text-xs font-bold text-charcoal font-sans mt-0.5">
-                    Interactive Pipe Organ Synthesizer
-                  </h3>
-                </div>
+          {/* Right Column (5 cols): Sculptural Brand Logo in Large Scale (Replacing Synthesizer Box) */}
+          <div className="lg:col-span-5 flex items-center justify-center relative select-none w-full py-6 lg:py-0">
+            {/* Subtle Ambient Radial Lighting */}
+            <div className="absolute w-[280px] sm:w-[380px] lg:w-[460px] aspect-square rounded-full bg-gradient-to-tr from-amber/[0.12] via-[#FAF7F2]/50 to-transparent blur-3xl pointer-events-none" />
 
-                <div className="handwriting text-xl text-charcoal font-bold transform -rotate-3 select-none">
-                  Harmonic Motif
-                </div>
-              </div>
-
-              {/* Minimalist Interstellar Challenge & Theme Play Ribbon (Zero Clutter) */}
-              <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#E3DACD]/70 text-xs font-mono gap-2">
-                {/* Challenge Progress / Victory Announcement */}
-                <div className="flex items-center gap-2 min-w-0">
-                  <span className="text-amber text-sm select-none">🎹</span>
-                  {hasWon ? (
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className="font-extrabold text-amber-dark flex items-center gap-1 text-[11px] sm:text-xs">
-                        <span className="animate-spin text-amber">✦</span>
-                        <span>Tesseract Resonance Unlocked! (100% Match)</span>
-                      </span>
-                      <button
-                        onClick={handleResetGame}
-                        className="text-[10px] text-charcoal underline hover:text-amber-dark ml-1"
-                      >
-                        Play Again
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className="text-[10px] sm:text-[11px] font-semibold text-charcoal">Play Tune:</span>
-                      <div className="flex items-center gap-1">
-                        {TARGET_MOTIF.map((letter, i) => {
-                          const isDone = matchedCount > i;
-                          const isNext = matchedCount === i;
-                          return (
-                            <span
-                              key={i}
-                              className={`px-1.5 py-0.5 rounded text-[10px] font-bold transition-all ${
-                                isDone
-                                  ? 'bg-amber text-charcoal shadow-sm'
-                                  : isNext
-                                    ? 'bg-charcoal text-white ring-1 ring-amber animate-pulse'
-                                    : 'bg-black/5 text-charcoal-muted'
-                              }`}
-                              title={`Step ${i + 1}: ${letter}`}
-                            >
-                              {letter}
-                            </span>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Actual Theme Play Button */}
-                <button
-                  onClick={handlePlayFullSuite}
-                  className={`px-3 py-1.5 rounded-full border text-[11px] font-mono font-semibold transition-all duration-200 flex items-center gap-1.5 shrink-0 shadow-sm ${
-                    isPlayingTheme
-                      ? 'bg-amber text-charcoal border-amber shadow-glow-amber animate-pulse'
-                      : 'bg-white/90 border-[#E0D5C3] text-charcoal hover:border-amber hover:text-amber-dark hover:bg-white'
-                  }`}
-                  title={isPlayingTheme ? "Stop Interstellar Theme" : "Play Actual Hans Zimmer Interstellar Theme"}
-                >
-                  {isPlayingTheme ? (
-                    <Square className="w-2.5 h-2.5 fill-current" />
-                  ) : (
-                    <Play className="w-2.5 h-2.5 fill-current text-amber-dark" />
-                  )}
-                  <span>{isPlayingTheme ? 'Playing...' : 'Play Theme'}</span>
-                </button>
-              </div>
-
-              {/* The 12-Bar Interactive Musical Keyboard & Telemetry Graph */}
-              <div 
-                onTouchStart={handleTouchMove}
-                onTouchMove={handleTouchMove}
-                className="h-52 sm:h-56 w-full flex items-end justify-between gap-1 sm:gap-1.5 px-2 pb-2 pt-6 bg-white/70 rounded-2xl border border-[#E8DFC9] relative select-none touch-pan-y"
-              >
-                {signatureChartData.map((bar, idx) => {
-                  const isAmber = bar.isAccent;
-                  const isHovered = activeBar === idx;
-                  const nodeMeta = INTERSTELLAR_NODES[idx];
-
-                  return (
-                    <div 
-                      key={bar.label}
-                      data-bar-index={idx}
-                      onMouseEnter={() => handleBarTrigger(idx)}
-                      onClick={() => handleBarTrigger(idx)}
-                      className="flex-1 h-full flex flex-col justify-end items-center group relative cursor-pointer"
-                    >
-                      {/* Floating Note & Metric Tooltip */}
-                      {isHovered && (
-                        <div className="absolute -top-12 z-30 px-2.5 py-1 rounded-md bg-charcoal text-white text-[10px] font-mono whitespace-nowrap shadow-xl border border-charcoal-muted/30 pointer-events-none flex flex-col items-center">
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-amber font-bold">🎵 {nodeMeta?.note} ({nodeMeta?.octaveNote})</span>
-                            {nodeMeta?.bassChord && (
-                              <>
-                                <span className="text-white/40">•</span>
-                                <span className="text-amber-light font-semibold">{nodeMeta.bassChord} Bass</span>
-                              </>
-                            )}
-                          </div>
-                          <span className="text-white/80 text-[9px]">{bar.label}: <strong className="text-amber">{bar.value}%</strong></span>
-                        </div>
-                      )}
-
-                      {/* Musical Bar Pillar */}
-                      <motion.div
-                        initial={{ height: 0 }}
-                        animate={{ height: bar.height }}
-                        transition={{ duration: 0.7, delay: idx * 0.02, ease: "easeOut" }}
-                        className={`w-full rounded-t-md transition-all duration-150 ${
-                          isAmber 
-                            ? 'bg-amber shadow-glow-amber ring-1 ring-amber/50' 
-                            : isHovered
-                              ? 'bg-charcoal ring-2 ring-amber/80 shadow-md -translate-y-1'
-                              : 'bg-charcoal hover:bg-charcoal-muted'
-                        }`}
-                      />
-
-                      {/* Piano Note Subtitle Under Each Bar */}
-                      <span className={`text-[9px] font-mono mt-1 transition-colors leading-none font-bold ${
-                        isHovered ? 'text-amber-dark' : 'text-charcoal-muted/70 group-hover:text-charcoal'
-                      }`}>
-                        {nodeMeta?.note}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Bottom Inspection Ticker */}
-              <div className="mt-3 flex items-center justify-between text-xs font-mono text-charcoal-muted">
-                <div className="flex items-center gap-2 min-w-0">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber animate-pulse shrink-0" />
-                  <span className="text-charcoal font-semibold truncate">
-                    {activeBar !== null 
-                      ? `${INTERSTELLAR_NODES[activeBar]?.note} (${INTERSTELLAR_NODES[activeBar]?.octaveNote}) • ${signatureChartData[activeBar].label}`
-                      : 'Hover or sweep nodes'
-                    }
-                  </span>
-                </div>
-                <span className="text-[11px] shrink-0 ml-2">
-                  {activeBar !== null ? (
-                    <span className="text-amber-dark font-medium">
-                      {INTERSTELLAR_NODES[activeBar]?.bassChord 
-                        ? `${INTERSTELLAR_NODES[activeBar]?.bassChord} Pedal • 100% Invariant` 
-                        : 'E5 Alternating Pedal'}
-                    </span>
-                  ) : (
-                    'Temple Church Pipe Organ'
-                  )}
-                </span>
-              </div>
-
-              {/* Minimalist Interaction Prompt */}
-              <p className="text-[10px] font-mono text-charcoal-muted/80 mt-1.5 text-center sm:text-left">
-                Sweep left-to-right across the nodes to hear the iconic Hans Zimmer Interstellar organ progression.
-              </p>
-
+            {/* Sculptural Vector Logo in Bigger Size */}
+            <div className="relative w-full max-w-[340px] sm:max-w-[420px] lg:max-w-[480px] xl:max-w-[520px] aspect-square flex items-center justify-center filter drop-shadow-[0_25px_35px_rgba(43,48,44,0.12)] drop-shadow-[0_10px_20px_rgba(43,48,44,0.06)] transition-transform duration-500 hover:scale-[1.03] group">
+              <DhirajLogo 
+                variant="light" 
+                className="w-full h-full object-contain"
+                title="Dhiraj Kumar Monogram"
+              />
             </div>
           </div>
-        </div>
 
-        {/* End of Hero Section */}
+        </div>
 
       </div>
     </section>
