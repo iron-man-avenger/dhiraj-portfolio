@@ -45,7 +45,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenArcade }) => {
   };
 
   return (
-    <section id="overview" className="relative pt-16 sm:pt-20 md:pt-24 pb-16 md:pb-24 z-10">
+    <section id="overview" className="relative pt-24 sm:pt-28 md:pt-32 pb-16 md:pb-24 z-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 relative">
         
         {/* Right Watermark Logo: Large-Scale & Light-Shade, Shifted Down & Right as before (Responsive Mobile Safe) */}
@@ -64,11 +64,11 @@ export const Hero: React.FC<HeroProps> = ({ onOpenArcade }) => {
         <div className="relative z-10 max-w-2xl sm:max-w-3xl lg:max-w-4xl flex flex-col gap-5 sm:gap-6">
           
           {/* Minimalist Accolade Tag */}
-          <div className="flex items-center gap-2 text-xs font-mono text-charcoal-muted">
-            <span className="w-2 h-2 rounded-full bg-amber animate-pulse" />
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-mono text-charcoal-muted">
+            <span className="w-2 h-2 rounded-full bg-amber animate-pulse shrink-0" />
             <span className="font-semibold text-charcoal">Microsoft Agentic AI Hackathon Winner</span>
-            <span>•</span>
-            <span>Azure OpenAI Category</span>
+            <span className="hidden sm:inline text-charcoal/40">•</span>
+            <span className="text-charcoal-muted">Azure OpenAI Category</span>
           </div>
 
           {/* Headline - Shifted Up, Impactful & Spacious */}

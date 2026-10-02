@@ -29,9 +29,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenArcade, soundMuted, onTogg
   };
 
   return (
-    <header className="fixed top-4 left-0 right-0 z-50 flex justify-center px-4 sm:px-6 pointer-events-none">
+    <header className="fixed top-3 sm:top-4 left-0 right-0 z-50 flex justify-center px-3 sm:px-6 pointer-events-none">
       <div className="w-full max-w-7xl pointer-events-auto">
-        <nav className="bg-white/95 backdrop-blur-md rounded-2xl px-5 sm:px-7 py-3 flex items-center justify-between border border-[#E3DACD] shadow-sm transition-all duration-300">
+        <nav className="bg-white/95 backdrop-blur-md rounded-2xl px-3.5 sm:px-6 md:px-7 py-2 sm:py-2.5 md:py-3 flex items-center justify-between border border-[#E3DACD] shadow-sm transition-all duration-300">
           
           {/* Left: Brand Logo + Name (Direct, No Box) */}
           <a 
@@ -71,14 +71,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenArcade, soundMuted, onTogg
           </div>
 
           {/* Right: Sound FX, Arcade & Outlined HIRE ME Button */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-2.5 md:gap-3">
             {/* Audio FX Toggle */}
             <button
               onClick={() => {
                 sounds.playTap();
                 onToggleSound();
               }}
-              className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl border transition-all duration-200 flex items-center justify-center ${
+              className={`w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-xl border transition-all duration-200 flex items-center justify-center shrink-0 ${
                 soundMuted 
                   ? 'border-[#E3DACD] bg-white text-charcoal-muted hover:text-[#2B302C] hover:border-[#2B302C]' 
                   : 'border-[#2B302C] bg-[#2B302C]/5 text-[#2B302C]'
@@ -99,7 +99,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenArcade, soundMuted, onTogg
                 sounds.playClick();
                 onOpenArcade();
               }}
-              className="hidden xl:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#2B302C]/30 hover:border-[#2B302C] text-[#2B302C] text-xs font-mono font-bold transition-all"
+              className="hidden xl:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#2B302C]/30 hover:border-[#2B302C] text-[#2B302C] text-xs font-mono font-bold transition-all shrink-0"
             >
               <Gamepad2 className="w-3.5 h-3.5 text-amber-dark" />
               <span>ARCADE</span>
@@ -109,7 +109,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenArcade, soundMuted, onTogg
             <a
               href="#contact"
               onClick={() => sounds.playTap()}
-              className="px-4 sm:px-6 py-2 rounded-xl border border-[#2B302C] text-[#2B302C] text-xs font-bold uppercase tracking-wider hover:bg-[#2B302C] hover:text-white transition-all shadow-2xs whitespace-nowrap"
+              className="px-3 sm:px-5 md:px-6 py-1.5 sm:py-2 rounded-xl border border-[#2B302C] text-[#2B302C] text-[11px] sm:text-xs font-bold uppercase tracking-wider hover:bg-[#2B302C] hover:text-white transition-all shadow-2xs whitespace-nowrap shrink-0"
             >
               HIRE ME
             </a>
@@ -120,7 +120,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenArcade, soundMuted, onTogg
                 sounds.playTap();
                 setMobileMenuOpen(!mobileMenuOpen);
               }}
-              className="md:hidden p-2 rounded-xl border border-[#2B302C]/30 text-[#2B302C] hover:bg-neutral-100 transition-colors ml-1"
+              className="md:hidden p-1.5 sm:p-2 rounded-xl border border-[#2B302C]/30 text-[#2B302C] hover:bg-neutral-100 transition-colors shrink-0"
               aria-label="Toggle Menu"
             >
               {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
