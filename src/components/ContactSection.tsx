@@ -16,7 +16,7 @@ export const ContactSection: React.FC = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    inquiryType: 'Multi-Agent Systems',
+    inquiryType: '',
     message: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -39,8 +39,9 @@ export const ContactSection: React.FC = () => {
       setSubmitted(true);
       sounds.playSuccess();
       // Also open user's default email client
-      const subject = encodeURIComponent(`[Portfolio Inquiry: ${formData.inquiryType}] from ${formData.name}`);
-      const body = encodeURIComponent(`Hi Dhiraj,\n\n${formData.message}\n\nFrom: ${formData.name} (${formData.email})`);
+      const topic = formData.inquiryType.trim() ? formData.inquiryType.trim() : 'AI Engineering Inquiry';
+      const subject = encodeURIComponent(`[Portfolio: ${topic}] from ${formData.name}`);
+      const body = encodeURIComponent(`Hi Dhiraj,\n\nTopic / Domain: ${topic}\n\n${formData.message}\n\nFrom: ${formData.name} (${formData.email})`);
       window.open(`mailto:${personalInfo.email}?subject=${subject}&body=${body}`, '_blank');
     }, 1200);
   };
@@ -230,19 +231,28 @@ export const ContactSection: React.FC = () => {
 
                   <div>
                     <label className="text-xs font-bold text-charcoal block mb-1.5">
-                      Inquiry Domain
+                      Inquiry Domain / Topic
                     </label>
-                    <select
+                    <input
+                      type="text"
+                      list="domain-suggestions"
                       value={formData.inquiryType}
                       onChange={(e) => setFormData({ ...formData, inquiryType: e.target.value })}
+                      placeholder="e.g. Multi-Agent Systems, Custom RAG, Vision AI, Full-Stack AI, or your project idea..."
                       className="w-full px-4 py-2.5 rounded-xl border border-[#E5DDCF] bg-ecru-50 text-xs text-charcoal focus:outline-none focus:ring-2 focus:ring-amber/50 font-sans"
-                    >
-                      <option value="Multi-Agent Systems & Verification">Multi-Agent Systems & Verification</option>
-                      <option value="Document AI & Invoice Processing">Document AI & Invoice Processing</option>
-                      <option value="Computer Vision & OWLv2">Computer Vision & OWLv2</option>
-                      <option value="Engineering Role / Hiring Inquiry">Engineering Role / Hiring Inquiry</option>
-                      <option value="Technical Advisory">Technical Advisory</option>
-                    </select>
+                    />
+                    <datalist id="domain-suggestions">
+                      <option value="Multi-Agent Systems & Verification" />
+                      <option value="Intelligent Document Processing (IDP)" />
+                      <option value="Computer Vision & OWLv2" />
+                      <option value="Enterprise RAG & Memory Architectures" />
+                      <option value="NLP-to-SQL Pipelines" />
+                      <option value="Full-Time AI Engineering Role" />
+                      <option value="Consulting & Technical Advisory" />
+                    </datalist>
+                    <span className="text-[10px] font-mono text-charcoal-muted mt-1 block">
+                      Type anything you'd like to discuss or collaborate on.
+                    </span>
                   </div>
 
                   <div>
