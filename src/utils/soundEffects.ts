@@ -409,7 +409,7 @@ class SoundManager {
     try {
       if (!this.themeAudio && typeof window !== 'undefined') {
         this.themeAudio = new Audio('/audio/interstellar-theme.mp3');
-        this.themeAudio.volume = 0.85;
+        this.themeAudio.volume = 0.25; // Gentle atmospheric background volume
       }
 
       if (this.themeAudio) {
