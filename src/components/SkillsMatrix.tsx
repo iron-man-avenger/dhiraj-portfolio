@@ -25,21 +25,21 @@ export const SkillsMatrix: React.FC = () => {
           {skillCategories.map((category) => (
             <div 
               key={category.title}
-              className="py-8 grid grid-cols-1 lg:grid-cols-12 gap-6 items-baseline transition-colors hover:bg-black/[0.01]"
+              className="py-8 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center transition-colors hover:bg-black/[0.01]"
             >
-              {/* Category Name & Scope (4 cols) with #2B302C Contrast */}
-              <div className="lg:col-span-4">
-                <h3 className="text-base font-extrabold text-[#2B302C] font-sans flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#2B302C]" />
+              {/* Category Name & Scope (4 cols) inside Primary #2B302C Box */}
+              <div className="lg:col-span-4 p-5 rounded-2xl bg-[#2B302C] text-white border border-[#39403B] shadow-sm flex flex-col justify-center">
+                <h3 className="text-sm sm:text-base font-bold text-white font-sans flex items-center gap-2.5">
+                  <span className="w-2 h-2 rounded-full bg-amber shrink-0 shadow-xs" />
                   <span>{category.title}</span>
                 </h3>
-                <p className="text-xs text-[#2B302C]/80 font-mono mt-1 pl-3.5 leading-relaxed font-medium">
+                <p className="text-xs text-white/75 font-mono mt-2 leading-relaxed font-normal">
                   {category.description}
                 </p>
               </div>
 
               {/* Skills List with Primary Accents on Expert Technologies (8 cols) */}
-              <div className="lg:col-span-8 flex flex-wrap gap-2.5">
+              <div className="lg:col-span-8 flex flex-wrap gap-2.5 items-center">
                 {category.skills.map((skill) => {
                   const isExpert = skill.level === 'Expert';
                   return (
