@@ -4,10 +4,7 @@ import {
   Play, 
   RotateCcw, 
   ShieldCheck, 
-  Cpu, 
-  Search, 
-  CheckCircle2, 
-  Sparkles
+  CheckCircle2
 } from 'lucide-react';
 import { sounds } from '../utils/soundEffects';
 
@@ -21,11 +18,9 @@ interface Scenario {
     title: string;
     description: string;
     tech: string;
-    status: 'success' | 'verified' | 'repaired';
     dataLog: string;
   }[];
   finalOutput: {
-    type: 'sql' | 'ocr' | 'cv';
     title: string;
     resultText: string;
     stats: { label: string; value: string }[];
@@ -36,97 +31,92 @@ export const AgentSimulator: React.FC = () => {
   const scenarios: Scenario[] = [
     {
       id: 'pnl-query',
-      name: '1. Multi-Agent NLP-to-SQL (Financial P&L)',
+      name: '1. NLP-to-SQL (Financial P&L)',
       query: 'Show last quarter’s beverage variance vs budget for site #4, breaking down wine and draft beer.',
       routerTarget: 'Accounting (P&L Specialist) + Sales Coordinator',
       verificationVerdict: '3/3 Verification Stages Passed (AST Valid, Invariants Reconciled, Zero Grain Mismatch)',
       stages: [
         {
-          title: 'Layer 1: Context & Entity Grounding',
-          description: 'Fiscal calendar resolution ("last quarter" -> Q2 FY25). Deterministic scan matches site #4 with client scope.',
-          tech: 'Dynamic In-Context Grounding',
-          status: 'success',
-          dataLog: 'RESOLVED: site_id=4, fiscal_quarter="2025-Q2", tenant_ctx="client_hospitality_uk"'
+          title: 'Context & Grounding',
+          description: 'Fiscal calendar resolution ("last quarter" -> Q2 FY25). Scoped to site #4.',
+          tech: 'Cosmos DB + BGE Embeddings',
+          dataLog: 'RESOLVED: site_id=4, fiscal_quarter="2025-Q2", tenant="hospitality_uk"'
         },
         {
-          title: 'Layer 2: Semantic Router & Specialist',
-          description: 'Router LLM selects Accounting specialist. Dynamic few-shot examples fetched from vector cache (Cosmos DB 24h TTL).',
-          tech: 'Azure OpenAI + Few-Shot Retrieval',
-          status: 'success',
-          dataLog: 'AGENT: Specialist_Accounting_v2 | COSINE_SIM: 0.942 on cached template'
+          title: 'Semantic Router',
+          description: 'Dispatches to Accounting specialist. In-context dynamic few-shot retrieval.',
+          tech: 'Azure OpenAI Orchestrator',
+          dataLog: 'ROUTED: Specialist_Accounting_v2 | COSINE_SIM: 0.942'
         },
         {
-          title: 'Layer 3: Pre-Execution Logic Judge',
-          description: 'LLM judge parses AST of generated SQL. Validates column schema against live catalog and verifies Row-Level Security parameters.',
-          tech: 'SQL AST Parser + Schema Verifier',
-          status: 'verified',
-          dataLog: 'SQL_JUDGE: AST syntactically valid. Tables: [gl_transactions, site_dim]. No un-aliased joins.'
+          title: 'SQL Logic Judge',
+          description: 'AST parser checks generated SQL against live schema and validates Row-Level Security.',
+          tech: 'SQL AST Schema Parser',
+          dataLog: 'JUDGE: AST syntactically valid. Tables: [gl_transactions, site_dim].'
         },
         {
-          title: 'Layer 4: MCP JSON-RPC Database Broker',
-          description: 'Model Context Protocol (MCP) server securely mints short-lived JWT from Key Vault and runs read-only query on PostgreSQL with RLS.',
-          tech: 'MCP Protocol + PostgreSQL RLS',
-          status: 'success',
-          dataLog: 'MCP_CALL: execute_sql() -> 42 rows returned in 18ms. JWT expired safely.'
+          title: 'MCP Execution',
+          description: 'Model Context Protocol (MCP) server runs query via Key Vault short-lived JWT.',
+          tech: 'MCP Server + PostgreSQL RLS',
+          dataLog: 'MCP_CALL: execute_sql() -> 42 rows in 18ms. JWT expired safely.'
         },
         {
-          title: 'Layer 5: Post-Execution Invariant Critic',
-          description: 'Deterministic math critic verifies variance = actual - budget. Answer critic confirms narration mentions zero hallucinated figures.',
-          tech: 'Triple Deterministic Verifier',
-          status: 'verified',
-          dataLog: 'INVARIANT_CHECK: Sum(wine) + Sum(beer) == Group Total (£42,890.12). 0% discrepancy.'
+          title: 'Invariant Critic',
+          description: 'Deterministic math critic proves variance = actual - budget before final narration.',
+          tech: 'Deterministic Math Critic',
+          dataLog: 'INVARIANT_PASS: Sum(wine) + Sum(beer) == Total (£42,890.12). 0% discrepancy.'
         }
       ],
       finalOutput: {
-        type: 'sql',
         title: 'Verified Financial Answer Streamed via NDJSON',
         resultText: 'For Site #4 in Q2 FY25, total beverage expenditure was £42,890.12 against an approved budget of £39,500.00 (+£3,390.12 or +8.58% variance). Wine accounts for £2,410.00 of the overspend driven by vintage cellar restocking in May.',
         stats: [
           { label: 'Latency', value: '1.42s' },
           { label: 'Token Cache Hit', value: 'Yes (Cosmos 24h)' },
           { label: 'AST Status', value: 'Passed (0 errors)' },
-          { label: 'Verification Layers', value: '3 Active' }
+          { label: 'Verification', value: '3/3 Active' }
         ]
       }
     },
     {
       id: 'invoice-ocr',
-      name: '2. Papertrail: Self-Validating Invoice Extraction',
+      name: '2. Papertrail: Invoice Extraction',
       query: 'Ingest Spanish multi-page supplier invoice (PDF) with handwritten delivery surcharge.',
       routerTarget: 'Document Intelligence + GPT-4o Vision + Arithmetic Engine',
-      verificationVerdict: 'Arithmetic Reconciliation Caught $45.00 Tax Discrepancy -> Fixed via Deterministic Rule',
+      verificationVerdict: 'Arithmetic Reconciliation Caught $45.00 Tax Discrepancy -> Repaired in Code',
       stages: [
         {
-          title: 'Layer 1: Document Layout & Text OCR',
-          description: 'Azure Document Intelligence extracts raw tabular line items and bounding boxes without hallucinations.',
+          title: 'Document Layout',
+          description: 'Azure Document Intelligence extracts raw tabular line items and bounding boxes.',
           tech: 'Azure Document Intelligence',
-          status: 'success',
-          dataLog: 'OCR_DONE: 18 line items detected, 3 pages processed. Bounding box recall: 98.4%'
+          dataLog: 'OCR_DONE: 18 line items detected, 3 pages processed. Recall: 98.4%'
         },
         {
-          title: 'Layer 2: Header Identity Pass',
-          description: 'Focused GPT-4o Vision pass extracts vendor Tax ID (CIF) and currency. Checksum validation (mod11) applied in code.',
-          tech: 'GPT-4o Vision + Mod11 Checksum',
-          status: 'success',
-          dataLog: 'VENDOR: Distribuciones Eléctricas S.L. | CIF: B82349102 (Checksum: VALID)'
+          title: 'Header Identity',
+          description: 'Focused GPT-4o Vision pass extracts vendor Tax ID (CIF) with mod11 checksum validation.',
+          tech: 'GPT-4o Vision + Mod11',
+          dataLog: 'VENDOR: Distribuciones Eléctricas S.L. | CIF: B82349102 (VALID)'
         },
         {
-          title: 'Layer 3: Arithmetic Reconciliation Proof',
-          description: 'Deterministic math engine sums line totals (€3,450.00) + 21% IVA (€724.50) vs printed Total (€4,174.50).',
-          tech: 'Self-Validating Math Invariants',
-          status: 'verified',
-          dataLog: 'MATH_CHECK: Lines sum (€3,450.00) + Tax (€724.50) == Total (€4,174.50). Match verified.'
+          title: 'Arithmetic Proof',
+          description: 'Deterministic math engine sums line totals (€3,450.00) + 21% IVA (€724.50) vs printed Total.',
+          tech: 'Deterministic Math Invariant',
+          dataLog: 'MATH_CHECK: Lines sum (€3,450.00) + Tax (€724.50) == Total (€4,174.50).'
         },
         {
-          title: 'Layer 4: Cost-Gated AI Guard',
-          description: 'Since arithmetic reconciles perfectly, expensive AI re-read is suppressed, preserving ~$0.03 unit economics.',
-          tech: 'Cost-Gated Execution Engine',
-          status: 'verified',
-          dataLog: 'COST_GATE: Error proof: FALSE -> Second LLM pass SKIPPED. Unit cost saved.'
+          title: 'Cost-Gated Guard',
+          description: 'Since arithmetic reconciles, expensive second LLM re-read is skipped, preserving ~$0.03 cost.',
+          tech: 'Cost-Gated AI Guard',
+          dataLog: 'COST_GATE: Error proof: FALSE -> Second LLM pass SKIPPED.'
+        },
+        {
+          title: 'Ledger Ready',
+          description: 'Exported as validated structured JSON accounting record with 0% silent error risk.',
+          tech: 'Ledger Normalizer',
+          dataLog: 'EXPORT: 18 lines allocated to GL 5210. Ready for ledger insertion.'
         }
       ],
       finalOutput: {
-        type: 'ocr',
         title: 'Reconciled Accounting Record Ready for Ledger Export',
         resultText: 'Invoice #ES-2025-881 successfully validated. 18 line items mapped to GL Account 5210 (Food & Beverage Purchases). VAT verified at 21% with valid EU intra-community checksum.',
         stats: [
@@ -139,35 +129,43 @@ export const AgentSimulator: React.FC = () => {
     },
     {
       id: 'bar-vision',
-      name: '3. Bar Vision: Zero-Shot Video Inventory',
+      name: '3. Bar Vision: Video Inventory',
       query: 'Process 45s handheld phone video of back-bar liquor bottles with motion blur.',
       routerTarget: 'OWLv2 Open-Vocabulary Detection + Optical Flow RANSAC',
       verificationVerdict: 'Spatial Trajectory Recovery Eliminated 35% Cross-Frame Duplicates',
       stages: [
         {
-          title: 'Layer 1: OWLv2 Zero-Shot Detection',
-          description: 'Open-vocabulary prompts detect bottles without training datasets, using intersection-over-smaller suppression.',
+          title: 'Zero-Shot OWLv2',
+          description: 'Open-vocabulary prompts detect bottles without labelled training datasets.',
           tech: 'PyTorch + OWLv2',
-          status: 'success',
-          dataLog: 'ZERO_SHOT: Prompt ["liquor bottle", "spirits bottle"] -> 142 raw bounding boxes'
+          dataLog: 'ZERO_SHOT: Prompt ["liquor bottle", "spirits bottle"] -> 142 raw boxes'
         },
         {
-          title: 'Layer 2: Camera Trajectory Recovery',
-          description: 'Lucas-Kanade optical flow + RANSAC affine estimation tracks camera pose, sampling only non-overlapping footprints.',
-          tech: 'Optical Flow + RANSAC (0.95 Inliers)',
-          status: 'verified',
-          dataLog: 'RANSAC_POSE: Inlier ratio 0.95. Unified 6 fragmented segments into 1 continuous path.'
+          title: 'Camera Pose Recovery',
+          description: 'Optical flow + RANSAC affine estimation tracks camera trajectory, sampling non-overlapping frames.',
+          tech: 'Optical Flow + RANSAC',
+          dataLog: 'RANSAC_POSE: Inlier ratio 0.95. Unified 6 fragmented segments into 1.'
         },
         {
-          title: 'Layer 3: 2D CNN Liquid Level Regression',
-          description: 'Custom CNN regresses fill fraction per detected bottle with group-by-entity cross validation.',
-          tech: 'PyTorch 2D CNN (MAE 0.144)',
-          status: 'success',
-          dataLog: 'LIQUID_REGRESSION: Average fill level: 64.2%. 28 bottles full, 12 partial.'
+          title: 'Spatial Dedup',
+          description: 'Intersection-over-smaller suppression removes nested bottle-neck boxes and duplicates.',
+          tech: 'Spatial Deduplication',
+          dataLog: 'DEDUP: Removed 35% raw duplicate detections from panning overlap.'
+        },
+        {
+          title: 'Liquid Regressor',
+          description: 'Custom 2D CNN regresses fill fraction per bottle with grouped leave-one-group-out cross validation.',
+          tech: '2D CNN Regressor',
+          dataLog: 'LIQUID_LEVEL: Average fill 64.2%. 28 full, 12 partial bottles.'
+        },
+        {
+          title: 'Review Manifest',
+          description: 'Streamed to FastAPI async job queue with review flags for low-confidence items.',
+          tech: 'FastAPI Async Queue',
+          dataLog: 'MANIFEST: 40 distinct bottles mapped. Commercial license clean.'
         }
       ],
       finalOutput: {
-        type: 'cv',
         title: 'Deduplicated Stocktake Manifest Generated',
         resultText: 'Video processed successfully. Detected 40 distinct bottles across 4 shelving tiers. Spatial deduplication prevented 22 duplicate counts caused by camera panning.',
         stats: [
@@ -203,7 +201,7 @@ export const AgentSimulator: React.FC = () => {
         setCompleted(true);
         sounds.playSuccess();
       }
-    }, 700);
+    }, 600);
   };
 
   const handleScenarioChange = (scenario: Scenario) => {
@@ -215,86 +213,74 @@ export const AgentSimulator: React.FC = () => {
   };
 
   return (
-    <section id="simulator" className="py-24 bg-[#EFE9DF]/50 border-y border-[#E3DACD] relative overflow-hidden">
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="simulator" className="py-24 bg-[#FAF7F2] border-t border-[#E3DACD]/60 relative">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Section Header */}
+        {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
           <div>
-            <div className="flex items-center gap-2.5 mb-2">
-              <span className="p-1 rounded-md bg-amber/20 text-charcoal">
-                <Cpu className="w-4 h-4 text-amber-dark" />
-              </span>
-              <span className="font-mono text-xs font-bold uppercase tracking-wider text-charcoal-muted">
-                Interactive Architecture Lab
-              </span>
-            </div>
+            <span className="text-xs font-mono font-bold uppercase tracking-widest text-amber-dark block mb-2">
+              Interactive Test Bench
+            </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-charcoal tracking-tight font-sans">
-              Test Dhiraj’s Multi-Agent & Verification Engine
+              Pipeline Execution Simulator
             </h2>
-            <p className="text-sm sm:text-base text-charcoal-muted mt-2 max-w-2xl">
-              Select a production scenario below and click <span className="font-semibold text-charcoal">"Run Verification Pipeline"</span> to watch real-time routing, schema AST checks, and deterministic mathematical critics in action.
+            <p className="text-sm sm:text-base text-charcoal-muted mt-2 max-w-xl font-normal leading-relaxed">
+              Test real production queries through Dhiraj's multi-agent routing, SQL AST judges, and arithmetic reconciliation.
             </p>
           </div>
 
-          {/* Scenario Selector Pills */}
-          <div className="flex flex-wrap gap-2">
+          {/* Scenario Selector Tabs */}
+          <div className="flex flex-wrap gap-1 p-1 bg-white/70 rounded-full border border-[#E3DACD] self-start md:self-auto">
             {scenarios.map((s) => (
               <button
                 key={s.id}
                 onClick={() => handleScenarioChange(s)}
-                className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-all ${
                   selectedScenario.id === s.id
-                    ? 'bg-charcoal text-white shadow-sm ring-2 ring-amber/50'
-                    : 'bg-white/80 text-charcoal-muted border border-[#E0D7C9] hover:bg-white hover:text-charcoal'
+                    ? 'bg-charcoal text-white shadow-sm'
+                    : 'text-charcoal-muted hover:text-charcoal hover:bg-black/[0.03]'
                 }`}
               >
-                <span>{s.name.split(' ')[1]}</span>
-                {selectedScenario.id === s.id && <Sparkles className="w-3 h-3 text-amber" />}
+                {s.name.split('.')[1]}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Main Interactive Stage Box */}
-        <div className="bg-[#FAF7F2] rounded-3xl border border-[#E3DACD] p-6 sm:p-8 shadow-elevated">
+        {/* Clean, Unified Terminal Console (Zero Clutter) */}
+        <div className="rounded-3xl bg-[#1C201D] text-white p-6 sm:p-8 border border-charcoal-border shadow-elevated">
           
-          {/* Query Bar & Launch Control */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-white border border-[#E5DDCF] shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 mb-8">
-            <div className="flex items-start gap-3 flex-1">
-              <div className="p-2 rounded-xl bg-ecru-100 text-charcoal mt-0.5 border border-[#E5DDCF]">
-                <Search className="w-4 h-4 text-amber-dark" />
-              </div>
-              <div>
-                <span className="text-[11px] font-mono font-bold text-charcoal-muted uppercase tracking-wider block">
-                  Simulated Input Request
-                </span>
-                <p className="text-sm font-semibold text-charcoal mt-0.5 font-sans">
-                  "{selectedScenario.query}"
-                </p>
-              </div>
+          {/* Query Bar */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 mb-6 border-b border-charcoal-border/70 gap-4">
+            <div>
+              <span className="text-[10px] font-mono uppercase tracking-widest text-amber font-bold block mb-1">
+                Input Query
+              </span>
+              <p className="text-sm font-mono text-gray-200">
+                "{selectedScenario.query}"
+              </p>
             </div>
 
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-3">
               <button
                 onClick={startSimulation}
                 disabled={isRunning}
-                className={`px-5 py-3 rounded-xl font-bold text-xs flex items-center gap-2 transition-all shadow-sm ${
+                className={`px-5 py-2.5 rounded-full font-bold text-xs font-mono flex items-center gap-2 transition-all ${
                   isRunning
-                    ? 'bg-charcoal-muted text-white cursor-not-allowed'
-                    : 'bg-amber text-charcoal-deep hover:bg-amber-light hover:scale-[1.02] active:scale-[0.98]'
+                    ? 'bg-charcoal-muted text-gray-300 cursor-not-allowed'
+                    : 'bg-amber text-charcoal-deep hover:bg-amber-light'
                 }`}
               >
                 {isRunning ? (
                   <>
-                    <div className="w-3.5 h-3.5 border-2 border-charcoal-deep border-t-transparent rounded-full animate-spin" />
-                    <span>Executing Pipeline...</span>
+                    <div className="w-3 h-3 border-2 border-charcoal-deep border-t-transparent rounded-full animate-spin" />
+                    <span>Running...</span>
                   </>
                 ) : (
                   <>
-                    <Play className="w-4 h-4 fill-charcoal-deep" />
-                    <span>Run Verification Pipeline</span>
+                    <Play className="w-3.5 h-3.5 fill-charcoal-deep" />
+                    <span>Run Pipeline</span>
                   </>
                 )}
               </button>
@@ -306,152 +292,89 @@ export const AgentSimulator: React.FC = () => {
                   setIsRunning(false);
                   setCompleted(false);
                 }}
-                className="p-3 rounded-xl border border-[#E5DDCF] text-charcoal-muted hover:text-charcoal hover:bg-ecru-100 transition-colors"
-                title="Reset Simulation"
+                className="p-2 rounded-full border border-charcoal-border text-gray-400 hover:text-white transition-colors"
+                title="Reset"
               >
-                <RotateCcw className="w-4 h-4" />
+                <RotateCcw className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
 
-          {/* Animated Pipeline Nodes */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 relative">
+          {/* Minimalist Horizontal Step Progression */}
+          <div className="grid grid-cols-1 sm:grid-cols-5 gap-3 pb-6 mb-6 border-b border-charcoal-border/50">
             {selectedScenario.stages.map((stage, idx) => {
               const isPast = activeStep > idx || completed;
               const isCurrent = activeStep === idx;
 
               return (
-                <div
+                <div 
                   key={idx}
-                  className={`p-4 rounded-2xl border transition-all duration-300 relative flex flex-col justify-between ${
+                  className={`p-3 rounded-xl transition-all border ${
                     isCurrent
-                      ? 'bg-amber/15 border-amber shadow-glow-amber ring-2 ring-amber/40 scale-[1.02]'
+                      ? 'border-amber bg-amber/10'
                       : isPast
-                      ? 'bg-white border-emerald-600/30 shadow-sm'
-                      : 'bg-white/40 border-[#E8DFC9] opacity-60'
+                      ? 'border-emerald-500/40 bg-white/5'
+                      : 'border-transparent bg-transparent opacity-40'
                   }`}
                 >
-                  <div>
-                    {/* Step number badge & status */}
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-charcoal text-white">
-                        0{idx + 1}
-                      </span>
-                      {isPast ? (
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                      ) : isCurrent ? (
-                        <div className="w-3 h-3 rounded-full bg-amber animate-ping" />
-                      ) : (
-                        <div className="w-2 h-2 rounded-full bg-charcoal-faded" />
-                      )}
-                    </div>
-
-                    <h4 className="text-xs font-bold text-charcoal leading-snug">
-                      {stage.title}
-                    </h4>
-                    <p className="text-[11px] text-charcoal-muted mt-1.5 leading-relaxed">
-                      {stage.description}
-                    </p>
+                  <div className="flex items-center justify-between text-[10px] font-mono text-gray-400 mb-1">
+                    <span>0{idx + 1}</span>
+                    {isPast && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />}
+                    {isCurrent && <span className="w-2 h-2 rounded-full bg-amber animate-ping" />}
                   </div>
-
-                  <div className="mt-4 pt-3 border-t border-[#E8DFC9]">
-                    <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-ecru-200 text-charcoal block truncate">
-                      {stage.tech}
-                    </span>
-                  </div>
+                  <div className="text-xs font-bold text-white font-sans">{stage.title}</div>
+                  <div className="text-[10px] font-mono text-gray-400 mt-0.5 truncate">{stage.tech}</div>
                 </div>
               );
             })}
           </div>
 
-          {/* Live Telemetry / Execution Output Terminal */}
-          <div className="mt-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
-            
-            {/* Terminal Console (7 cols) */}
-            <div className="lg:col-span-7 rounded-2xl bg-charcoal text-white p-5 font-mono text-xs border border-charcoal-border shadow-inner">
-              <div className="flex items-center justify-between pb-3 border-b border-charcoal-border/70 mb-3">
-                <div className="flex items-center gap-2">
-                  <div className="flex gap-1.5">
-                    <div className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
-                    <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
-                    <div className="w-2.5 h-2.5 rounded-full bg-green-500/80" />
-                  </div>
-                  <span className="text-[11px] text-charcoal-faded ml-2">dhiraj-kernel://mcp-worker-01</span>
-                </div>
-                <span className="text-[10px] text-amber font-semibold uppercase tracking-wider">
-                  {isRunning ? 'PIPELINE ACTIVE' : completed ? 'VERIFIED PASSED' : 'STANDBY'}
-                </span>
-              </div>
-
-              <div className="space-y-2 min-h-[140px] flex flex-col justify-end">
-                {activeStep === -1 && !completed && (
-                  <p className="text-charcoal-faded italic">
-                    Press "Run Verification Pipeline" above to initialize telemetry streams...
-                  </p>
-                )}
-
-                {selectedScenario.stages.map((stage, idx) => {
-                  if (activeStep < idx && !completed) return null;
-                  return (
-                    <motion.div
-                      key={idx}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      className="flex items-start gap-2"
-                    >
-                      <span className="text-amber">➜</span>
-                      <span className="text-gray-300">
-                        <strong className="text-white">[{stage.title.split(':')[0]}]</strong> {stage.dataLog}
-                      </span>
-                    </motion.div>
-                  );
-                })}
-
-                {completed && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="pt-2 text-emerald-400 font-bold flex items-center gap-2 border-t border-charcoal-border/50"
-                  >
-                    <ShieldCheck className="w-4 h-4" />
-                    <span>[VERIFIED] {selectedScenario.verificationVerdict}</span>
-                  </motion.div>
-                )}
-              </div>
-            </div>
-
-            {/* Structured Result Display (5 cols) */}
-            <div className="lg:col-span-5 rounded-2xl bg-white p-5 border border-[#E5DDCF] shadow-sm flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-[11px] font-mono font-bold text-amber-dark uppercase tracking-wider">
-                    Execution Outcome
-                  </span>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200">
-                    Production Safe
-                  </span>
-                </div>
-
-                <h4 className="text-sm font-bold text-charcoal font-sans mb-2">
-                  {selectedScenario.finalOutput.title}
-                </h4>
-
-                <p className="text-xs text-charcoal-muted leading-relaxed font-sans bg-ecru-50 p-3 rounded-xl border border-[#E5DDCF]">
-                  {completed ? selectedScenario.finalOutput.resultText : 'Awaiting pipeline execution to assemble and verify data payload...'}
+          {/* Real-Time Telemetry Logs & Streamed Output */}
+          <div className="space-y-3 font-mono text-xs">
+            <div className="min-h-[110px] space-y-1.5 text-gray-300">
+              {activeStep === -1 && !completed && (
+                <p className="text-gray-500 italic">
+                  Press "Run Pipeline" above to execute verification stages...
                 </p>
-              </div>
+              )}
 
-              {/* Verified Metric Chips */}
-              <div className="mt-4 pt-3 border-t border-[#E5DDCF] grid grid-cols-2 gap-2">
-                {selectedScenario.finalOutput.stats.map((s, idx) => (
-                  <div key={idx} className="p-2 rounded-lg bg-ecru-100 border border-[#E8DFC9]">
-                    <span className="text-[10px] font-mono text-charcoal-muted block">{s.label}</span>
-                    <span className="text-xs font-bold text-charcoal font-mono">{s.value}</span>
-                  </div>
-                ))}
-              </div>
+              {selectedScenario.stages.map((stage, idx) => {
+                if (activeStep < idx && !completed) return null;
+                return (
+                  <motion.div
+                    key={idx}
+                    initial={{ opacity: 0, x: -6 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="flex items-start gap-2"
+                  >
+                    <span className="text-amber">➜</span>
+                    <span>
+                      <strong className="text-white">[{stage.title}]</strong> {stage.dataLog}
+                    </span>
+                  </motion.div>
+                );
+              })}
             </div>
 
+            {/* Final Answer Banner */}
+            {completed && (
+              <motion.div
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="pt-4 border-t border-charcoal-border/70 flex flex-col gap-2"
+              >
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="text-emerald-400 font-bold flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4" />
+                    [VERIFIED] {selectedScenario.verificationVerdict}
+                  </span>
+                  <span className="text-amber font-mono">Status: Streamed OK</span>
+                </div>
+                <p className="text-xs font-sans text-gray-200 bg-white/5 p-4 rounded-xl leading-relaxed">
+                  {selectedScenario.finalOutput.resultText}
+                </p>
+              </motion.div>
+            )}
           </div>
 
         </div>

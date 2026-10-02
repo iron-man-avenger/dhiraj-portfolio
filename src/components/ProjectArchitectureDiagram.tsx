@@ -1,25 +1,18 @@
 import { 
   ArrowRight, 
-  ShieldCheck, 
-  Database, 
-  FileText, 
-  Sparkles, 
-  CheckCircle2, 
-  Layers, 
-  Zap
+  ShieldCheck
 } from 'lucide-react';
 
-interface DiagramNode {
+interface ArchitectureFlow {
   title: string;
-  subtitle: string;
-  badge?: string;
-  type: 'input' | 'ai' | 'router' | 'verify' | 'database' | 'output';
-  details?: string[];
-}
-
-interface DiagramStep {
-  groupName: string;
-  nodes: DiagramNode[];
+  summary: string;
+  stages: {
+    num: string;
+    label: string;
+    tech: string;
+    details: string;
+  }[];
+  verificationHighlight: string;
 }
 
 interface ProjectArchitectureDiagramProps {
@@ -28,665 +21,328 @@ interface ProjectArchitectureDiagramProps {
 
 export const ProjectArchitectureDiagram: React.FC<ProjectArchitectureDiagramProps> = ({ projectId }) => {
   
-  // Custom diagram steps per project
-  const getDiagramData = (): { title: string; steps: DiagramStep[] } => {
+  const getFlowData = (): ArchitectureFlow => {
     switch (projectId) {
       case 'financial-multi-agent':
         return {
-          title: "Multi-Agent NLP-to-SQL & 3-Tier Verification Topology",
-          steps: [
+          title: "Multi-Agent NLP-to-SQL System Architecture",
+          summary: "Brokered via Model Context Protocol (MCP) with 3 independent verification gates.",
+          stages: [
             {
-              groupName: "1. Ingestion & Grounding",
-              nodes: [
-                {
-                  title: "Natural Language Query",
-                  subtitle: "User input via Chat UI / Widget",
-                  type: "input",
-                  badge: "Prompt",
-                  details: ["Fiscal period detection", "Literal entity grounding"]
-                },
-                {
-                  title: "Context Memory Store",
-                  subtitle: "Cosmos DB (24h TTL) + LangMem",
-                  type: "database",
-                  badge: "BGE Embeddings",
-                  details: ["Semantic cache hit check", "Episodic thread recall"]
-                }
-              ]
+              num: "01",
+              label: "Ingestion & Grounding",
+              tech: "Cosmos DB + BGE Embeddings",
+              details: "Resolves fiscal calendar dates and grounds follow-up entities against 24h semantic cache."
             },
             {
-              groupName: "2. Multi-Agent Routing",
-              nodes: [
-                {
-                  title: "Semantic Router LLM",
-                  subtitle: "Azure OpenAI Orchestrator",
-                  type: "router",
-                  badge: "Permission Gated",
-                  details: ["Dynamic few-shot retrieval", "Cross-agent decomposition"]
-                },
-                {
-                  title: "6 Specialist Agents",
-                  subtitle: "P&L, Sales, Labor, KPI, Stock, Advisory",
-                  type: "ai",
-                  badge: "Domain Specialists",
-                  details: ["SQL code generator", "Self-correcting retry loop"]
-                }
-              ]
+              num: "02",
+              label: "Multi-Agent Routing",
+              tech: "Azure OpenAI + 6 Specialist LLMs",
+              details: "Router dispatches to domain specialist (P&L, Sales, Labor, KPI, Stocktake, Advisory)."
             },
             {
-              groupName: "3. Verification & Execution",
-              nodes: [
-                {
-                  title: "Pre-Exec Logic Judge",
-                  subtitle: "SQL AST Schema Verifier",
-                  type: "verify",
-                  badge: "Tier 1 Guard",
-                  details: ["Live schema AST parse", "Rejects invalid columns"]
-                },
-                {
-                  title: "MCP JSON-RPC Server",
-                  subtitle: "Model Context Protocol Broker",
-                  type: "database",
-                  badge: "Key Vault JWT",
-                  details: ["PostgreSQL Row-Level Security", "SQL Server / SQLite"]
-                }
-              ]
+              num: "03",
+              label: "Pre-Exec Logic Judge",
+              tech: "SQL AST Schema Verifier",
+              details: "Parses generated SQL against live database catalog; blocks un-aliased joins and column drift."
             },
             {
-              groupName: "4. Output Invariant Validation",
-              nodes: [
-                {
-                  title: "Post-Exec Invariant Critic",
-                  subtitle: "Deterministic Math & Grain Check",
-                  type: "verify",
-                  badge: "Tier 2 & 3 Guards",
-                  details: ["No-arithmetic narration rules", "Catches hallucinated figures"]
-                },
-                {
-                  title: "Streamed Response",
-                  subtitle: "NDJSON Stream to React Client",
-                  type: "output",
-                  badge: "Production Safe",
-                  details: ["Recharts pivot tables", "Follow-up query suggestions"]
-                }
-              ]
+              num: "04",
+              label: "MCP Broker & Database",
+              tech: "JSON-RPC + PostgreSQL RLS",
+              details: "Short-lived Key Vault JWTs execute read-only queries with strict Row-Level Security."
+            },
+            {
+              num: "05",
+              label: "Post-Exec Invariant Critic",
+              tech: "Deterministic Math Rules",
+              details: "Verifies variance calculations match source invariants; rejects hallucinated figures before narration."
             }
-          ]
+          ],
+          verificationHighlight: "3 independent layers catch errors before SQL execution and before final response streaming."
         };
 
       case 'papertrail-idp':
         return {
-          title: "Hybrid Intelligent Document Processing Pipeline",
-          steps: [
+          title: "Intelligent Document Processing (IDP) Architecture",
+          summary: "Self-validating invoice extraction pipeline deployed on Azure Kubernetes Service (AKS).",
+          stages: [
             {
-              groupName: "1. Document Ingestion",
-              nodes: [
-                {
-                  title: "Supplier PDFs / Scans",
-                  subtitle: "Multi-language invoices & receipts",
-                  type: "input",
-                  badge: "Input Stream",
-                  details: ["Greek, Thai, Arabic, Spanish", "Phone photos & carbon copies"]
-                },
-                {
-                  title: "Batch Classifier",
-                  subtitle: "Page-level splitting engine",
-                  type: "router",
-                  badge: "Page Grouper",
-                  details: ["Separates invoices from credit notes", "Skips non-field email covers"]
-                }
-              ]
+              num: "01",
+              label: "Document Stream Intake",
+              tech: "Batch Document Classifier",
+              details: "Ingests multi-page supplier PDFs across Thai, Greek, Arabic, and Spanish, grouping invoices."
             },
             {
-              groupName: "2. Hybrid Extraction",
-              nodes: [
-                {
-                  title: "Azure Document Intelligence",
-                  subtitle: "OCR & Layout Table Parser",
-                  type: "ai",
-                  badge: "Line-Item OCR",
-                  details: ["Tabular bounding boxes", "Raw text transcription"]
-                },
-                {
-                  title: "GPT-4o Vision Pass",
-                  subtitle: "Targeted Header Extractor",
-                  type: "ai",
-                  badge: "Header Identity",
-                  details: ["Vendor tax ID extraction", "Mod11 / Mod10 checksum"]
-                }
-              ]
+              num: "02",
+              label: "Hybrid Dual-Pass OCR",
+              tech: "Azure Doc Intelligence + GPT-4o",
+              details: "Layout & tables routed to Document Intelligence; vendor identity extracted via focused GPT-4o pass."
             },
             {
-              groupName: "3. Deterministic Validation",
-              nodes: [
-                {
-                  title: "Arithmetic Reconciliation",
-                  subtitle: "Self-Validating Math Invariants",
-                  type: "verify",
-                  badge: "Correctness Proof",
-                  details: ["Line sums == Subtotal", "Subtotal + Tax == Total"]
-                },
-                {
-                  title: "Cost-Gated AI Guard",
-                  subtitle: "Error-triggered re-reads",
-                  type: "verify",
-                  badge: "~$0.03 / Doc",
-                  details: ["Second LLM pass ONLY on math error", "Multi-calendar date conversion"]
-                }
-              ]
+              num: "03",
+              label: "Deterministic Checks",
+              tech: "Mod11/10 Checksum + i18n Rules",
+              details: "Validates tax IDs with algorithmic checksums; standardizes Buddhist/Gregorian dates in code."
             },
             {
-              groupName: "4. Ledger Delivery",
-              nodes: [
-                {
-                  title: "Validated Accounting JSON",
-                  subtitle: "Exported to Azure SQL / AKS",
-                  type: "output",
-                  badge: "Production Ready",
-                  details: ["20s processing (60% cut)", "Zero hallucinated totals"]
-                }
-              ]
+              num: "04",
+              label: "Arithmetic Reconciliation",
+              tech: "Mathematical Invariant Gate",
+              details: "Proves sum of lines = subtotal, and subtotal + tax = total; catches silent errors before ledger export."
+            },
+            {
+              num: "05",
+              label: "Cost-Gated Re-Read",
+              tech: "Error-Proof Gating (~$0.03/doc)",
+              details: "Expensive second LLM passes are only unlocked on mathematical proof of error."
             }
-          ]
+          ],
+          verificationHighlight: "Arithmetic reconciliation guarantees correctness without trusting model hallucination."
         };
 
       case 'gl-master-mapping':
         return {
-          title: "6-Tier Waterfall & Idempotent Mapping Architecture",
-          steps: [
+          title: "GL Master Mapping & Benchmark Classification Flow",
+          summary: "High-scale 36.5k LOC platform classifying charts of accounts across 6 ERP systems.",
+          stages: [
             {
-              groupName: "1. ERP Ingestion",
-              nodes: [
-                {
-                  title: "Client Charts of Accounts",
-                  subtitle: "Ingestion from 6 ERP platforms",
-                  type: "input",
-                  badge: "6 ERPs",
-                  details: ["QBO, Xero, Sage X3, Iplicit, etc.", "Up to 500 accounts/client"]
-                }
-              ]
+              num: "01",
+              label: "Chart of Accounts Intake",
+              tech: "6 ERP Integrations (QBO, Xero, etc.)",
+              details: "Ingests unstructured accounts up to 500 lines per client onboarding."
             },
             {
-              groupName: "2. Classification Waterfall",
-              nodes: [
-                {
-                  title: "6-Tier Waterfall Engine",
-                  subtitle: "Tiered precision cascade",
-                  type: "ai",
-                  badge: "100% Auto-Classify",
-                  details: [
-                    "T1: Curated mappings",
-                    "T2: Learned overlay",
-                    "T3: Exact/normalized lookup",
-                    "T4: Jaccard GL code gating",
-                    "T5: Azure OpenAI Embeddings",
-                    "T6: TF-IDF fallback"
-                  ]
-                },
-                {
-                  title: "Live Schema Catalog",
-                  subtitle: "Dynamic 70-Category DB",
-                  type: "database",
-                  badge: "Drift Prevention",
-                  details: ["Eliminates 79% silent taxonomy drift", "Codes derived from live DB"]
-                }
-              ]
+              num: "02",
+              label: "6-Tier Waterfall Engine",
+              tech: "Azure OpenAI + Jaccard + TF-IDF",
+              details: "Curated lists -> Learned overlay -> Normalized lookup -> Embeddings -> TF-IDF fallback."
             },
             {
-              groupName: "3. Safe Bulk Operations",
-              nodes: [
-                {
-                  title: "Snapshot & Restore",
-                  subtitle: "Point-in-time safe undo engine",
-                  type: "verify",
-                  badge: "53 Byte Checks",
-                  details: ["Pre-flight scope verification", "Transactional rollback on error"]
-                },
-                {
-                  title: "Human Review Gate",
-                  subtitle: "438 ambiguous accounts",
-                  type: "router",
-                  badge: "Refuse to Guess",
-                  details: ["Routes ambiguity to accountants", "Prevents confident errors"]
-                }
-              ]
+              num: "03",
+              label: "Live DB Schema Catalog",
+              tech: "Dynamic 70-Category Model",
+              details: "Derives vocabulary from live DB, permanently eliminating the 79% silent drift defect."
             },
             {
-              groupName: "4. Presentation Layer",
-              nodes: [
-                {
-                  title: "Progressive SSE Grid",
-                  subtitle: "3,690-Line React Virtualized Grid",
-                  type: "output",
-                  badge: "FastAPI + SSE",
-                  details: ["Offset-based resume across retries", "Frozen headers in 1100px iframe"]
-                }
-              ]
+              num: "04",
+              label: "Transactional Snapshot",
+              tech: "53 Byte-Level Assertions",
+              details: "Point-in-time safe undo protecting bystander records with transactional rollback."
+            },
+            {
+              num: "05",
+              label: "Progressive SSE Stream",
+              tech: "FastAPI + React Virtualized Grid",
+              details: "Heartbeat-monitored SSE streaming populates 500-row grids with frozen identity columns."
             }
-          ]
+          ],
+          verificationHighlight: "100% auto-classification on typical clients with zero tolerance for silent taxonomic drift."
         };
 
       case 'bar-vision':
         return {
-          title: "Video-to-Inventory Spatial Pipeline",
-          steps: [
+          title: "Bar Vision: Video-to-Inventory Spatial Architecture",
+          summary: "Zero-shot object detection and optical flow pose recovery pipeline.",
+          stages: [
             {
-              groupName: "1. Video Capture",
-              nodes: [
-                {
-                  title: "Handheld Phone Video",
-                  subtitle: "Back-bar stock recording",
-                  type: "input",
-                  badge: "Handheld RGB",
-                  details: ["45s panning footage", "Variable lighting & motion blur"]
-                }
-              ]
+              num: "01",
+              label: "Handheld Video Input",
+              tech: "Smartphone Back-Bar Recording",
+              details: "Continuous video panning across multi-tier shelving with variable lighting."
             },
             {
-              groupName: "2. Tracking & Detection",
-              nodes: [
-                {
-                  title: "Camera Pose Recovery",
-                  subtitle: "Optical Flow + RANSAC",
-                  type: "ai",
-                  badge: "0.95 Inlier Ratio",
-                  details: ["Lucas-Kanade trajectory tracking", "Cuts 6 split paths into 1 unified track"]
-                },
-                {
-                  title: "Zero-Shot OWLv2",
-                  subtitle: "Open-vocabulary bottle detector",
-                  type: "ai",
-                  badge: "Zero Training Data",
-                  details: ["Open-vocabulary text prompts", "Intersection-over-smaller suppression"]
-                }
-              ]
+              num: "02",
+              label: "Camera Pose Recovery",
+              tech: "Optical Flow + RANSAC (0.95 Inliers)",
+              details: "Tracks camera trajectory, uniting fragmented paths and sampling non-overlapping frames."
             },
             {
-              groupName: "3. Spatial Deduplication & Liquid Level",
-              nodes: [
-                {
-                  title: "Spatial Footprint Dedup",
-                  subtitle: "Non-overlapping camera frames",
-                  type: "verify",
-                  badge: "-35% Duplicates",
-                  details: ["Tracks camera instead of objects", "Fixes 40% over-counting bug"]
-                },
-                {
-                  title: "2D CNN Liquid Regressor",
-                  subtitle: "Per-bottle fill estimator",
-                  type: "ai",
-                  badge: "MAE 0.144",
-                  details: ["Trained CNN on bottle crops", "Group-by-entity cross validation"]
-                }
-              ]
+              num: "03",
+              label: "Open-Vocabulary Detection",
+              tech: "OWLv2 PyTorch Detector",
+              details: "Zero-shot bottle detection using open text prompts without requiring custom training datasets."
             },
             {
-              groupName: "4. Stock Manifest",
-              nodes: [
-                {
-                  title: "Browser Review Manifest",
-                  subtitle: "FastAPI async job queue",
-                  type: "output",
-                  badge: "Commercial Safe",
-                  details: ["AGPL-3 dependencies excluded", "Streamed stage logs with overlays"]
-                }
-              ]
+              num: "04",
+              label: "Spatial Deduplication",
+              tech: "Intersection-over-Smaller Suppress",
+              details: "Eliminates nested bottle-neck boxes and removes 35% duplicate cross-frame counts."
+            },
+            {
+              num: "05",
+              label: "Liquid Level Regression",
+              tech: "Custom 2D CNN (MAE 0.144)",
+              details: "Regresses per-bottle liquid fill level with leave-one-group-out cross validation."
             }
-          ]
+          ],
+          verificationHighlight: "Tracking the camera trajectory instead of individual chaotic bottles prevents double-counting."
         };
 
       case 'promoters-copilot':
         return {
-          title: "Financial Extraction & Predictive Forecasting Flow",
-          steps: [
+          title: "Promoter's Copilot Extraction & Forecast Flow",
+          summary: "Financial document intelligence and predictive modeling platform.",
+          stages: [
             {
-              groupName: "1. Data Ingestion",
-              nodes: [
-                {
-                  title: "Financial Statements (PDF)",
-                  subtitle: "Balance sheets & P&L filings",
-                  type: "input",
-                  badge: "Multi-Format",
-                  details: ["Unstructured PDFs", "Scanned financial summaries"]
-                }
-              ]
+              num: "01",
+              label: "Financial Statements Intake",
+              tech: "PDF & Scanned Filings",
+              details: "Unstructured balance sheets and annual earnings statements."
             },
             {
-              groupName: "2. Document Intelligence",
-              nodes: [
-                {
-                  title: "Azure Document Intelligence",
-                  subtitle: "Prebuilt & Custom Layout Models",
-                  type: "ai",
-                  badge: "Field Extraction",
-                  details: ["Table cell extraction", "Header & currency normalization"]
-                }
-              ]
+              num: "02",
+              label: "Table & Field Extraction",
+              tech: "Azure Document Intelligence",
+              details: "Normalized table schemas, currency alignment, and balance line items."
             },
             {
-              groupName: "3. Time-Series Forecasting",
-              nodes: [
-                {
-                  title: "Predictive Analytics Model",
-                  subtitle: "Trend & seasonality regression",
-                  type: "verify",
-                  badge: "ML Analytics",
-                  details: ["Historical run-rate calculations", "Cash flow projection models"]
-                }
-              ]
+              num: "03",
+              label: "Time-Series Regression",
+              tech: "Predictive Financial Models",
+              details: "Calculates historical run-rates and generates multi-quarter revenue forecasts."
             },
             {
-              groupName: "4. Executive Dashboard",
-              nodes: [
-                {
-                  title: "Natural Language Insights",
-                  subtitle: "Query-based analytics UI",
-                  type: "output",
-                  badge: "FastAPI Backend",
-                  details: ["Interactive forecast visuals", "Automated executive reporting"]
-                }
-              ]
+              num: "04",
+              label: "Interactive Reporting",
+              tech: "FastAPI + Analytical UI",
+              details: "Delivers query-driven executive dashboards and risk indicators."
             }
-          ]
+          ],
+          verificationHighlight: "Deterministic line-item reconciliation ensures extracted figures match audited totals."
         };
 
       case 'manufacturing-copilot':
         return {
-          title: "Multimodal Industrial Troubleshooting Topology",
-          steps: [
+          title: "Manufacturing Multimodal Troubleshooting Topology",
+          summary: "Visual equipment identification with multilingual technical Q&A.",
+          stages: [
             {
-              groupName: "1. Multimodal Input",
-              nodes: [
-                {
-                  title: "Equipment Image & Voice Query",
-                  subtitle: "Captured from shop floor devices",
-                  type: "input",
-                  badge: "Voice + Photo",
-                  details: ["Factory machine photos", "Multilingual speech queries"]
-                }
-              ]
+              num: "01",
+              label: "Visual & Voice Intake",
+              tech: "Shop Floor Mobile Capture",
+              details: "Machine photos and spoken troubleshooting queries from operators."
             },
             {
-              groupName: "2. Computer Vision & Retrieval",
-              nodes: [
-                {
-                  title: "Azure Computer Vision",
-                  subtitle: "Machine Model Identification",
-                  type: "ai",
-                  badge: "Visual Match",
-                  details: ["Model plate detection", "Part number OCR"]
-                },
-                {
-                  title: "Vector Knowledge Base",
-                  subtitle: "Machinery manuals & schematics",
-                  type: "database",
-                  badge: "Cosine Similarity",
-                  details: ["Troubleshooting guide retrieval", "Safety protocols"]
-                }
-              ]
+              num: "02",
+              label: "Model Identification",
+              tech: "Azure Computer Vision",
+              details: "Extracts machine model numbers and matches component visual signatures."
             },
             {
-              groupName: "3. Multilingual LLM Copilot",
-              nodes: [
-                {
-                  title: "Azure OpenAI Copilot",
-                  subtitle: "Technical Q&A in 4 Languages",
-                  type: "ai",
-                  badge: "4 Languages",
-                  details: ["English, Hindi, Gujarati, Bengali", "Role-based access permissions"]
-                }
-              ]
+              num: "03",
+              label: "Vector Manual Retrieval",
+              tech: "Embeddings + Vector Search",
+              details: "Retrieves exact maintenance procedures and electrical schematics."
             },
             {
-              groupName: "4. Shop Floor Action",
-              nodes: [
-                {
-                  title: "ERP / MES Integration",
-                  subtitle: "Real-time production telemetries",
-                  type: "output",
-                  badge: "Connected Factory",
-                  details: ["Maintenance ticket dispatch", "Live equipment uptime stats"]
-                }
-              ]
+              num: "04",
+              label: "Multilingual Resolution",
+              tech: "Azure OpenAI (4 Languages)",
+              details: "Generates spoken and text troubleshooting in English, Hindi, Gujarati, and Bengali."
             }
-          ]
+          ],
+          verificationHighlight: "Grounds responses strictly against manufacturer technical manuals to prevent unsafe steps."
         };
 
       case 'visitor-management':
       default:
         return {
-          title: "Smart Biometric Visitor Check-In Architecture",
-          steps: [
+          title: "Corporate Visitor Biometric Architecture",
+          summary: "Facial recognition and automated cloud approval workflows.",
+          stages: [
             {
-              groupName: "1. Visitor Arrival",
-              nodes: [
-                {
-                  title: "Kiosk Check-In / Advance Link",
-                  subtitle: "Walk-in & scheduled guest intake",
-                  type: "input",
-                  badge: "Intake",
-                  details: ["Visitor registration form", "Govt ID badge capture"]
-                }
-              ]
+              num: "01",
+              label: "Kiosk Registration",
+              tech: "Walk-in & Advance Guest Links",
+              details: "Captures guest details, host information, and government identification."
             },
             {
-              groupName: "2. Biometric Verification",
-              nodes: [
-                {
-                  title: "Azure Face Recognition",
-                  subtitle: "Returning visitor identification",
-                  type: "ai",
-                  badge: "Biometric AI",
-                  details: ["Facial feature vector extraction", "Instant autofill for returnees"]
-                }
-              ]
+              num: "02",
+              label: "Biometric Matching",
+              tech: "Azure Face API",
+              details: "Recognizes returning visitors for 1-click check-in without manual re-entry."
             },
             {
-              groupName: "3. Host Workflow Orchestration",
-              nodes: [
-                {
-                  title: "Power Automate Flow",
-                  subtitle: "Multi-stage host approval",
-                  type: "verify",
-                  badge: "Cloud Workflow",
-                  details: ["Instant SMS & Email notifications", "Host 1-click arrival approval"]
-                }
-              ]
+              num: "03",
+              label: "Automated Host Routing",
+              tech: "Power Automate Workflows",
+              details: "Sends immediate SMS and email alerts with 1-tap host approval."
             },
             {
-              groupName: "4. Secure Access & Reporting",
-              nodes: [
-                {
-                  title: "Dynamic QR Pass & Admin CSV",
-                  subtitle: "Security desk console",
-                  type: "output",
-                  badge: "Audited Pass",
-                  details: ["Encrypted QR badge generation", "Filtered security audit reports"]
-                }
-              ]
+              num: "04",
+              label: "Dynamic Pass Generation",
+              tech: "Encrypted QR Verification",
+              details: "Produces time-limited security passes and logs entries to compliance CSVs."
             }
-          ]
+          ],
+          verificationHighlight: "End-to-end security compliance with automated host authorization."
         };
     }
   };
 
-  const { title, steps } = getDiagramData();
-
-  // Helper for node type styling
-  const getNodeStyles = (type: DiagramNode['type']) => {
-    switch (type) {
-      case 'input':
-        return {
-          border: 'border-[#D5CABE]',
-          bg: 'bg-white',
-          badgeBg: 'bg-ecru-200 text-charcoal',
-          icon: FileText
-        };
-      case 'ai':
-        return {
-          border: 'border-amber/60',
-          bg: 'bg-amber/10',
-          badgeBg: 'bg-amber text-charcoal-deep font-bold',
-          icon: Sparkles
-        };
-      case 'router':
-        return {
-          border: 'border-charcoal/40',
-          bg: 'bg-[#2E332E] text-white',
-          badgeBg: 'bg-amber/20 text-amber font-mono font-bold',
-          icon: Zap
-        };
-      case 'verify':
-        return {
-          border: 'border-emerald-500/50',
-          bg: 'bg-emerald-50/70',
-          badgeBg: 'bg-emerald-600 text-white font-bold',
-          icon: ShieldCheck
-        };
-      case 'database':
-        return {
-          border: 'border-blue-400/40',
-          bg: 'bg-blue-50/60',
-          badgeBg: 'bg-blue-100 text-blue-800 font-mono font-bold',
-          icon: Database
-        };
-      case 'output':
-        return {
-          border: 'border-charcoal',
-          bg: 'bg-charcoal text-white',
-          badgeBg: 'bg-amber text-charcoal-deep font-bold',
-          icon: CheckCircle2
-        };
-    }
-  };
+  const flow = getFlowData();
 
   return (
-    <div className="mb-8 p-5 sm:p-6 rounded-3xl bg-[#FAF7F2] border border-[#E3DACD] shadow-sm">
+    <div className="mb-8 p-6 rounded-2xl bg-[#F4EFE6]/80 border border-[#E3DACD]">
       
-      {/* Diagram Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-6 border-b border-[#EAE2D5] gap-2">
-        <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded-lg bg-amber/20 text-amber-dark">
-            <Layers className="w-4 h-4" />
-          </div>
-          <div>
-            <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-charcoal-muted">
-              Interactive System Architecture Diagram
-            </h4>
-            <p className="text-sm font-bold text-charcoal font-sans">
-              {title}
-            </p>
-          </div>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-baseline justify-between pb-4 mb-6 border-b border-[#E3DACD]/70 gap-2">
+        <div>
+          <span className="text-[10px] font-mono uppercase tracking-widest text-amber-dark font-bold block mb-1">
+            System Architecture
+          </span>
+          <h4 className="text-base font-bold text-charcoal font-sans">
+            {flow.title}
+          </h4>
         </div>
-
-        <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-ecru-100 text-charcoal-muted border border-[#E0D5C3] self-start sm:self-auto">
-          Dataflow Pipeline
-        </span>
+        <p className="text-xs text-charcoal-muted font-mono">
+          {flow.summary}
+        </p>
       </div>
 
-      {/* Visual Flow Stages */}
-      <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 relative">
-          
-          {steps.map((step, sIdx) => (
-            <div key={sIdx} className="flex flex-col gap-3 relative">
-              
-              {/* Step Header */}
-              <div className="flex items-center justify-between pb-1 border-b border-[#E8DFC9]">
-                <span className="text-[11px] font-mono font-bold text-charcoal tracking-wide">
-                  {step.groupName}
-                </span>
-                <span className="text-[10px] font-mono text-charcoal-muted">
-                  STAGE 0{sIdx + 1}
-                </span>
-              </div>
-
-              {/* Nodes within Step */}
-              <div className="space-y-3 flex-1 flex flex-col justify-start">
-                {step.nodes.map((node, nIdx) => {
-                  const style = getNodeStyles(node.type);
-                  const Icon = style.icon;
-                  const isDark = node.type === 'output' || node.type === 'router';
-
-                  return (
-                    <div
-                      key={nIdx}
-                      className={`p-3.5 rounded-2xl border transition-all duration-200 shadow-sm relative group hover:shadow-md ${style.border} ${style.bg}`}
-                    >
-                      {/* Node Top: Icon & Badge */}
-                      <div className="flex items-center justify-between gap-1.5 mb-2">
-                        <div className="flex items-center gap-1.5">
-                          <Icon className={`w-3.5 h-3.5 ${isDark ? 'text-amber' : 'text-charcoal'}`} />
-                          <span className={`text-[10px] font-mono font-bold ${isDark ? 'text-gray-300' : 'text-charcoal-muted'}`}>
-                            {node.type.toUpperCase()}
-                          </span>
-                        </div>
-                        {node.badge && (
-                          <span className={`text-[9px] px-2 py-0.5 rounded-full ${style.badgeBg}`}>
-                            {node.badge}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Node Title & Subtitle */}
-                      <h5 className={`text-xs font-bold leading-tight font-sans ${isDark ? 'text-white' : 'text-charcoal'}`}>
-                        {node.title}
-                      </h5>
-                      <p className={`text-[10px] mt-0.5 font-mono ${isDark ? 'text-gray-300' : 'text-charcoal-muted'}`}>
-                        {node.subtitle}
-                      </p>
-
-                      {/* Node Micro-Details */}
-                      {node.details && (
-                        <div className="mt-2.5 pt-2 border-t border-black/10 space-y-1">
-                          {node.details.map((detail, dIdx) => (
-                            <div key={dIdx} className="flex items-center gap-1 text-[10px]">
-                              <span className={`w-1 h-1 rounded-full ${isDark ? 'bg-amber' : 'bg-charcoal'}`} />
-                              <span className={`${isDark ? 'text-gray-300' : 'text-charcoal-muted'}`}>
-                                {detail}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Connecting arrow to next column on desktop */}
-              {sIdx < steps.length - 1 && (
-                <div className="hidden lg:flex absolute -right-2.5 top-1/2 -translate-y-1/2 z-10 text-[#C8934C]">
-                  <ArrowRight className="w-5 h-5 drop-shadow-sm" />
+      {/* Clean Horizontal Pipeline (Minimalist, calm, zero colored box clutter) */}
+      <div className="relative">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 relative">
+          {flow.stages.map((stage, idx) => (
+            <div 
+              key={idx} 
+              className="relative p-3.5 rounded-xl bg-white/70 border border-[#E5DDCF] flex flex-col justify-between hover:bg-white hover:border-amber/50 transition-all group"
+            >
+              <div>
+                {/* Step indicator */}
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[10px] font-mono font-bold text-charcoal-muted">
+                    {stage.num}
+                  </span>
+                  {idx < flow.stages.length - 1 ? (
+                    <ArrowRight className="w-3.5 h-3.5 text-amber/60 group-hover:text-amber transition-colors hidden lg:block" />
+                  ) : (
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  )}
                 </div>
-              )}
+
+                <h5 className="text-xs font-bold text-charcoal leading-snug font-sans">
+                  {stage.label}
+                </h5>
+
+                <span className="text-[10px] font-mono font-medium text-amber-dark block mt-1">
+                  {stage.tech}
+                </span>
+
+                <p className="text-[11px] text-charcoal-muted leading-relaxed mt-2 font-sans">
+                  {stage.details}
+                </p>
+              </div>
             </div>
           ))}
-
         </div>
       </div>
 
-      {/* Legend Footer */}
-      <div className="mt-6 pt-3 border-t border-[#EAE2D5] flex flex-wrap items-center justify-between gap-3 text-[10px] font-mono text-charcoal-muted">
-        <div className="flex flex-wrap items-center gap-3">
-          <span className="font-bold text-charcoal">Topology Key:</span>
-          <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded bg-[#FAF7F2] border border-charcoal/40" /> Ingestion
-          </span>
-          <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded bg-amber" /> AI Model / Agent
-          </span>
-          <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded bg-emerald-500" /> Deterministic Verification
-          </span>
-          <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded bg-blue-400" /> Database / Storage Broker
-          </span>
-          <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded bg-charcoal" /> Verified Output Stream
-          </span>
-        </div>
-        <span>Flow: Left ➔ Right</span>
+      {/* Subtle Verification Callout */}
+      <div className="mt-4 pt-3 border-t border-[#E3DACD]/60 flex items-center gap-2 text-xs text-charcoal font-medium">
+        <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+        <span><strong className="text-charcoal font-bold">Reliability Guarantee:</strong> {flow.verificationHighlight}</span>
       </div>
 
     </div>
