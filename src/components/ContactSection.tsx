@@ -21,6 +21,7 @@ export const ContactSection: React.FC = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const copyEmail = () => {
     sounds.playTap();
@@ -29,21 +30,48 @@ export const ContactSection: React.FC = () => {
     setTimeout(() => setCopied(false), 2500);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     sounds.playClick();
     setIsSubmitting(true);
+    setErrorMessage('');
 
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setSubmitted(true);
-      sounds.playSuccess();
-      // Also open user's default email client
+    try {
       const topic = formData.inquiryType.trim() ? formData.inquiryType.trim() : 'AI Engineering Inquiry';
-      const subject = encodeURIComponent(`[Portfolio: ${topic}] from ${formData.name}`);
-      const body = encodeURIComponent(`Hi Dhiraj,\n\nTopic / Domain: ${topic}\n\n${formData.message}\n\nFrom: ${formData.name} (${formData.email})`);
-      window.open(`mailto:${personalInfo.email}?subject=${subject}&body=${body}`, '_blank');
-    }, 1200);
+      
+      const submissionData = new FormData();
+      submissionData.append("access_key", "d2e05507-622a-4bc4-9f47-2fcb7bdd6d37");
+      submissionData.append("name", formData.name);
+      submissionData.append("email", formData.email);
+      submissionData.append("subject", `[Portfolio: ${topic}] from ${formData.name}`);
+      submissionData.append("inquiry_topic", topic);
+      submissionData.append("message", formData.message);
+      submissionData.append("from_name", formData.name);
+
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        body: submissionData
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        sounds.playSuccess();
+        setSubmitted(true);
+        setFormData({
+          name: '',
+          email: '',
+          inquiryType: '',
+          message: ''
+        });
+      } else {
+        setErrorMessage(data.message || "Submission failed. Please try again or email directly.");
+      }
+    } catch {
+      setErrorMessage("Network error occurred while sending. Please try again or email ai.cloudranger@gmail.com directly.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -185,20 +213,25 @@ export const ContactSection: React.FC = () => {
                     <Check className="w-7 h-7" />
                   </div>
                   <h4 className="text-lg font-bold text-charcoal">
-                    Routing Query Initialized!
+                    Message Sent Directly to Dhiraj!
                   </h4>
                   <p className="text-xs text-charcoal-muted max-w-sm mt-1 mb-6">
-                    Your message draft has been prepared and routed. Dhiraj will review and respond promptly.
+                    Your inquiry has been delivered straight into Dhiraj's Gmail inbox (<span className="font-mono text-charcoal font-semibold">{personalInfo.email}</span>). He will review and respond promptly.
                   </p>
                   <button
                     onClick={() => setSubmitted(false)}
-                    className="px-4 py-2 rounded-xl bg-charcoal text-white text-xs font-bold"
+                    className="px-5 py-2.5 rounded-xl bg-charcoal text-white text-xs font-bold hover:bg-charcoal-deep transition-colors shadow-sm"
                   >
-                    Send Another Note
+                    Send Another Message
                   </button>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
+                  {errorMessage && (
+                    <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-medium">
+                      {errorMessage}
+                    </div>
+                  )}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="text-xs font-bold text-charcoal block mb-1.5">
