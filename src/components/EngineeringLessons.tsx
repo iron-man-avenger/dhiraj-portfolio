@@ -9,11 +9,11 @@ export const EngineeringLessons: React.FC = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
           <div>
-            <span className="text-xs font-mono font-bold uppercase tracking-widest text-amber-dark flex items-center gap-2 mb-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber" />
+            <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#2B302C] flex items-center gap-2 mb-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#2B302C]" />
               <span>Engineering Mindset</span>
             </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-charcoal tracking-tight font-sans">
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-[#2B302C] tracking-tight font-sans">
               Production Principles & Architectural Discipline
             </h2>
             <p className="text-sm sm:text-base text-charcoal-muted mt-2 max-w-xl font-normal leading-relaxed">
@@ -26,22 +26,22 @@ export const EngineeringLessons: React.FC = () => {
           </div>
         </div>
 
-        {/* Clean Editorial Layout (No Box Clutter) */}
+        {/* Clean Editorial Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
           
-          {/* Left Column (5 cols): Case Autopsy Note */}
-          <div className="lg:col-span-5 p-8 rounded-3xl bg-[#F4EFE6] border border-[#E3DACD] hover:border-amber/40 hover:shadow-glow-amber/5 transition-all duration-300">
-            <span className="text-[10px] font-mono uppercase tracking-widest text-amber-dark font-bold block mb-2">
+          {/* Left Column (5 cols): Case Autopsy Note with #2B302C Box Background */}
+          <div className="lg:col-span-5 p-8 rounded-3xl bg-[#2B302C] text-white border border-[#39403B] shadow-elevated transition-all duration-300 relative overflow-hidden group">
+            <span className="text-[10px] font-mono uppercase tracking-widest text-amber font-bold block mb-2">
               Production Autopsy
             </span>
-            <h3 className="text-xl font-bold text-charcoal font-sans leading-snug mb-3">
+            <h3 className="text-xl font-bold text-white font-sans leading-snug mb-3">
               The 79% Silent Taxonomy Drift Defect (12,087 Mappings)
             </h3>
-            <p className="text-xs sm:text-sm text-charcoal-muted leading-relaxed font-normal mb-4">
+            <p className="text-xs sm:text-sm text-white/80 leading-relaxed font-normal mb-5">
               When an ERP taxonomy expanded from 31 to 70 categories without re-keying stored artifacts, every automated validator passed because stale codes fell inside the valid range. Every prediction emitted a code that contradicted its own label.
             </p>
-            <div className="pt-4 border-t border-[#E5DDCF] text-xs font-mono text-charcoal">
-              <strong className="text-amber-dark font-bold">The Fix:</strong> Derived vocabulary strictly from the live database catalog, making taxonomic drift structurally impossible to recur.
+            <div className="pt-4 border-t border-white/10 text-xs font-mono text-white/90">
+              <strong className="text-amber font-bold">The Fix:</strong> Derived vocabulary strictly from the live database catalog, making taxonomic drift structurally impossible to recur.
             </div>
           </div>
 

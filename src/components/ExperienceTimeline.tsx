@@ -8,11 +8,11 @@ export const ExperienceTimeline: React.FC = () => {
         
         {/* Header */}
         <div className="mb-16">
-          <span className="text-xs font-mono font-bold uppercase tracking-widest text-amber-dark flex items-center gap-2 mb-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber" />
+          <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#2B302C] flex items-center gap-2 mb-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#2B302C]" />
             <span>Career & Honors</span>
           </span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-charcoal tracking-tight font-sans">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-[#2B302C] tracking-tight font-sans">
             Work Journey & Recognized Credentials
           </h2>
           <p className="text-sm sm:text-base text-charcoal-muted mt-2 max-w-xl font-normal leading-relaxed">
@@ -29,7 +29,7 @@ export const ExperienceTimeline: React.FC = () => {
                 <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1">
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="text-lg font-bold text-charcoal font-sans">
+                      <h3 className="text-lg font-extrabold text-[#2B302C] font-sans">
                         {exp.role}
                       </h3>
                       {exp.period.includes('Present') && (
@@ -80,8 +80,8 @@ export const ExperienceTimeline: React.FC = () => {
             
             {/* Awards */}
             <div>
-              <span className="text-xs font-mono font-bold uppercase tracking-widest text-amber-dark flex items-center gap-2 mb-3">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber" />
+              <span className="text-xs font-mono font-extrabold uppercase tracking-widest text-[#2B302C] flex items-center gap-2 mb-3">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#2B302C]" />
                 <span>Recognitions</span>
               </span>
               <div className="space-y-4">
@@ -92,20 +92,28 @@ export const ExperienceTimeline: React.FC = () => {
                       key={idx} 
                       className={`pb-3.5 border-b border-[#E3DACD]/70 transition-all ${
                         isTopAward 
-                          ? 'p-4 rounded-2xl bg-amber/[0.08] border border-amber/30 shadow-2xs' 
+                          ? 'p-5 rounded-2xl bg-[#2B302C] text-white border border-[#39403B] shadow-elevated' 
                           : ''
                       }`}
                     >
-                      <span className="text-[10px] font-mono text-charcoal-muted flex items-center justify-between">
+                      <span className={`text-[10px] font-mono flex items-center justify-between ${
+                        isTopAward ? 'text-white/70' : 'text-charcoal-muted'
+                      }`}>
                         <span>{award.year} • {award.organization}</span>
                         {isTopAward && (
-                          <span className="text-amber-dark font-bold text-[10px] uppercase tracking-wider">Top Honor</span>
+                          <span className="bg-amber text-[#2B302C] font-extrabold text-[9px] uppercase tracking-wider px-2 py-0.5 rounded shadow-sm">
+                            Top Honor
+                          </span>
                         )}
                       </span>
-                      <h4 className="text-sm font-bold text-charcoal font-sans mt-0.5">
+                      <h4 className={`text-sm font-bold font-sans mt-1.5 ${
+                        isTopAward ? 'text-white' : 'text-charcoal'
+                      }`}>
                         {award.title}
                       </h4>
-                      <p className="text-xs text-charcoal-muted mt-1 leading-relaxed">
+                      <p className={`text-xs mt-1.5 leading-relaxed ${
+                        isTopAward ? 'text-white/80' : 'text-charcoal-muted'
+                      }`}>
                         {award.description}
                       </p>
                     </div>
@@ -116,8 +124,8 @@ export const ExperienceTimeline: React.FC = () => {
 
             {/* Certifications */}
             <div>
-              <span className="text-xs font-mono font-bold uppercase tracking-widest text-amber-dark flex items-center gap-2 mb-3">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber" />
+              <span className="text-xs font-mono font-extrabold uppercase tracking-widest text-[#2B302C] flex items-center gap-2 mb-3">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#2B302C]" />
                 <span>Certifications</span>
               </span>
               <div className="space-y-2 text-xs font-mono">
@@ -134,8 +142,8 @@ export const ExperienceTimeline: React.FC = () => {
 
             {/* Education */}
             <div>
-              <span className="text-xs font-mono font-bold uppercase tracking-widest text-amber-dark flex items-center gap-2 mb-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber" />
+              <span className="text-xs font-mono font-extrabold uppercase tracking-widest text-[#2B302C] flex items-center gap-2 mb-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#2B302C]" />
                 <span>Education</span>
               </span>
               <div className="text-xs">

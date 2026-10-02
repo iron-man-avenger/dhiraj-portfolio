@@ -36,11 +36,11 @@ export const ProjectsSection: React.FC = () => {
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
           <div>
-            <span className="text-xs font-mono font-bold uppercase tracking-widest text-amber-dark flex items-center gap-2 mb-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber" />
+            <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#2B302C] flex items-center gap-2 mb-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#2B302C]" />
               <span>Selected Works</span>
             </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-charcoal tracking-tight font-sans">
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-[#2B302C] tracking-tight font-sans">
               Flagship Engineering Projects
             </h2>
             <p className="text-sm sm:text-base text-charcoal-muted mt-2 max-w-xl font-normal leading-relaxed">

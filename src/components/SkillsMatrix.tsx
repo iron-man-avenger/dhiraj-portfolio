@@ -8,11 +8,11 @@ export const SkillsMatrix: React.FC = () => {
         
         {/* Header */}
         <div className="mb-16">
-          <span className="text-xs font-mono font-bold uppercase tracking-widest text-amber-dark flex items-center gap-2 mb-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber" />
+          <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#2B302C] flex items-center gap-2 mb-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#2B302C]" />
             <span>Technical Stack</span>
           </span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-charcoal tracking-tight font-sans">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-[#2B302C] tracking-tight font-sans">
             Production Skills & Architectural Domains
           </h2>
           <p className="text-sm sm:text-base text-charcoal-muted mt-2 max-w-xl font-normal leading-relaxed">
@@ -20,20 +20,20 @@ export const SkillsMatrix: React.FC = () => {
           </p>
         </div>
 
-        {/* Clean, Editorial Skills Directory with Primary Amber Depth */}
+        {/* Clean, Editorial Skills Directory with Primary #2B302C Depth */}
         <div className="divide-y divide-[#E3DACD]/70 border-y border-[#E3DACD]/70">
           {skillCategories.map((category) => (
             <div 
               key={category.title}
               className="py-8 grid grid-cols-1 lg:grid-cols-12 gap-6 items-baseline transition-colors hover:bg-black/[0.01]"
             >
-              {/* Category Name & Scope (4 cols) with Amber Marker */}
+              {/* Category Name & Scope (4 cols) with #2B302C Contrast */}
               <div className="lg:col-span-4">
-                <h3 className="text-base font-bold text-charcoal font-sans flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber" />
+                <h3 className="text-base font-extrabold text-[#2B302C] font-sans flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#2B302C]" />
                   <span>{category.title}</span>
                 </h3>
-                <p className="text-xs text-charcoal-muted font-mono mt-1 pl-3.5">
+                <p className="text-xs text-[#2B302C]/80 font-mono mt-1 pl-3.5 leading-relaxed font-medium">
                   {category.description}
                 </p>
               </div>
