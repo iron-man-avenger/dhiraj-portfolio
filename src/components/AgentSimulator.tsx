@@ -231,20 +231,29 @@ export const AgentSimulator: React.FC = () => {
           </div>
 
           {/* Scenario Selector Tabs */}
-          <div className="flex flex-wrap gap-1 p-1 bg-white/70 rounded-full border border-[#E3DACD] self-start md:self-auto">
-            {scenarios.map((s) => (
-              <button
-                key={s.id}
-                onClick={() => handleScenarioChange(s)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-all ${
-                  selectedScenario.id === s.id
-                    ? 'bg-charcoal text-white shadow-sm'
-                    : 'text-charcoal-muted hover:text-charcoal hover:bg-black/[0.03]'
-                }`}
-              >
-                {s.name.split('.')[1]}
-              </button>
-            ))}
+          <div className="inline-flex items-center gap-1 p-1 bg-white/80 rounded-2xl md:rounded-full border border-[#E3DACD] shadow-sm max-w-full overflow-x-auto">
+            {scenarios.map((s) => {
+              const labelMap: Record<string, string> = {
+                'pnl-query': 'NLP-to-SQL',
+                'invoice-ocr': 'Papertrail IDP',
+                'bar-vision': 'Bar Vision'
+              };
+              const isSelected = selectedScenario.id === s.id;
+
+              return (
+                <button
+                  key={s.id}
+                  onClick={() => handleScenarioChange(s)}
+                  className={`px-4 py-1.5 rounded-xl md:rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 ${
+                    isSelected
+                      ? 'bg-charcoal text-white shadow-sm'
+                      : 'text-charcoal-muted hover:text-charcoal hover:bg-black/[0.04]'
+                  }`}
+                >
+                  {labelMap[s.id] || s.name}
+                </button>
+              );
+            })}
           </div>
         </div>
 

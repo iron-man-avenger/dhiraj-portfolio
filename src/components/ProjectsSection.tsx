@@ -48,7 +48,7 @@ export const ProjectsSection: React.FC = () => {
           </div>
 
           {/* Minimalist Filter Tabs */}
-          <div className="flex flex-wrap gap-1 p-1 bg-white/60 rounded-full border border-[#E3DACD] self-start md:self-auto">
+          <div className="flex flex-wrap gap-1 p-1 bg-white/70 rounded-2xl md:rounded-full border border-[#E3DACD] self-start md:self-auto shadow-sm">
             {categories.map((cat) => (
               <button
                 key={cat}
@@ -56,10 +56,10 @@ export const ProjectsSection: React.FC = () => {
                   sounds.playTap();
                   setSelectedCategory(cat);
                 }}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-all ${
+                className={`px-3.5 py-1.5 rounded-xl md:rounded-full text-xs font-semibold transition-all duration-200 ${
                   selectedCategory === cat
                     ? 'bg-charcoal text-white shadow-sm'
-                    : 'text-charcoal-muted hover:text-charcoal hover:bg-black/[0.03]'
+                    : 'text-charcoal-muted hover:text-charcoal hover:bg-black/[0.04]'
                 }`}
               >
                 {cat}

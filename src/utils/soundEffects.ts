@@ -176,75 +176,162 @@ class SoundManager {
     } catch {}
   }
 
-  // Interstellar Theme Synthesizer (Hans Zimmer Cosmic Piano & Organ Harmonics)
-  public playInterstellarTone(index: number): string {
+  // Deep 32-foot Cathedral Pipe Organ Bass Pedal Chords (Am, G Major, F Major)
+  public playOrganBassChord(chord: 'Am' | 'G' | 'F') {
+    if (this.isMuted) return;
+    try {
+      this.initCtx();
+      if (!this.ctx) return;
+      const now = this.ctx.currentTime;
+      const destination = this.compressor || this.ctx.destination;
+
+      // Chord fundamental and harmonic frequencies for massive 32ft church organ pipe resonance
+      let roots: number[] = [];
+      if (chord === 'Am') {
+        roots = [55.00, 110.00, 164.81]; // A1 (32ft sub), A2 (16ft principal), E3 (8ft fifth)
+      } else if (chord === 'G') {
+        roots = [48.99, 97.99, 146.83]; // G1 (32ft sub), G2 (16ft principal), D3 (8ft fifth)
+      } else if (chord === 'F') {
+        roots = [43.65, 87.31, 130.81]; // F1 (32ft sub), F2 (16ft principal), C3 (8ft fifth)
+      }
+
+      const bassFilter = this.ctx.createBiquadFilter();
+      bassFilter.type = 'lowpass';
+      bassFilter.frequency.setValueAtTime(360, now);
+      bassFilter.Q.setValueAtTime(1.3, now);
+
+      const bassGain = this.ctx.createGain();
+      bassGain.gain.setValueAtTime(0.0001, now);
+      bassGain.gain.linearRampToValueAtTime(0.09, now + 0.05);
+      bassGain.gain.exponentialRampToValueAtTime(0.0001, now + 2.2);
+
+      roots.forEach((freq, idx) => {
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        osc.type = idx === 0 ? 'sine' : 'triangle';
+        osc.frequency.setValueAtTime(freq, now);
+        osc.connect(bassFilter);
+        osc.start(now);
+        osc.stop(now + 2.25);
+      });
+
+      bassFilter.connect(bassGain);
+      bassGain.connect(destination);
+    } catch {}
+  }
+
+  // Authentic Massive Church Pipe Organ Note (Flute + Principal Pipes + Cathedral Voix Céleste)
+  public playOrganPipe(node: InterstellarNode): string {
     if (this.isMuted) return '';
     try {
       this.initCtx();
       if (!this.ctx) return '';
-
-      const target = INTERSTELLAR_NODES[Math.max(0, Math.min(index, INTERSTELLAR_NODES.length - 1))];
       const now = this.ctx.currentTime;
       const destination = this.compressor || this.ctx.destination;
 
-      // 1. Fundamental Felt Piano Oscillator (Sine)
-      const osc1 = this.ctx.createOscillator();
-      osc1.type = 'sine';
-      osc1.frequency.setValueAtTime(target.freq, now);
-
-      // 2. Shimmering Cathedral Organ Harmonic (Detuned Triangle +3.5 cents)
-      const osc2 = this.ctx.createOscillator();
-      osc2.type = 'triangle';
-      osc2.frequency.setValueAtTime(target.freq * 1.0022, now);
-
-      // 3. Sub-bass Organ Pedal (for notes under 450Hz for authentic Hans Zimmer chest resonance)
-      let subOsc: OscillatorNode | null = null;
-      let subGain: GainNode | null = null;
-      if (target.freq <= 450) {
-        subOsc = this.ctx.createOscillator();
-        subGain = this.ctx.createGain();
-        subOsc.type = 'sine';
-        subOsc.frequency.setValueAtTime(target.freq * 0.5, now);
-        subGain.gain.setValueAtTime(0.0001, now);
-        subGain.gain.linearRampToValueAtTime(0.035, now + 0.04);
-        subGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.2);
-        subOsc.connect(subGain);
-        subGain.connect(destination);
-        subOsc.start(now);
-        subOsc.stop(now + 1.3);
+      // Automatically trigger left-hand bass pedal chord on root beats
+      if (node.bassChord) {
+        this.playOrganBassChord(node.bassChord);
       }
 
-      // Warm acoustic Lowpass filter (filters harsh digital harmonics, replicates room acoustic)
+      // 1. 8' Principal Flute pipe (Sine fundamental)
+      const osc1 = this.ctx.createOscillator();
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(node.freq, now);
+
+      // 2. 4' Octave pipe (Triangle + subtle cathedral chorus detuning +3 cents)
+      const osc2 = this.ctx.createOscillator();
+      osc2.type = 'triangle';
+      osc2.frequency.setValueAtTime(node.freq * 1.0022, now);
+
+      // 3. 2-2/3' Nazard Harmonic pipe (Air shimmer of organ pipes)
+      const osc3 = this.ctx.createOscillator();
+      const osc3Gain = this.ctx.createGain();
+      osc3.type = 'sine';
+      osc3.frequency.setValueAtTime(node.freq * 2.0, now);
+      osc3Gain.gain.setValueAtTime(0.025, now);
+      osc3.connect(osc3Gain);
+
+      // Acoustic Lowpass filter (emulating stone sanctuary acoustic damping)
       const filter = this.ctx.createBiquadFilter();
       filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(Math.min(target.freq * 3.6, 2200), now);
+      filter.frequency.setValueAtTime(2600, now);
       filter.Q.setValueAtTime(1.1, now);
 
-      // Master Note Amplitude Envelope
+      // Master pipe envelope: 40ms air swell attack + 1.5s lingering cathedral decay
       const gain = this.ctx.createGain();
       gain.gain.setValueAtTime(0.0001, now);
-      // Hans Zimmer signature felt-piano attack: 35ms soft rise
-      gain.gain.linearRampToValueAtTime(0.085, now + 0.035);
-      // Lingering space reverb tail: exponential decay over 1.4 seconds
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.4);
+      gain.gain.linearRampToValueAtTime(0.08, now + 0.04);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.5);
 
       osc1.connect(filter);
       osc2.connect(filter);
+      osc3Gain.connect(filter);
       filter.connect(gain);
       gain.connect(destination);
 
       osc1.start(now);
       osc2.start(now);
-      osc1.stop(now + 1.45);
-      osc2.stop(now + 1.45);
+      osc3.start(now);
 
-      return target.note;
+      osc1.stop(now + 1.55);
+      osc2.stop(now + 1.55);
+      osc3.stop(now + 1.55);
+
+      return node.note;
     } catch {
       return '';
     }
   }
 
-  // Auto-play the iconic Hans Zimmer Interstellar motif across the 12 bars
+  // Play node by index (backwards compatible)
+  public playInterstellarTone(index: number): string {
+    const target = INTERSTELLAR_NODES[Math.max(0, Math.min(index, INTERSTELLAR_NODES.length - 1))];
+    return this.playOrganPipe(target);
+  }
+
+  // Play an individual Hans Zimmer pattern (1, 2, 3, 4, or 5)
+  public playInterstellarPattern(
+    patternId: number,
+    onStep?: (barIdx: number) => void,
+    onComplete?: () => void
+  ): () => void {
+    if (this.isMuted) {
+      if (onComplete) onComplete();
+      return () => {};
+    }
+
+    // Determine bars corresponding to the pattern
+    let barIndices: number[] = [];
+    if (patternId === 1) barIndices = [0, 1, 2, 3]; // A - E - A - E (Am)
+    else if (patternId === 2) barIndices = [4, 5, 6, 7]; // B - E - B - E (G)
+    else if (patternId === 3) barIndices = [8, 9, 8, 9]; // C - E - C - E (F)
+    else if (patternId === 4) barIndices = [10, 11, 10, 11]; // D - E - D - E (F)
+    else if (patternId === 5) barIndices = [6, 7, 6, 7]; // B - E - B - E (G Return)
+
+    const timeouts: (ReturnType<typeof setTimeout>)[] = [];
+    const stepDuration = 270;
+
+    barIndices.forEach((bIdx, step) => {
+      const t = setTimeout(() => {
+        this.playOrganPipe(INTERSTELLAR_NODES[bIdx]);
+        if (onStep) onStep(bIdx);
+      }, step * stepDuration);
+      timeouts.push(t);
+    });
+
+    const endT = setTimeout(() => {
+      if (onComplete) onComplete();
+    }, barIndices.length * stepDuration + 250);
+    timeouts.push(endT);
+
+    return () => {
+      timeouts.forEach(t => clearTimeout(t));
+      if (onComplete) onComplete();
+    };
+  }
+
+  // Auto-play the complete Hans Zimmer Interstellar Suite across all patterns
   public playInterstellarTheme(
     onNoteTrigger?: (index: number) => void,
     onComplete?: () => void
@@ -254,23 +341,32 @@ class SoundManager {
       return () => {};
     }
 
-    // Iconic "Day One / Stay / First Step" Interstellar melodic sequence
-    const motif = [2, 3, 4, 5, 4, 3, 7, 8, 9, 10, 11, 0, 1, 2];
-    const delays = [0, 320, 640, 980, 1380, 1750, 2120, 2500, 2880, 3260, 3640, 4020, 4400, 4800];
+    // Complete authentic Hans Zimmer progression:
+    // Pattern 1 (A-E-A-E with Am) -> Pattern 2 (B-E-B-E with G) -> Pattern 3 (C-E-C-E with F) ->
+    // Pattern 4 (D-E-D-E with F) -> Return Pattern 5 (B-E-B-E with G) -> Final Resolution Pattern 1 (A-E-A-E with Am)
+    const sequence = [
+      0, 1, 2, 3,       // Pattern 1: A - E - A - E (Am)
+      4, 5, 6, 7,       // Pattern 2: B - E - B - E (G)
+      8, 9, 8, 9,       // Pattern 3: C - E - C - E (F)
+      10, 11, 10, 11,   // Pattern 4: D - E - D - E (F)
+      6, 7, 6, 7,       // Return:    B - E - B - E (G)
+      0, 1, 2, 3        // Finale:    A - E - A - E (Am)
+    ];
 
     const timeouts: (ReturnType<typeof setTimeout>)[] = [];
+    const stepDuration = 265;
 
-    motif.forEach((barIdx, i) => {
+    sequence.forEach((barIdx, i) => {
       const t = setTimeout(() => {
-        this.playInterstellarTone(barIdx);
+        this.playOrganPipe(INTERSTELLAR_NODES[barIdx]);
         if (onNoteTrigger) onNoteTrigger(barIdx);
-      }, delays[i]);
+      }, i * stepDuration);
       timeouts.push(t);
     });
 
     const endTimeout = setTimeout(() => {
       if (onComplete) onComplete();
-    }, 5400);
+    }, sequence.length * stepDuration + 600);
     timeouts.push(endTimeout);
 
     return () => {
@@ -282,26 +378,92 @@ class SoundManager {
 
 export interface InterstellarNode {
   barIndex: number;
-  note: string;
-  name: string;
+  note: string;         // 'A', 'E', 'B', 'C', 'D'
+  octaveNote: string;   // 'A4', 'E5', 'B4', etc.
   freq: number;
+  bassChord?: 'Am' | 'G' | 'F';
+  bassName?: string;    // 'Am (A Minor)', 'G Major', 'F Major'
+  patternIndex: number; // 1, 2, 3, 4
+  patternName: string;  // 'Pattern 1', 'Pattern 2', etc.
   title: string;
+}
+
+export interface InterstellarPattern {
+  id: number;
+  name: string;
+  notes: string[];
+  noteSequenceText: string;
+  bassChord: 'Am' | 'G' | 'F';
+  bassName: string;
   description: string;
 }
 
+export const INTERSTELLAR_PATTERNS: InterstellarPattern[] = [
+  {
+    id: 1,
+    name: 'Pattern 1',
+    notes: ['A', 'E', 'A', 'E'],
+    noteSequenceText: 'A — E — A — E',
+    bassChord: 'Am',
+    bassName: 'Am (A Minor)',
+    description: 'A-E alternation over deep Am pipe organ pedal'
+  },
+  {
+    id: 2,
+    name: 'Pattern 2',
+    notes: ['B', 'E', 'B', 'E'],
+    noteSequenceText: 'B — E — B — E',
+    bassChord: 'G',
+    bassName: 'G Major',
+    description: 'B-E step upward over G Major bass pedal'
+  },
+  {
+    id: 3,
+    name: 'Pattern 3',
+    notes: ['C', 'E', 'C', 'E'],
+    noteSequenceText: 'C — E — C — E',
+    bassChord: 'F',
+    bassName: 'F Major',
+    description: 'C-E rising harmonic tension over F Major'
+  },
+  {
+    id: 4,
+    name: 'Pattern 4',
+    notes: ['D', 'E', 'D', 'E'],
+    noteSequenceText: 'D — E — D — E',
+    bassChord: 'F',
+    bassName: 'F Major',
+    description: 'D-E emotional peak before the return'
+  },
+  {
+    id: 5,
+    name: 'Pattern 5',
+    notes: ['B', 'E', 'B', 'E'],
+    noteSequenceText: 'B — E — B — E',
+    bassChord: 'G',
+    bassName: 'G Major',
+    description: 'Drop back down to B over G Major'
+  }
+];
+
 export const INTERSTELLAR_NODES: InterstellarNode[] = [
-  { barIndex: 0, note: 'A3', name: 'A3 • 220Hz', freq: 220.00, title: 'Earth Ground', description: 'Deep acoustic fundamental' },
-  { barIndex: 1, note: 'C4', name: 'C4 • 261Hz', freq: 261.63, title: 'Atmosphere Launch', description: 'Ascending minor 3rd' },
-  { barIndex: 2, note: 'E4', name: 'E4 • 330Hz', freq: 329.63, title: 'Amber Horizon (Peak)', description: 'Hans Zimmer fifth harmonic' },
-  { barIndex: 3, note: 'A4', name: 'A4 • 440Hz', freq: 440.00, title: 'Endurance Orbit', description: 'Octave resonance' },
-  { barIndex: 4, note: 'B4', name: 'B4 • 494Hz', freq: 493.88, title: 'Wormhole Drift', description: 'Suspense modal step' },
-  { barIndex: 5, note: 'C5', name: 'C5 • 523Hz', freq: 523.25, title: 'Gargantua Singularity', description: 'Climax emotional peak' },
-  { barIndex: 6, note: 'B4', name: 'B4 • 494Hz', freq: 493.88, title: 'Relativity Descent', description: 'Gravitational dilation' },
-  { barIndex: 7, note: 'A4', name: 'A4 • 440Hz', freq: 440.00, title: 'Stay Motif', description: 'The tesseract message' },
-  { barIndex: 8, note: 'G4', name: 'G4 • 392Hz', freq: 392.00, title: 'Time Invariant', description: 'Descending cadential step' },
-  { barIndex: 9, note: 'E4', name: 'E4 • 330Hz', freq: 329.63, title: 'Quantum Data', description: 'Watch second-hand pulse' },
-  { barIndex: 10, note: 'D4', name: 'D4 • 294Hz', freq: 293.66, title: 'Murph Resolution', description: 'Penultimate resolution' },
-  { barIndex: 11, note: 'C4', name: 'C4 • 261Hz', freq: 261.63, title: 'Home Base', description: 'Harmonic return' },
+  // Pattern 1: A — E — A — E (Am Bass)
+  { barIndex: 0, note: 'A', octaveNote: 'A4', freq: 440.00, bassChord: 'Am', bassName: 'Am Bass', patternIndex: 1, patternName: 'Pattern 1', title: 'Token Parser' },
+  { barIndex: 1, note: 'E', octaveNote: 'E5', freq: 659.25, patternIndex: 1, patternName: 'Pattern 1', title: 'Vector Search' },
+  { barIndex: 2, note: 'A', octaveNote: 'A4', freq: 440.00, bassChord: 'Am', bassName: 'Am Bass', patternIndex: 1, patternName: 'Pattern 1', title: 'Multi-Agent Routing' },
+  { barIndex: 3, note: 'E', octaveNote: 'E5', freq: 659.25, patternIndex: 1, patternName: 'Pattern 1', title: 'AST Logic Judge' },
+
+  // Pattern 2: B — E — B — E (G Major Bass)
+  { barIndex: 4, note: 'B', octaveNote: 'B4', freq: 493.88, bassChord: 'G', bassName: 'G Maj Bass', patternIndex: 2, patternName: 'Pattern 2', title: 'Numeric Invariants' },
+  { barIndex: 5, note: 'E', octaveNote: 'E5', freq: 659.25, patternIndex: 2, patternName: 'Pattern 2', title: 'OWLv2 Vision' },
+  { barIndex: 6, note: 'B', octaveNote: 'B4', freq: 493.88, bassChord: 'G', bassName: 'G Maj Bass', patternIndex: 2, patternName: 'Pattern 2', title: 'Optical Flow Pose' },
+  { barIndex: 7, note: 'E', octaveNote: 'E5', freq: 659.25, patternIndex: 2, patternName: 'Pattern 2', title: 'SSE Streaming' },
+
+  // Pattern 3 & 4: C — E — D — E (F Major Bass)
+  { barIndex: 8, note: 'C', octaveNote: 'C5', freq: 523.25, bassChord: 'F', bassName: 'F Maj Bass', patternIndex: 3, patternName: 'Pattern 3', title: 'MCP Protocol' },
+  { barIndex: 9, note: 'E', octaveNote: 'E5', freq: 659.25, patternIndex: 3, patternName: 'Pattern 3', title: 'Cost Gating' },
+  { barIndex: 10, note: 'D', octaveNote: 'D5', freq: 587.33, bassChord: 'F', bassName: 'F Maj Bass', patternIndex: 4, patternName: 'Pattern 4', title: 'Audit Trails' },
+  { barIndex: 11, note: 'E', octaveNote: 'E5', freq: 659.25, patternIndex: 4, patternName: 'Pattern 4', title: 'AKS Cluster' },
 ];
 
 export const sounds = new SoundManager();
