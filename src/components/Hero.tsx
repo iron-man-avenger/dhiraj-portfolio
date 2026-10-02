@@ -45,11 +45,11 @@ export const Hero: React.FC<HeroProps> = ({ onOpenArcade }) => {
   };
 
   return (
-    <section id="overview" className="relative pt-16 sm:pt-20 md:pt-24 pb-16 md:pb-24 overflow-hidden">
+    <section id="overview" className="relative pt-16 sm:pt-20 md:pt-24 pb-16 md:pb-24 z-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 relative">
         
-        {/* Right Watermark Logo: Large-Scale & Light-Shade (Same as Shreeji reference) */}
-        <div className="absolute -right-24 sm:-right-20 md:right-[-8%] lg:right-[-12%] xl:right-[-15%] top-1/2 -translate-y-1/2 w-[380px] sm:w-[500px] md:w-[620px] lg:w-[720px] xl:w-[800px] aspect-square pointer-events-none select-none z-0 opacity-20 sm:opacity-25 transition-all duration-500">
+        {/* Right Watermark Logo: Large-Scale & Light-Shade, Displayed in Full & Flowing into Next Section */}
+        <div className="absolute right-[-4%] sm:right-[-2%] md:right-0 lg:right-2 xl:right-4 top-1/2 -translate-y-1/2 w-[360px] sm:w-[480px] md:w-[580px] lg:w-[680px] xl:w-[760px] aspect-square pointer-events-none select-none z-0 opacity-25 sm:opacity-30 transition-all duration-500">
           {/* Subtle Ambient Radial Lighting */}
           <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-amber/[0.15] via-[#FAF7F2]/40 to-transparent blur-3xl" />
           

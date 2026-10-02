@@ -31,7 +31,7 @@ export function App() {
         onToggleSound={handleToggleSound}
       />
 
-      <main>
+      <main className="relative overflow-x-clip">
         {/* Hero with Signature Interactive Bar Chart (Directly inspired by reference image) */}
         <Hero onOpenArcade={() => setIsArcadeOpen(true)} />
 
