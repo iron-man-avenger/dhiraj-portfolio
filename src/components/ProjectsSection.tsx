@@ -11,6 +11,7 @@ import {
 import { projects } from '../data/portfolioData';
 import type { Project } from '../types';
 import { sounds } from '../utils/soundEffects';
+import { ProjectArchitectureDiagram } from './ProjectArchitectureDiagram';
 
 export const ProjectsSection: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
@@ -168,7 +169,7 @@ export const ProjectsSection: React.FC = () => {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-3xl bg-[#FAF7F2] rounded-3xl border border-[#E3DACD] shadow-2xl p-6 sm:p-8 max-h-[90vh] overflow-y-auto my-auto"
+              className="relative w-full max-w-4xl bg-[#FAF7F2] rounded-3xl border border-[#E3DACD] shadow-2xl p-6 sm:p-8 max-h-[90vh] overflow-y-auto my-auto"
             >
               {/* Close Button */}
               <button
@@ -209,6 +210,9 @@ export const ProjectsSection: React.FC = () => {
                   </div>
                 ))}
               </div>
+
+              {/* Visual System Architecture Diagram */}
+              <ProjectArchitectureDiagram projectId={activeModalProject.id} />
 
               {/* Architecture Breakdown if available */}
               {activeModalProject.architectureBreakdown && (
