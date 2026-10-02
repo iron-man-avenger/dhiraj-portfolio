@@ -47,17 +47,19 @@ export const SkillsMatrix: React.FC = () => {
                       key={skill.name}
                       className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono transition-all shadow-2xs group ${
                         isExpert
-                          ? 'bg-amber/[0.08] border border-amber/35 text-charcoal hover:border-amber hover:bg-amber/15'
+                          ? 'bg-amber/[0.12] border border-amber/40 text-[#2B302C] hover:border-amber hover:bg-amber/20'
                           : 'bg-white/80 border border-[#E3DACD] text-charcoal hover:border-amber/50 hover:bg-white hover:text-amber-dark'
                       }`}
                     >
-                      <span className={`font-semibold ${isExpert ? 'text-charcoal' : ''}`}>{skill.name}</span>
+                      <span className={`font-semibold ${isExpert ? 'text-[#2B302C] font-bold' : ''}`}>
+                        {skill.name}
+                      </span>
                       {isExpert && (
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber shrink-0" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#2B302C] shrink-0" />
                       )}
                       {skill.highlight && (
                         <span className={`text-[10px] transition-colors ${
-                          isExpert ? 'text-amber-dark font-medium' : 'text-charcoal-muted group-hover:text-charcoal'
+                          isExpert ? 'text-[#2B302C]/85 font-medium' : 'text-charcoal-muted group-hover:text-charcoal'
                         }`}>
                           — {skill.highlight}
                         </span>
