@@ -58,45 +58,71 @@ class SoundManager {
     return this.isMuted;
   }
 
-  // Soft tactile click
+  // Sweet, gentle tactile micro-click (pure sine acoustic tick)
   public playClick() {
     if (this.isMuted) return;
     try {
       this.initCtx();
       if (!this.ctx) return;
+      const now = this.ctx.currentTime;
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(420, this.ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(180, this.ctx.currentTime + 0.04);
-      gain.gain.setValueAtTime(0.06, this.ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.04);
+      osc.frequency.setValueAtTime(987.77, now); // B5 gentle bell note
+      osc.frequency.exponentialRampToValueAtTime(784.00, now + 0.035); // G5 soft decay
+      
+      // Soft envelope with no harsh click
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.linearRampToValueAtTime(0.035, now + 0.003);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.045);
+      
       osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.start();
-      osc.stop(this.ctx.currentTime + 0.05);
+      gain.connect(this.compressor || this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.05);
     } catch {
       // AudioContext might be blocked until user interaction
     }
   }
 
-  // Light tap
+  // Sweet, musical droplet tap (soft marimba / glass pluck)
   public playTap() {
     if (this.isMuted) return;
     try {
       this.initCtx();
       if (!this.ctx) return;
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(600, this.ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(320, this.ctx.currentTime + 0.05);
-      gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.05);
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.start();
-      osc.stop(this.ctx.currentTime + 0.06);
+      const now = this.ctx.currentTime;
+
+      // Primary tone: warm C6 droplet
+      const osc1 = this.ctx.createOscillator();
+      const gain1 = this.ctx.createGain();
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(1046.50, now); // C6
+      osc1.frequency.exponentialRampToValueAtTime(880.00, now + 0.06);
+
+      gain1.gain.setValueAtTime(0.0001, now);
+      gain1.gain.linearRampToValueAtTime(0.045, now + 0.003);
+      gain1.gain.exponentialRampToValueAtTime(0.0001, now + 0.075);
+
+      // Sweet subtle overtone (E6 ~ 1318.5Hz) for delicate glass shimmer
+      const osc2 = this.ctx.createOscillator();
+      const gain2 = this.ctx.createGain();
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(1318.51, now); // E6
+      
+      gain2.gain.setValueAtTime(0.0001, now);
+      gain2.gain.linearRampToValueAtTime(0.02, now + 0.003);
+      gain2.gain.exponentialRampToValueAtTime(0.0001, now + 0.055);
+
+      osc1.connect(gain1);
+      osc2.connect(gain2);
+      gain1.connect(this.compressor || this.ctx.destination);
+      gain2.connect(this.compressor || this.ctx.destination);
+
+      osc1.start(now);
+      osc2.start(now);
+      osc1.stop(now + 0.08);
+      osc2.stop(now + 0.08);
     } catch {}
   }
 
@@ -340,7 +366,37 @@ class SoundManager {
     };
   }
 
-  // Play the actual downloaded original Hans Zimmer Interstellar theme audio file
+  // Sweet pill switch chime (dual crystal micro-note for tabs and filters)
+  public playPillSelect() {
+    if (this.isMuted) return;
+    try {
+      this.initCtx();
+      if (!this.ctx) return;
+      const now = this.ctx.currentTime;
+      
+      // Two quick ascending micro-droplets: G5 -> C6
+      const notes = [783.99, 1046.50];
+      notes.forEach((freq, idx) => {
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now + idx * 0.032);
+        
+        const startTime = now + idx * 0.032;
+        gain.gain.setValueAtTime(0.0001, startTime);
+        gain.gain.linearRampToValueAtTime(0.032, startTime + 0.002);
+        gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.048);
+
+        osc.connect(gain);
+        gain.connect(this.compressor || this.ctx.destination);
+        osc.start(startTime);
+        osc.stop(startTime + 0.052);
+      });
+    } catch {}
+  }
+
+  // Play the actual downloaded original Hans Zimmer Interstellar theme audio file (trimmed starting at 20s motif)
   public playOriginalTheme(
     onProgress?: (barIdx: number) => void,
     onComplete?: () => void
@@ -357,10 +413,22 @@ class SoundManager {
       }
 
       if (this.themeAudio) {
-        this.themeAudio.currentTime = 0;
-        this.themeAudio.play().then(() => {
-          this.isThemeAudioPlaying = true;
-        }).catch(() => {});
+        const executePlay = () => {
+          if (!this.themeAudio) return;
+          this.themeAudio.currentTime = 0;
+          this.themeAudio.play().then(() => {
+            this.isThemeAudioPlaying = true;
+          }).catch(() => {});
+        };
+
+        if (this.themeAudio.readyState >= 2) {
+          executePlay();
+        } else {
+          this.themeAudio.addEventListener('canplay', () => {
+            executePlay();
+          }, { once: true });
+          this.themeAudio.load();
+        }
 
         this.themeAudio.onended = () => {
           this.isThemeAudioPlaying = false;
@@ -368,8 +436,8 @@ class SoundManager {
         };
 
         // Synchronize gentle amber visual pulses across the bars to the music tempo
-        const visualSequence = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 8, 9, 10, 11, 10, 11, 6, 7, 0, 1, 2];
-        const stepTime = 560; // majestic tempo matching the recording
+        const visualSequence = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 4, 5, 6, 7, 0, 1, 2, 3];
+        const stepTime = 580; // majestic tempo matching the recording
         const timers: (ReturnType<typeof setTimeout>)[] = [];
 
         visualSequence.forEach((barIdx, step) => {

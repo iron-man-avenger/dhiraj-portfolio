@@ -5,7 +5,7 @@ import {
   Play,
   Square
 } from 'lucide-react';
-import { personalInfo, headlineMetrics, signatureChartData } from '../data/portfolioData';
+import { personalInfo, signatureChartData } from '../data/portfolioData';
 import { sounds, INTERSTELLAR_NODES } from '../utils/soundEffects';
 
 interface HeroProps {
@@ -130,9 +130,9 @@ export const Hero: React.FC<HeroProps> = ({ onOpenArcade }) => {
               Building self-correcting multi-agent systems & vision AI.
             </h1>
 
-            {/* Subtitle / Intro */}
+            {/* Subtitle / Intro - Natural, confident and distinct from project bullets */}
             <p className="text-base sm:text-lg text-charcoal-muted font-normal leading-relaxed max-w-xl">
-              I’m <span className="font-semibold text-charcoal">{personalInfo.name}</span>, an AI Engineer based in {personalInfo.location}. I build production agentic pipelines with 3-tier deterministic verification, intelligent document extraction, and zero-shot computer vision.
+              I’m <span className="font-semibold text-charcoal">{personalInfo.name}</span>, an AI Engineer based in {personalInfo.location}. I specialize in autonomous multi-agent systems and vision AI, engineering deterministic reliability and resilient orchestration for real-world production.
             </p>
 
             {/* Clean Action Buttons */}
@@ -167,23 +167,23 @@ export const Hero: React.FC<HeroProps> = ({ onOpenArcade }) => {
             </div>
           </div>
 
-          {/* Right Column (5 cols): Interactive Interstellar Pipe Organ & Telemetry */}
+          {/* Right Column (5 cols): Interactive Interstellar Pipe Organ & Theme Suite */}
           <div className="lg:col-span-5 relative w-full pt-1">
             <div className="p-5 sm:p-6 rounded-3xl bg-[#F4EFE6]/90 border border-[#E3DACD] shadow-sm">
               
-              {/* Header: Telemetry Title & Handwriting Note */}
+              {/* Header: Hans Zimmer Pipe Organ Tribute */}
               <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#E3DACD]/70 gap-2">
                 <div>
                   <span className="text-[10px] font-mono uppercase tracking-widest text-amber-dark font-bold block">
-                    System Telemetry
+                    Hans Zimmer • First Step
                   </span>
                   <h3 className="text-xs font-bold text-charcoal font-sans mt-0.5">
-                    Pipeline Invariant Verification
+                    Interactive Pipe Organ Synthesizer
                   </h3>
                 </div>
 
                 <div className="handwriting text-xl text-charcoal font-bold transform -rotate-3 select-none">
-                  Over 12K+ Verified
+                  Harmonic Motif
                 </div>
               </div>
 
@@ -345,22 +345,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenArcade }) => {
           </div>
         </div>
 
-        {/* Minimalist Stats Row (Clean horizontal line, no heavy boxed cards) */}
-        <div className="mt-16 pt-8 border-t border-[#E3DACD]/80 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-          {headlineMetrics.map((metric, idx) => (
-            <div key={idx} className="flex flex-col">
-              <span className="text-2xl sm:text-3xl font-extrabold text-charcoal font-sans tracking-tight">
-                {metric.number}
-              </span>
-              <span className="text-xs font-bold text-charcoal mt-1">
-                {metric.label}
-              </span>
-              <span className="text-[11px] text-charcoal-muted font-mono leading-tight mt-0.5">
-                {metric.description}
-              </span>
-            </div>
-          ))}
-        </div>
+        {/* End of Hero Section */}
 
       </div>
     </section>

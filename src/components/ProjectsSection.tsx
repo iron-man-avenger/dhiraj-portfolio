@@ -53,7 +53,7 @@ export const ProjectsSection: React.FC = () => {
               <button
                 key={cat}
                 onClick={() => {
-                  sounds.playTap();
+                  sounds.playPillSelect();
                   setSelectedCategory(cat);
                 }}
                 className={`px-3.5 py-1.5 rounded-xl md:rounded-full text-xs font-semibold transition-all duration-200 ${
