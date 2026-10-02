@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    background-color: #F7F2EB;
+    color: #2B302C;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background-color: #D4A066;
+    color: #1E2320;
+  }
+}
+
+/* Custom Scrollbar styled for the warm theme */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #EFE7DC;
+}
+::-webkit-scrollbar-thumb {
+  background: #C8934C;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #B58249;
+}
+
+/* Glassmorphism helpers for warm palette */
+.glass-panel {
+  background: rgba(247, 242, 235, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(227, 218, 205, 0.8);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(229, 221, 207, 0.9);
+}
+
+.dark-glass-card {
+  background: rgba(36, 41, 37, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(57, 64, 59, 0.7);
+}
+
+/* Organic handwritten text styling */
+.handwriting {
+  font-family: 'Caveat', cursive;
+  line-height: 1;
+}
+
+/* Grid background pattern */
+.bg-grid-pattern {
+  background-size: 32px 32px;
+  background-image: 
+    linear-gradient(to right, rgba(43, 48, 44, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(43, 48, 44, 0.04) 1px, transparent 1px);
+}
+
+.bg-dots-pattern {
+  background-image: radial-gradient(rgba(43, 48, 44, 0.08) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
