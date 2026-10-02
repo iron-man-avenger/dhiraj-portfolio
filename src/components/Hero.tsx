@@ -2,20 +2,22 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   ArrowRight,
-  Music,
   Play,
   Square
 } from 'lucide-react';
 import { personalInfo, headlineMetrics, signatureChartData } from '../data/portfolioData';
-import { sounds, INTERSTELLAR_NODES, INTERSTELLAR_PATTERNS } from '../utils/soundEffects';
+import { sounds, INTERSTELLAR_NODES } from '../utils/soundEffects';
 
 interface HeroProps {
   onOpenArcade: () => void;
 }
 
+const TARGET_MOTIF = ['A', 'E', 'B', 'E', 'C', 'E', 'D', 'E'];
+
 export const Hero: React.FC<HeroProps> = ({ onOpenArcade }) => {
   const [activeBar, setActiveBar] = useState<number | null>(2);
-  const [activePattern, setActivePattern] = useState<number | null>(1);
+  const [matchedCount, setMatchedCount] = useState<number>(0);
+  const [hasWon, setHasWon] = useState<boolean>(false);
   const [isPlayingTheme, setIsPlayingTheme] = useState(false);
   const cancelThemeRef = useRef<(() => void) | null>(null);
 
@@ -37,29 +39,34 @@ export const Hero: React.FC<HeroProps> = ({ onOpenArcade }) => {
     setActiveBar(idx);
     const node = INTERSTELLAR_NODES[idx];
     if (node) {
-      setActivePattern(node.patternIndex);
       sounds.playOrganPipe(node);
+
+      // Interactive tune matching game
+      if (!hasWon) {
+        const expectedNote = TARGET_MOTIF[matchedCount];
+        if (node.note === expectedNote) {
+          const nextCount = matchedCount + 1;
+          setMatchedCount(nextCount);
+          if (nextCount === TARGET_MOTIF.length) {
+            setHasWon(true);
+            sounds.playTesseractVictory();
+          }
+        } else {
+          // If they hit 'A', start at 1, else reset
+          if (node.note === TARGET_MOTIF[0]) {
+            setMatchedCount(1);
+          } else {
+            setMatchedCount(0);
+          }
+        }
+      }
     }
   };
 
-  const handlePlayPattern = (patternId: number) => {
-    if (cancelThemeRef.current) {
-      cancelThemeRef.current();
-      cancelThemeRef.current = null;
-    }
-    setActivePattern(patternId);
-    setIsPlayingTheme(true);
-    const cancel = sounds.playInterstellarPattern(
-      patternId,
-      (bIdx) => {
-        setActiveBar(bIdx);
-      },
-      () => {
-        setIsPlayingTheme(false);
-        cancelThemeRef.current = null;
-      }
-    );
-    cancelThemeRef.current = cancel;
+  const handleResetGame = () => {
+    setMatchedCount(0);
+    setHasWon(false);
+    sounds.playTap();
   };
 
   const handlePlayFullSuite = () => {
@@ -76,8 +83,6 @@ export const Hero: React.FC<HeroProps> = ({ onOpenArcade }) => {
     const cancel = sounds.playInterstellarTheme(
       (bIdx) => {
         setActiveBar(bIdx);
-        const node = INTERSTELLAR_NODES[bIdx];
-        if (node) setActivePattern(node.patternIndex);
       },
       () => {
         setIsPlayingTheme(false);
@@ -101,8 +106,6 @@ export const Hero: React.FC<HeroProps> = ({ onOpenArcade }) => {
       }
     }
   };
-
-  const currentNode = activeBar !== null ? INTERSTELLAR_NODES[activeBar] : null;
 
   return (
     <section id="overview" className="relative pt-28 pb-16 md:pt-36 md:pb-20 overflow-hidden">
@@ -168,146 +171,92 @@ export const Hero: React.FC<HeroProps> = ({ onOpenArcade }) => {
           <div className="lg:col-span-5 relative w-full pt-1">
             <div className="p-5 sm:p-6 rounded-3xl bg-[#F4EFE6]/90 border border-[#E3DACD] shadow-sm">
               
-              {/* Header: Telemetry Title & Interstellar Play Button */}
-              <div className="flex items-center justify-between pb-3 mb-3.5 border-b border-[#E3DACD]/70 gap-2">
+              {/* Header: Telemetry Title & Handwriting Note */}
+              <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#E3DACD]/70 gap-2">
                 <div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] font-mono uppercase tracking-widest text-amber-dark font-bold block">
-                      System Telemetry
-                    </span>
-                    <span className="text-[10px] text-charcoal-muted">•</span>
-                    <span className="text-[10px] font-mono text-charcoal-muted flex items-center gap-1">
-                      <Music className="w-2.5 h-2.5 text-amber" />
-                      <span>Hans Zimmer Pipe Organ</span>
-                    </span>
-                  </div>
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-amber-dark font-bold block">
+                    System Telemetry
+                  </span>
                   <h3 className="text-xs font-bold text-charcoal font-sans mt-0.5">
                     Pipeline Invariant Verification
                   </h3>
                 </div>
 
-                <div className="flex items-center gap-2 sm:gap-3">
-                  <div className="hidden sm:block handwriting text-xl text-charcoal font-bold transform -rotate-3 select-none">
-                    Over 12K+ Verified
-                  </div>
-                  <button
-                    onClick={handlePlayFullSuite}
-                    className={`px-3 py-1.5 rounded-full border text-[11px] font-mono font-semibold transition-all duration-200 flex items-center gap-1.5 shadow-sm ${
-                      isPlayingTheme
-                        ? 'bg-amber text-charcoal border-amber shadow-glow-amber animate-pulse'
-                        : 'bg-white/90 border-[#E0D5C3] text-charcoal hover:border-amber hover:text-amber-dark hover:bg-white'
-                    }`}
-                    title={isPlayingTheme ? "Stop Interstellar Theme" : "Play Full Hans Zimmer Interstellar Suite"}
-                  >
-                    {isPlayingTheme ? (
-                      <Square className="w-2.5 h-2.5 fill-current" />
-                    ) : (
-                      <Play className="w-2.5 h-2.5 fill-current text-amber-dark" />
-                    )}
-                    <span>{isPlayingTheme ? 'Playing...' : 'Play Suite'}</span>
-                  </button>
+                <div className="handwriting text-xl text-charcoal font-bold transform -rotate-3 select-none">
+                  Over 12K+ Verified
                 </div>
               </div>
 
-              {/* GUIDE ABOVE GRAPH: Authentic Interstellar Letters & Bass Chord Guide */}
-              <div className="mb-3 p-3 rounded-2xl bg-white/80 border border-[#E8DFC9] shadow-inner">
-                {/* Guide Title & Current Bass Pedal Indicator */}
-                <div className="flex items-center justify-between pb-2 mb-2 border-b border-[#EFE7D8] text-[10px] font-mono">
-                  <span className="font-bold text-charcoal flex items-center gap-1">
-                    <span>🎹</span>
-                    <span>Interstellar Motif Guide:</span>
-                    <span className="font-normal text-charcoal-muted hidden sm:inline">Alternate to E with deep bass</span>
-                  </span>
-                  <span className="px-2 py-0.5 rounded-full bg-amber/20 text-amber-dark font-extrabold border border-amber/40">
-                    {currentNode?.bassName ? currentNode.bassName : 'Am (A Minor)'}
-                  </span>
+              {/* Minimalist Interstellar Challenge & Theme Play Ribbon (Zero Clutter) */}
+              <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#E3DACD]/70 text-xs font-mono gap-2">
+                {/* Challenge Progress / Victory Announcement */}
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-amber text-sm select-none">🎹</span>
+                  {hasWon ? (
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="font-extrabold text-amber-dark flex items-center gap-1 text-[11px] sm:text-xs">
+                        <span className="animate-spin text-amber">✦</span>
+                        <span>Tesseract Resonance Unlocked! (100% Match)</span>
+                      </span>
+                      <button
+                        onClick={handleResetGame}
+                        className="text-[10px] text-charcoal underline hover:text-amber-dark ml-1"
+                      >
+                        Play Again
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="text-[10px] sm:text-[11px] font-semibold text-charcoal">Play Tune:</span>
+                      <div className="flex items-center gap-1">
+                        {TARGET_MOTIF.map((letter, i) => {
+                          const isDone = matchedCount > i;
+                          const isNext = matchedCount === i;
+                          return (
+                            <span
+                              key={i}
+                              className={`px-1.5 py-0.5 rounded text-[10px] font-bold transition-all ${
+                                isDone
+                                  ? 'bg-amber text-charcoal shadow-sm'
+                                  : isNext
+                                    ? 'bg-charcoal text-white ring-1 ring-amber animate-pulse'
+                                    : 'bg-black/5 text-charcoal-muted'
+                              }`}
+                              title={`Step ${i + 1}: ${letter}`}
+                            >
+                              {letter}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
-                {/* Mobile-Friendly Full-Width Tap to Play Button (Visible on mobile/tablet) */}
+                {/* Actual Theme Play Button */}
                 <button
                   onClick={handlePlayFullSuite}
-                  className={`sm:hidden w-full mb-2.5 py-2 px-3 rounded-xl border text-xs font-mono font-bold transition-all duration-200 flex items-center justify-center gap-2 shadow-sm ${
+                  className={`px-3 py-1.5 rounded-full border text-[11px] font-mono font-semibold transition-all duration-200 flex items-center gap-1.5 shrink-0 shadow-sm ${
                     isPlayingTheme
                       ? 'bg-amber text-charcoal border-amber shadow-glow-amber animate-pulse'
-                      : 'bg-charcoal text-white border-charcoal hover:bg-charcoal-deep active:scale-[0.98]'
+                      : 'bg-white/90 border-[#E0D5C3] text-charcoal hover:border-amber hover:text-amber-dark hover:bg-white'
                   }`}
+                  title={isPlayingTheme ? "Stop Interstellar Theme" : "Play Actual Hans Zimmer Interstellar Theme"}
                 >
                   {isPlayingTheme ? (
-                    <Square className="w-3 h-3 fill-current" />
+                    <Square className="w-2.5 h-2.5 fill-current" />
                   ) : (
-                    <Play className="w-3 h-3 fill-current text-amber" />
+                    <Play className="w-2.5 h-2.5 fill-current text-amber-dark" />
                   )}
-                  <span>{isPlayingTheme ? 'Playing Interstellar Theme...' : '▶ Tap to Play Interstellar Theme'}</span>
+                  <span>{isPlayingTheme ? 'Playing...' : 'Play Theme'}</span>
                 </button>
-
-                {/* 5 Pattern Interactive Cards (A-E, B-E, C-E, D-E, Return B-E) */}
-                <div className="grid grid-cols-5 gap-1 text-center font-mono">
-                  {INTERSTELLAR_PATTERNS.map((p) => {
-                    const isCur = activePattern === p.id;
-                    return (
-                      <button
-                        key={p.id}
-                        onClick={() => handlePlayPattern(p.id)}
-                        className={`p-1 sm:p-1.5 rounded-lg border text-left transition-all active:scale-95 touch-manipulation ${
-                          isCur
-                            ? 'bg-charcoal text-white border-charcoal shadow-sm'
-                            : 'bg-[#FAF7F2] text-charcoal border-[#EADFCB] hover:border-amber hover:bg-white'
-                        }`}
-                        title={p.description}
-                      >
-                        <div className="flex items-center justify-between text-[8px] sm:text-[9px] leading-tight">
-                          <span className={isCur ? 'text-amber' : 'text-charcoal-muted'}>{p.name.replace('Pattern ', 'P')}</span>
-                          <span className="font-bold text-[8px] sm:text-[9px]">{p.bassChord}</span>
-                        </div>
-                        <div className="text-[10px] sm:text-[11px] font-bold tracking-tight mt-0.5 truncate">
-                          {p.noteSequenceText}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* 12-Letter Piano Ribbon directly above the 12 bars */}
-                <div className="mt-2.5 pt-2 border-t border-[#EFE7D8]">
-                  <div className="flex items-center justify-between gap-0.5 sm:gap-1 text-[10px] font-mono text-center">
-                    {INTERSTELLAR_NODES.map((node, idx) => {
-                      const isHovered = activeBar === idx;
-                      return (
-                        <button
-                          key={idx}
-                          onTouchStart={(e) => {
-                            e.preventDefault();
-                            handleBarTrigger(idx);
-                          }}
-                          onClick={() => handleBarTrigger(idx)}
-                          className={`flex-1 py-1.5 sm:py-1 rounded transition-all font-bold touch-manipulation active:scale-95 ${
-                            isHovered
-                              ? 'bg-amber text-charcoal ring-1 ring-amber-dark shadow-sm scale-105'
-                              : node.note === 'E'
-                                ? 'bg-[#F2ECE0] text-charcoal-muted hover:bg-amber/20 hover:text-charcoal'
-                                : 'bg-charcoal text-white hover:bg-charcoal-muted'
-                          }`}
-                          title={`Bar ${idx + 1}: Note ${node.note} (${node.octaveNote}) ${node.bassChord ? `• ${node.bassChord} Bass` : ''}`}
-                        >
-                          {node.note}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  {/* Subtle Bass Chord Bracket Line */}
-                  <div className="mt-1 flex items-center justify-between text-[8px] sm:text-[9px] font-mono text-charcoal-muted px-1">
-                    <span className="w-4/12 text-left font-semibold text-amber-dark">├─ Am Bass ─┤</span>
-                    <span className="w-4/12 text-center font-semibold text-amber-dark">├─ G Bass ─┤</span>
-                    <span className="w-4/12 text-right font-semibold text-amber-dark">├─ F Bass ─┤</span>
-                  </div>
-                </div>
               </div>
 
               {/* The 12-Bar Interactive Musical Keyboard & Telemetry Graph */}
               <div 
                 onTouchStart={handleTouchMove}
                 onTouchMove={handleTouchMove}
-                className="h-48 sm:h-52 w-full flex items-end justify-between gap-1 sm:gap-1.5 px-2 pb-2 pt-6 bg-white/70 rounded-2xl border border-[#E8DFC9] relative select-none touch-pan-y"
+                className="h-52 sm:h-56 w-full flex items-end justify-between gap-1 sm:gap-1.5 px-2 pb-2 pt-6 bg-white/70 rounded-2xl border border-[#E8DFC9] relative select-none touch-pan-y"
               >
                 {signatureChartData.map((bar, idx) => {
                   const isAmber = bar.isAccent;

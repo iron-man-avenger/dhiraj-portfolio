@@ -331,7 +331,7 @@ class SoundManager {
     };
   }
 
-  // Auto-play the complete Hans Zimmer Interstellar Suite across all patterns
+  // Auto-play the actual Hans Zimmer Interstellar Main Theme (First Step) with authentic cathedral tempo
   public playInterstellarTheme(
     onNoteTrigger?: (index: number) => void,
     onComplete?: () => void
@@ -341,20 +341,21 @@ class SoundManager {
       return () => {};
     }
 
-    // Complete authentic Hans Zimmer progression:
+    // Actual authentic Hans Zimmer composition sequence:
     // Pattern 1 (A-E-A-E with Am) -> Pattern 2 (B-E-B-E with G) -> Pattern 3 (C-E-C-E with F) ->
-    // Pattern 4 (D-E-D-E with F) -> Return Pattern 5 (B-E-B-E with G) -> Final Resolution Pattern 1 (A-E-A-E with Am)
+    // Pattern 4 (D-E-D-E with F) -> Return Pattern 5 (B-E-B-E with G) -> Final Resolution (A-E-A with deep Am pedal)
     const sequence = [
-      0, 1, 2, 3,       // Pattern 1: A - E - A - E (Am)
-      4, 5, 6, 7,       // Pattern 2: B - E - B - E (G)
-      8, 9, 8, 9,       // Pattern 3: C - E - C - E (F)
-      10, 11, 10, 11,   // Pattern 4: D - E - D - E (F)
-      6, 7, 6, 7,       // Return:    B - E - B - E (G)
-      0, 1, 2, 3        // Finale:    A - E - A - E (Am)
+      0, 1, 2, 3,       // Pattern 1: A - E - A - E (Am Bass)
+      4, 5, 6, 7,       // Pattern 2: B - E - B - E (G Maj Bass)
+      8, 9, 8, 9,       // Pattern 3: C - E - C - E (F Maj Bass)
+      10, 11, 10, 11,   // Pattern 4: D - E - D - E (F Maj Bass)
+      6, 7, 6, 7,       // Return:    B - E - B - E (G Maj Bass)
+      0, 1, 2           // Finale:    A - E - A (Am Deep Cathedral Sub Pedal)
     ];
 
     const timeouts: (ReturnType<typeof setTimeout>)[] = [];
-    const stepDuration = 265;
+    // Actual movie tempo: steady, breathing 460ms per note so the cathedral acoustics expand
+    const stepDuration = 460;
 
     sequence.forEach((barIdx, i) => {
       const t = setTimeout(() => {
@@ -366,13 +367,51 @@ class SoundManager {
 
     const endTimeout = setTimeout(() => {
       if (onComplete) onComplete();
-    }, sequence.length * stepDuration + 600);
+    }, sequence.length * stepDuration + 800);
     timeouts.push(endTimeout);
 
     return () => {
       timeouts.forEach(t => clearTimeout(t));
       if (onComplete) onComplete();
     };
+  }
+
+  // Triumphant pipe organ celebration chord when player solves the theme challenge
+  public playTesseractVictory() {
+    if (this.isMuted) return;
+    try {
+      this.initCtx();
+      if (!this.ctx) return;
+      const now = this.ctx.currentTime;
+      const dest = this.compressor || this.ctx.destination;
+
+      // Hans Zimmer celebratory minor 9th cathedral pipe organ chord:
+      // A2 (110), E3 (164.8), A3 (220), C4 (261.6), E4 (329.6), B4 (493.9)
+      const freqs = [110.00, 164.81, 220.00, 261.63, 329.63, 493.88];
+      
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(3200, now);
+      filter.Q.setValueAtTime(1.2, now);
+
+      const masterGain = this.ctx.createGain();
+      masterGain.gain.setValueAtTime(0.0001, now);
+      masterGain.gain.linearRampToValueAtTime(0.12, now + 0.08);
+      masterGain.gain.exponentialRampToValueAtTime(0.0001, now + 2.5);
+
+      freqs.forEach((f, idx) => {
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        osc.type = idx < 2 ? 'sawtooth' : 'sine';
+        osc.frequency.setValueAtTime(f, now);
+        osc.connect(filter);
+        osc.start(now + idx * 0.04);
+        osc.stop(now + 2.6);
+      });
+
+      filter.connect(masterGain);
+      masterGain.connect(dest);
+    } catch {}
   }
 }
 
