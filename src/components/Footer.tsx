@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowUp } from 'lucide-react';
 import { personalInfo } from '../data/portfolioData';
 import { sounds } from '../utils/soundEffects';
+import { DhirajLogo } from './DhirajLogo';
 
 export const Footer: React.FC = () => {
   const scrollToTop = () => {
@@ -18,8 +19,8 @@ export const Footer: React.FC = () => {
           {/* Brand Left (6 cols) */}
           <div className="md:col-span-6 flex flex-col gap-3">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-amber text-charcoal-deep font-extrabold flex items-center justify-center font-sans text-sm">
-                DK
+              <div className="w-9 h-9 rounded-xl bg-[#242925] border border-charcoal-border p-1.5 flex items-center justify-center">
+                <DhirajLogo variant="on-dark" className="w-6 h-6" />
               </div>
               <span className="font-bold text-lg font-sans tracking-tight">
                 {personalInfo.name}

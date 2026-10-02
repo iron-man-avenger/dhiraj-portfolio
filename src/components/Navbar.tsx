@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Volume2, VolumeX, Gamepad2, Menu, X } from 'lucide-react';
 import { sounds } from '../utils/soundEffects';
+import { DhirajLogo } from './DhirajLogo';
 
 interface NavbarProps {
   onOpenArcade: () => void;
@@ -38,8 +39,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenArcade, soundMuted, onTogg
             onClick={() => handleLinkClick('OVERVIEW')}
             className="flex items-center gap-3 group"
           >
-            <div className="w-8 h-8 rounded-lg bg-[#2B302C] flex items-center justify-center text-white font-extrabold font-mono text-xs tracking-wider shadow-2xs transition-transform duration-200 group-hover:scale-105">
-              DK
+            <div className="w-8 h-8 rounded-lg bg-[#2B302C] p-1 flex items-center justify-center shadow-2xs transition-transform duration-200 group-hover:scale-105">
+              <DhirajLogo variant="on-dark" className="w-5 h-5" />
             </div>
             <span className="font-extrabold text-xs sm:text-sm tracking-wider uppercase text-[#2B302C] font-sans group-hover:text-amber-dark transition-colors whitespace-nowrap">
               DHIRAJ KUMAR
