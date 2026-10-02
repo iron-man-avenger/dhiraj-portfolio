@@ -29,8 +29,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenArcade, soundMuted, onTogg
 
   return (
     <header className="fixed top-4 left-0 right-0 z-50 flex justify-center px-4 sm:px-6 pointer-events-none">
-      <div className="w-full max-w-6xl pointer-events-auto">
-        <nav className="glass-panel rounded-full px-3.5 sm:px-5 py-2 flex items-center justify-between shadow-elevated border border-[#E0D5C3]/90 bg-[#F7F2EB]/90 backdrop-blur-xl transition-all duration-300">
+      <div className="w-full max-w-7xl pointer-events-auto">
+        <nav className="glass-panel rounded-full px-3.5 sm:px-6 py-2 flex items-center justify-between shadow-elevated border border-[#E0D5C3]/90 bg-[#F7F2EB]/90 backdrop-blur-xl transition-all duration-300">
           
           {/* Left: Brand Monogram & Status */}
           <a 

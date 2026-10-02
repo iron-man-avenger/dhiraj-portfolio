@@ -109,7 +109,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenArcade }) => {
 
   return (
     <section id="overview" className="relative pt-28 pb-16 md:pt-36 md:pb-20 overflow-hidden">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
         
         {/* Top: Editorial Hero Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">

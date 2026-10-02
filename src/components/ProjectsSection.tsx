@@ -31,7 +31,7 @@ export const ProjectsSection: React.FC = () => {
 
   return (
     <section id="projects" className="py-24 bg-[#F7F2EB] relative border-t border-[#E3DACD]/60">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
         
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">

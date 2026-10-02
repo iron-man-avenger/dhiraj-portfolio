@@ -4,7 +4,7 @@ import { skillCategories } from '../data/portfolioData';
 export const SkillsMatrix: React.FC = () => {
   return (
     <section id="skills" className="py-24 bg-[#FAF7F2] border-t border-[#E3DACD]/60 relative">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
         
         {/* Header */}
         <div className="mb-16">

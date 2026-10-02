@@ -3,6 +3,8 @@ class SoundManager {
   private ctx: AudioContext | null = null;
   private compressor: DynamicsCompressorNode | null = null;
   private isMuted: boolean = false;
+  private themeAudio: HTMLAudioElement | null = null;
+  private isThemeAudioPlaying: boolean = false;
 
   constructor() {
     // Check saved preference
@@ -39,7 +41,14 @@ class SoundManager {
   public toggleMute(): boolean {
     this.isMuted = !this.isMuted;
     localStorage.setItem('dk_portfolio_sound_muted', String(this.isMuted));
-    if (!this.isMuted) {
+    if (this.isMuted) {
+      if (this.themeAudio) {
+        try {
+          this.themeAudio.pause();
+          this.isThemeAudioPlaying = false;
+        } catch {}
+      }
+    } else {
       this.playTap();
     }
     return this.isMuted;
@@ -331,9 +340,9 @@ class SoundManager {
     };
   }
 
-  // Auto-play the actual Hans Zimmer Interstellar Main Theme (First Step) with authentic cathedral tempo
-  public playInterstellarTheme(
-    onNoteTrigger?: (index: number) => void,
+  // Play the actual downloaded original Hans Zimmer Interstellar theme audio file
+  public playOriginalTheme(
+    onProgress?: (barIdx: number) => void,
     onComplete?: () => void
   ): () => void {
     if (this.isMuted) {
@@ -341,39 +350,59 @@ class SoundManager {
       return () => {};
     }
 
-    // Actual authentic Hans Zimmer composition sequence:
-    // Pattern 1 (A-E-A-E with Am) -> Pattern 2 (B-E-B-E with G) -> Pattern 3 (C-E-C-E with F) ->
-    // Pattern 4 (D-E-D-E with F) -> Return Pattern 5 (B-E-B-E with G) -> Final Resolution (A-E-A with deep Am pedal)
-    const sequence = [
-      0, 1, 2, 3,       // Pattern 1: A - E - A - E (Am Bass)
-      4, 5, 6, 7,       // Pattern 2: B - E - B - E (G Maj Bass)
-      8, 9, 8, 9,       // Pattern 3: C - E - C - E (F Maj Bass)
-      10, 11, 10, 11,   // Pattern 4: D - E - D - E (F Maj Bass)
-      6, 7, 6, 7,       // Return:    B - E - B - E (G Maj Bass)
-      0, 1, 2           // Finale:    A - E - A (Am Deep Cathedral Sub Pedal)
-    ];
+    try {
+      if (!this.themeAudio && typeof window !== 'undefined') {
+        this.themeAudio = new Audio('/audio/interstellar-theme.mp3');
+        this.themeAudio.volume = 0.85;
+      }
 
-    const timeouts: (ReturnType<typeof setTimeout>)[] = [];
-    // Actual movie tempo: steady, breathing 460ms per note so the cathedral acoustics expand
-    const stepDuration = 460;
+      if (this.themeAudio) {
+        this.themeAudio.currentTime = 0;
+        this.themeAudio.play().then(() => {
+          this.isThemeAudioPlaying = true;
+        }).catch(() => {});
 
-    sequence.forEach((barIdx, i) => {
-      const t = setTimeout(() => {
-        this.playOrganPipe(INTERSTELLAR_NODES[barIdx]);
-        if (onNoteTrigger) onNoteTrigger(barIdx);
-      }, i * stepDuration);
-      timeouts.push(t);
-    });
+        this.themeAudio.onended = () => {
+          this.isThemeAudioPlaying = false;
+          if (onComplete) onComplete();
+        };
 
-    const endTimeout = setTimeout(() => {
-      if (onComplete) onComplete();
-    }, sequence.length * stepDuration + 800);
-    timeouts.push(endTimeout);
+        // Synchronize gentle amber visual pulses across the bars to the music tempo
+        const visualSequence = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 8, 9, 10, 11, 10, 11, 6, 7, 0, 1, 2];
+        const stepTime = 560; // majestic tempo matching the recording
+        const timers: (ReturnType<typeof setTimeout>)[] = [];
 
-    return () => {
-      timeouts.forEach(t => clearTimeout(t));
-      if (onComplete) onComplete();
-    };
+        visualSequence.forEach((barIdx, step) => {
+          const t = setTimeout(() => {
+            if (this.isThemeAudioPlaying && onProgress) {
+              onProgress(barIdx);
+            }
+          }, step * stepTime);
+          timers.push(t);
+        });
+
+        return () => {
+          if (this.themeAudio) {
+            this.themeAudio.pause();
+            this.themeAudio.currentTime = 0;
+          }
+          this.isThemeAudioPlaying = false;
+          timers.forEach(t => clearTimeout(t));
+          if (onComplete) onComplete();
+        };
+      }
+    } catch {}
+
+    if (onComplete) onComplete();
+    return () => {};
+  }
+
+  // Auto-play the actual Hans Zimmer Interstellar Main Theme (original recording)
+  public playInterstellarTheme(
+    onNoteTrigger?: (index: number) => void,
+    onComplete?: () => void
+  ): () => void {
+    return this.playOriginalTheme(onNoteTrigger, onComplete);
   }
 
   // Triumphant pipe organ celebration chord when player solves the theme challenge
