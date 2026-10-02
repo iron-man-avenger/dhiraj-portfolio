@@ -223,26 +223,43 @@ export const Hero: React.FC<HeroProps> = ({ onOpenArcade }) => {
                   </span>
                 </div>
 
+                {/* Mobile-Friendly Full-Width Tap to Play Button (Visible on mobile/tablet) */}
+                <button
+                  onClick={handlePlayFullSuite}
+                  className={`sm:hidden w-full mb-2.5 py-2 px-3 rounded-xl border text-xs font-mono font-bold transition-all duration-200 flex items-center justify-center gap-2 shadow-sm ${
+                    isPlayingTheme
+                      ? 'bg-amber text-charcoal border-amber shadow-glow-amber animate-pulse'
+                      : 'bg-charcoal text-white border-charcoal hover:bg-charcoal-deep active:scale-[0.98]'
+                  }`}
+                >
+                  {isPlayingTheme ? (
+                    <Square className="w-3 h-3 fill-current" />
+                  ) : (
+                    <Play className="w-3 h-3 fill-current text-amber" />
+                  )}
+                  <span>{isPlayingTheme ? 'Playing Interstellar Theme...' : '▶ Tap to Play Interstellar Theme'}</span>
+                </button>
+
                 {/* 5 Pattern Interactive Cards (A-E, B-E, C-E, D-E, Return B-E) */}
-                <div className="grid grid-cols-2 sm:grid-cols-5 gap-1 text-center font-mono">
+                <div className="grid grid-cols-5 gap-1 text-center font-mono">
                   {INTERSTELLAR_PATTERNS.map((p) => {
                     const isCur = activePattern === p.id;
                     return (
                       <button
                         key={p.id}
                         onClick={() => handlePlayPattern(p.id)}
-                        className={`p-1.5 rounded-lg border text-left transition-all ${
+                        className={`p-1 sm:p-1.5 rounded-lg border text-left transition-all active:scale-95 touch-manipulation ${
                           isCur
                             ? 'bg-charcoal text-white border-charcoal shadow-sm'
                             : 'bg-[#FAF7F2] text-charcoal border-[#EADFCB] hover:border-amber hover:bg-white'
                         }`}
                         title={p.description}
                       >
-                        <div className="flex items-center justify-between text-[9px] leading-tight">
+                        <div className="flex items-center justify-between text-[8px] sm:text-[9px] leading-tight">
                           <span className={isCur ? 'text-amber' : 'text-charcoal-muted'}>{p.name.replace('Pattern ', 'P')}</span>
-                          <span className="font-bold">{p.bassChord}</span>
+                          <span className="font-bold text-[8px] sm:text-[9px]">{p.bassChord}</span>
                         </div>
-                        <div className="text-[11px] font-bold tracking-tight mt-0.5 whitespace-nowrap">
+                        <div className="text-[10px] sm:text-[11px] font-bold tracking-tight mt-0.5 truncate">
                           {p.noteSequenceText}
                         </div>
                       </button>
@@ -252,16 +269,20 @@ export const Hero: React.FC<HeroProps> = ({ onOpenArcade }) => {
 
                 {/* 12-Letter Piano Ribbon directly above the 12 bars */}
                 <div className="mt-2.5 pt-2 border-t border-[#EFE7D8]">
-                  <div className="flex items-center justify-between gap-1 text-[10px] font-mono text-center">
+                  <div className="flex items-center justify-between gap-0.5 sm:gap-1 text-[10px] font-mono text-center">
                     {INTERSTELLAR_NODES.map((node, idx) => {
                       const isHovered = activeBar === idx;
                       return (
                         <button
                           key={idx}
+                          onTouchStart={(e) => {
+                            e.preventDefault();
+                            handleBarTrigger(idx);
+                          }}
                           onClick={() => handleBarTrigger(idx)}
-                          className={`flex-1 py-1 rounded transition-all font-bold ${
+                          className={`flex-1 py-1.5 sm:py-1 rounded transition-all font-bold touch-manipulation active:scale-95 ${
                             isHovered
-                              ? 'bg-amber text-charcoal ring-1 ring-amber-dark shadow-sm scale-110'
+                              ? 'bg-amber text-charcoal ring-1 ring-amber-dark shadow-sm scale-105'
                               : node.note === 'E'
                                 ? 'bg-[#F2ECE0] text-charcoal-muted hover:bg-amber/20 hover:text-charcoal'
                                 : 'bg-charcoal text-white hover:bg-charcoal-muted'
@@ -274,7 +295,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenArcade }) => {
                     })}
                   </div>
                   {/* Subtle Bass Chord Bracket Line */}
-                  <div className="mt-1 flex items-center justify-between text-[9px] font-mono text-charcoal-muted px-1">
+                  <div className="mt-1 flex items-center justify-between text-[8px] sm:text-[9px] font-mono text-charcoal-muted px-1">
                     <span className="w-4/12 text-left font-semibold text-amber-dark">├─ Am Bass ─┤</span>
                     <span className="w-4/12 text-center font-semibold text-amber-dark">├─ G Bass ─┤</span>
                     <span className="w-4/12 text-right font-semibold text-amber-dark">├─ F Bass ─┤</span>
@@ -284,8 +305,9 @@ export const Hero: React.FC<HeroProps> = ({ onOpenArcade }) => {
 
               {/* The 12-Bar Interactive Musical Keyboard & Telemetry Graph */}
               <div 
+                onTouchStart={handleTouchMove}
                 onTouchMove={handleTouchMove}
-                className="h-48 sm:h-52 w-full flex items-end justify-between gap-1 sm:gap-1.5 px-2 pb-2 pt-6 bg-white/70 rounded-2xl border border-[#E8DFC9] relative select-none"
+                className="h-48 sm:h-52 w-full flex items-end justify-between gap-1 sm:gap-1.5 px-2 pb-2 pt-6 bg-white/70 rounded-2xl border border-[#E8DFC9] relative select-none touch-pan-y"
               >
                 {signatureChartData.map((bar, idx) => {
                   const isAmber = bar.isAccent;
