@@ -11,8 +11,18 @@ export const Footer: React.FC = () => {
   };
 
   return (
-    <footer className="bg-charcoal text-white pt-16 pb-12 border-t border-charcoal-border">
-      <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
+    <footer className="bg-charcoal text-white pt-16 pb-12 border-t border-charcoal-border relative overflow-hidden">
+      {/* Large Light-Shade Watermark Logo */}
+      <div className="absolute -right-10 sm:-right-6 md:right-[0%] lg:right-[3%] xl:right-[6%] top-1/2 -translate-y-1/2 w-[280px] sm:w-[380px] md:w-[460px] lg:w-[520px] aspect-square pointer-events-none select-none z-0 opacity-10 sm:opacity-15 md:opacity-20 transition-all duration-500">
+        <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-amber/[0.12] via-white/[0.04] to-transparent blur-3xl" />
+        <DhirajLogo 
+          variant="dark" 
+          className="w-full h-full object-contain filter drop-shadow-[0_20px_40px_rgba(0,0,0,0.6)]" 
+          title="Dhiraj Kumar Monogram Watermark" 
+        />
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 relative z-10">
         
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 pb-12 border-b border-charcoal-border/60 items-center justify-between">
           
