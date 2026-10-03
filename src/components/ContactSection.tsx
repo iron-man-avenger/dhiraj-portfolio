@@ -5,14 +5,17 @@ import {
   Send, 
   Copy, 
   Check, 
-  ArrowUpRight,
-  Languages
+  ArrowUpRight, 
+  Languages, 
+  ExternalLink
 } from 'lucide-react';
+import emailjs from '@emailjs/browser';
 import { personalInfo } from '../data/portfolioData';
 import { sounds } from '../utils/soundEffects';
 
 export const ContactSection: React.FC = () => {
   const [copied, setCopied] = useState(false);
+  const [copiedMessage, setCopiedMessage] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -22,6 +25,12 @@ export const ContactSection: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [directPrompt, setDirectPrompt] = useState<{
+    subject: string;
+    body: string;
+    gmailUrl: string;
+    mailtoUrl: string;
+  } | null>(null);
 
   const copyEmail = () => {
     sounds.playTap();
@@ -30,48 +39,106 @@ export const ContactSection: React.FC = () => {
     setTimeout(() => setCopied(false), 2500);
   };
 
+  const copyFormattedMessage = (text: string) => {
+    sounds.playTap();
+    navigator.clipboard.writeText(text);
+    setCopiedMessage(true);
+    setTimeout(() => setCopiedMessage(false), 2500);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     sounds.playClick();
     setIsSubmitting(true);
     setErrorMessage('');
 
-    try {
-      const topic = formData.inquiryType.trim() ? formData.inquiryType.trim() : 'AI Engineering Inquiry';
-      
-      const submissionData = new FormData();
-      submissionData.append("access_key", "d2e05507-622a-4bc4-9f47-2fcb7bdd6d37");
-      submissionData.append("name", formData.name);
-      submissionData.append("email", formData.email);
-      submissionData.append("subject", `[Portfolio: ${topic}] from ${formData.name}`);
-      submissionData.append("inquiry_topic", topic);
-      submissionData.append("message", formData.message);
-      submissionData.append("from_name", formData.name);
+    const topic = formData.inquiryType.trim() ? formData.inquiryType.trim() : 'AI Engineering Inquiry';
+    const subject = `[Portfolio: ${topic}] from ${formData.name}`;
+    const formattedBody = `Hi Dhiraj,\n\n${formData.message}\n\n---\nSender Details:\nName: ${formData.name}\nEmail: ${formData.email}\nTopic: ${topic}`;
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(personalInfo.email)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(formattedBody)}`;
+    const mailtoUrl = `mailto:${personalInfo.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(formattedBody)}`;
 
-      const response = await fetch("https://api.web3forms.com/submit", {
-        method: "POST",
-        body: submissionData
-      });
+    const emailServiceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+    const emailTemplateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+    const emailPublicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+    const web3formsKey = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY;
 
-      const data = await response.json();
+    // Option 1: Direct Client-Side Email via EmailJS JavaScript Library
+    if (emailServiceId && emailTemplateId && emailPublicKey) {
+      try {
+        const response = await emailjs.send(
+          emailServiceId,
+          emailTemplateId,
+          {
+            from_name: formData.name,
+            from_email: formData.email,
+            reply_to: formData.email,
+            subject: subject,
+            inquiry_topic: topic,
+            message: formData.message,
+            to_email: personalInfo.email,
+          },
+          emailPublicKey
+        );
 
-      if (data.success) {
-        sounds.playSuccess();
-        setSubmitted(true);
-        setFormData({
-          name: '',
-          email: '',
-          inquiryType: '',
-          message: ''
-        });
-      } else {
-        setErrorMessage(data.message || "Submission failed. Please try again or email directly.");
+        if (response.status === 200 || response.text === 'OK') {
+          sounds.playSuccess();
+          setSubmitted(true);
+          setDirectPrompt(null);
+          setFormData({ name: '', email: '', inquiryType: '', message: '' });
+          setIsSubmitting(false);
+          return;
+        }
+      } catch (err) {
+        console.warn('EmailJS delivery encounter, falling back to direct mail composer:', err);
       }
-    } catch {
-      setErrorMessage("Network error occurred while sending. Please try again or email ai.cloudranger@gmail.com directly.");
-    } finally {
-      setIsSubmitting(false);
+    } 
+    // Option 2: Web3Forms fallback if configured
+    else if (web3formsKey) {
+      try {
+        const submissionData = new FormData();
+        submissionData.append("access_key", web3formsKey);
+        submissionData.append("name", formData.name);
+        submissionData.append("email", formData.email);
+        submissionData.append("subject", subject);
+        submissionData.append("inquiry_topic", topic);
+        submissionData.append("message", formData.message);
+        submissionData.append("from_name", formData.name);
+
+        const response = await fetch("https://api.web3forms.com/submit", {
+          method: "POST",
+          body: submissionData
+        });
+        const data = await response.json();
+        if (data.success) {
+          sounds.playSuccess();
+          setSubmitted(true);
+          setDirectPrompt(null);
+          setFormData({ name: '', email: '', inquiryType: '', message: '' });
+          setIsSubmitting(false);
+          return;
+        }
+      } catch (err) {
+        console.warn('Web3Forms delivery encounter, falling back to direct mail composer:', err);
+      }
     }
+
+    // Option 3: Universal 100% Reliability Client-Side Delivery (Opens Gmail Web / Mail Client)
+    sounds.playTap();
+    setDirectPrompt({
+      subject,
+      body: formattedBody,
+      gmailUrl,
+      mailtoUrl
+    });
+
+    try {
+      window.open(gmailUrl, '_blank');
+    } catch {
+      // Pop-up blockers handled by UI prompt buttons below
+    }
+
+    setIsSubmitting(false);
   };
 
   return (
@@ -197,11 +264,14 @@ export const ContactSection: React.FC = () => {
               
               <div className="flex items-center justify-between pb-4 border-b border-[#EAE2D5] mb-6">
                 <div>
-                  <h3 className="text-lg font-bold text-charcoal font-sans">
-                    Send a Direct Note
+                  <h3 className="text-lg font-bold text-charcoal font-sans flex items-center gap-2">
+                    <span>Send a Direct Note</span>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-amber/15 text-amber-dark border border-amber/20 font-bold">
+                      EmailJS Powered
+                    </span>
                   </h3>
                   <p className="text-xs text-charcoal-muted font-mono mt-0.5">
-                    Structured query routing to Dhiraj's inbox
+                    Direct dispatch straight to Dhiraj's personal inbox
                   </p>
                 </div>
                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -219,11 +289,78 @@ export const ContactSection: React.FC = () => {
                     Your inquiry has been delivered straight into Dhiraj's Gmail inbox (<span className="font-mono text-charcoal font-semibold">{personalInfo.email}</span>). He will review and respond promptly.
                   </p>
                   <button
-                    onClick={() => setSubmitted(false)}
+                    onClick={() => {
+                      sounds.playTap();
+                      setSubmitted(false);
+                    }}
                     className="px-5 py-2.5 rounded-xl bg-charcoal text-white text-xs font-bold hover:bg-charcoal-deep transition-colors shadow-sm"
                   >
                     Send Another Message
                   </button>
+                </div>
+              ) : directPrompt ? (
+                <div className="py-8 flex flex-col items-center text-center">
+                  <div className="w-14 h-14 rounded-2xl bg-amber/15 text-amber-dark flex items-center justify-center mb-4 border border-amber/30">
+                    <Mail className="w-7 h-7" />
+                  </div>
+                  <h4 className="text-lg font-bold text-charcoal">
+                    Inquiry Prepared for Dhiraj!
+                  </h4>
+                  <p className="text-xs text-charcoal-muted max-w-md mt-1 mb-6 leading-relaxed">
+                    Your message has been pre-formatted for <span className="font-mono text-charcoal font-semibold">{personalInfo.email}</span>. Click below to complete dispatch via Gmail Web or your local email client:
+                  </p>
+
+                  <div className="w-full flex flex-col sm:flex-row gap-3 justify-center mb-5">
+                    <a
+                      href={directPrompt.gmailUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      onClick={() => sounds.playSuccess()}
+                      className="px-5 py-3 rounded-xl bg-amber text-charcoal-deep font-bold text-xs flex items-center justify-center gap-2 hover:bg-amber-light shadow-sm transition-all"
+                    >
+                      <Mail className="w-4 h-4 text-charcoal-deep" />
+                      <span>Dispatch via Gmail (Web)</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+
+                    <a
+                      href={directPrompt.mailtoUrl}
+                      onClick={() => sounds.playTap()}
+                      className="px-5 py-3 rounded-xl bg-white border border-[#E5DDCF] text-charcoal font-semibold text-xs flex items-center justify-center gap-2 hover:border-charcoal shadow-sm transition-all"
+                    >
+                      <span>Default Email Client</span>
+                      <ArrowUpRight className="w-3.5 h-3.5 text-charcoal-muted" />
+                    </a>
+                  </div>
+
+                  <div className="flex items-center gap-4 text-xs">
+                    <button
+                      onClick={() => copyFormattedMessage(directPrompt.body)}
+                      className="font-semibold text-charcoal-muted hover:text-charcoal flex items-center gap-1.5 transition-colors"
+                    >
+                      {copiedMessage ? (
+                        <>
+                          <Check className="w-3.5 h-3.5 text-emerald-600" />
+                          <span className="text-emerald-700">Copied to Clipboard!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3.5 h-3.5" />
+                          <span>Copy Message Text</span>
+                        </>
+                      )}
+                    </button>
+                    <span className="text-charcoal-muted/30">•</span>
+                    <button
+                      onClick={() => {
+                        sounds.playTap();
+                        setDirectPrompt(null);
+                      }}
+                      className="font-semibold text-charcoal-muted hover:text-charcoal transition-colors"
+                    >
+                      Edit Message
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -319,6 +456,29 @@ export const ContactSection: React.FC = () => {
                       </>
                     )}
                   </button>
+
+                  <div className="pt-3 flex flex-col sm:flex-row items-center justify-between gap-2 border-t border-[#EAE2D5]/70 text-[11px] font-mono text-charcoal-muted">
+                    <span>Direct email client shortcuts:</span>
+                    <div className="flex items-center gap-2.5">
+                      <a
+                        href={`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(personalInfo.email)}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-amber-dark font-bold hover:underline inline-flex items-center gap-1"
+                      >
+                        <span>Open Gmail Web</span>
+                        <ArrowUpRight className="w-3 h-3" />
+                      </a>
+                      <span>•</span>
+                      <a
+                        href={`mailto:${personalInfo.email}`}
+                        className="text-charcoal font-semibold hover:underline inline-flex items-center gap-1"
+                      >
+                        <span>Mail Client</span>
+                        <ArrowUpRight className="w-3 h-3" />
+                      </a>
+                    </div>
+                  </div>
                 </form>
               )}
 

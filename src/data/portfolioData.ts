@@ -8,7 +8,7 @@ export const personalInfo = {
   location: "Ahmedabad, India",
   email: "ai.cloudranger@gmail.com",
   phone: "9828762154",
-  linkedin: "http://www.linkedin.com/in/dhiraj-malviya-1830a1288",
+  linkedin: "https://www.linkedin.com/in/ai-dhiraj",
   twitter: "https://x.com/Dheeraj1953068",
   github: "https://github.com",
   objective: "Building intelligent, self-correcting, and production-hardened AI solutions. Specializing in Multi-Agent NLP-to-SQL architectures, 3-layer deterministic verification, high-throughput Intelligent Document Processing (IDP), and Computer Vision pipelines.",
