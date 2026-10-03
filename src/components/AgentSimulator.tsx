@@ -104,7 +104,7 @@ export const AgentSimulator: React.FC = () => {
     {
       id: 'invoice-ocr',
       name: '2. Papertrail: Invoice Extraction',
-      tag: 'Document AI',
+      tag: 'Papertrail IDP',
       query: 'Ingest Spanish multi-page supplier invoice (PDF) with handwritten delivery surcharge.',
       routerTarget: 'Document Intelligence + GPT-4o Vision + Arithmetic Engine',
       verificationVerdict: 'Arithmetic Reconciliation Caught $45.00 Tax Discrepancy -> Repaired in Code',
@@ -164,7 +164,7 @@ export const AgentSimulator: React.FC = () => {
     {
       id: 'bar-vision',
       name: '3. Bar Vision: Video Inventory',
-      tag: 'Computer Vision',
+      tag: 'Bar Vision CV',
       query: 'Process 45s handheld phone video of back-bar liquor bottles with motion blur.',
       routerTarget: 'OWLv2 Open-Vocabulary Detection + Optical Flow RANSAC',
       verificationVerdict: 'Spatial Trajectory Recovery Eliminated 35% Cross-Frame Duplicates',
@@ -224,7 +224,7 @@ export const AgentSimulator: React.FC = () => {
     {
       id: 'pharma-ocr',
       name: '4. PharmaAI: Agreement to Invoice',
-      tag: 'Document AI',
+      tag: 'PharmaAI OCR',
       query: 'Ingest signed 12-page Clinical Research Agreement (Pharmaris Canada) with 50% milestone advance.',
       routerTarget: 'Azure Document Intelligence + GPT-4o + GST/LUT Invariant Engine',
       verificationVerdict: 'Derived 50% Advance ($1,575 USD) • Applied 0% Export LUT • Routed to USD SWIFT',
@@ -358,7 +358,7 @@ export const AgentSimulator: React.FC = () => {
                   onClick={() => handleScenarioChange(s)}
                   className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 flex items-center gap-1.5 ${
                     isSelected
-                      ? 'bg-charcoal text-white shadow-sm'
+                      ? 'bg-amber text-charcoal-deep font-bold shadow-sm'
                       : 'text-charcoal-muted hover:text-charcoal hover:bg-black/[0.04]'
                   }`}
                 >

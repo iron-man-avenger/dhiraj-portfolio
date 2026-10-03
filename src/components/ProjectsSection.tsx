@@ -60,7 +60,7 @@ export const ProjectsSection: React.FC = () => {
                 }}
                 className={`px-3.5 py-1.5 rounded-xl md:rounded-full text-xs font-semibold transition-all duration-200 ${
                   selectedCategory === cat
-                    ? 'bg-charcoal text-white shadow-sm'
+                    ? 'bg-amber text-charcoal-deep font-bold shadow-sm'
                     : 'text-charcoal-muted hover:text-charcoal hover:bg-black/[0.04]'
                 }`}
               >
