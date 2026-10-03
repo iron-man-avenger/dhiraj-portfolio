@@ -3,11 +3,11 @@ import { engineeringPrinciples } from '../data/portfolioData';
 
 export const EngineeringLessons: React.FC = () => {
   return (
-    <section id="principles" className="py-24 bg-[#F7F2EB] border-t border-[#E3DACD]/60 relative">
+    <section id="principles" className="pt-6 sm:pt-8 pb-16 sm:pb-20 bg-[#F7F2EB] border-t border-[#E3DACD]/60 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
         
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-10 gap-5 sm:gap-6">
           <div>
             <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#2B302C] flex items-center gap-2 mb-2">
               <span className="w-1.5 h-1.5 rounded-full bg-[#2B302C]" />

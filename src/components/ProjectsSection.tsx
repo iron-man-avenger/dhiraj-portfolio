@@ -31,11 +31,11 @@ export const ProjectsSection: React.FC = () => {
   };
 
   return (
-    <section id="projects" className="py-24 bg-[#F7F2EB] relative border-t border-[#E3DACD]/60">
+    <section id="projects" className="pt-6 sm:pt-8 pb-16 sm:pb-20 bg-[#F7F2EB] relative border-t border-[#E3DACD]/60">
       <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
         
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-10 gap-5 sm:gap-6">
           <div>
             <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#2B302C] flex items-center gap-2 mb-2">
               <span className="w-1.5 h-1.5 rounded-full bg-[#2B302C]" />
@@ -79,7 +79,7 @@ export const ProjectsSection: React.FC = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: idx * 0.05 }}
-              className="p-7 sm:p-8 rounded-3xl bg-[#F7F2EB] border border-[#E3DACD] hover:border-amber/50 hover:shadow-lg transition-all duration-300 flex flex-col justify-between group"
+              className="p-5 sm:p-7 md:p-8 rounded-3xl bg-[#F7F2EB] border border-[#E3DACD] hover:border-amber/50 hover:shadow-lg transition-all duration-300 flex flex-col justify-between group"
             >
               <div>
                 {/* Meta Top Line with Primary Amber Category Pill */}
@@ -153,12 +153,12 @@ export const ProjectsSection: React.FC = () => {
               initial={{ opacity: 0, scale: 0.96, y: 15 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.96, y: 15 }}
-              className="relative w-full max-w-4xl bg-[#F7F2EB] rounded-3xl border border-[#E3DACD] shadow-2xl p-6 sm:p-10 max-h-[90vh] overflow-y-auto my-auto"
+              className="relative w-full max-w-4xl bg-[#F7F2EB] rounded-3xl border border-[#E3DACD] shadow-2xl p-5 sm:p-8 md:p-10 max-h-[90vh] overflow-y-auto my-auto"
             >
               {/* Close Button */}
               <button
                 onClick={handleCloseModal}
-                className="absolute top-6 right-6 p-2 rounded-full border border-[#E5DDCF] bg-[#F7F2EB] text-charcoal-muted hover:text-charcoal hover:bg-ecru-200 transition-colors"
+                className="absolute top-4 sm:top-6 right-4 sm:right-6 p-2 rounded-full border border-[#E5DDCF] bg-[#F7F2EB] text-charcoal-muted hover:text-charcoal hover:bg-ecru-200 transition-colors"
                 aria-label="Close"
               >
                 <X className="w-5 h-5" />

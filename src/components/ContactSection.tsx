@@ -142,13 +142,13 @@ export const ContactSection: React.FC = () => {
   };
 
   return (
-    <section id="contact" className="py-24 bg-[#F7F2EB] border-t border-[#E3DACD] relative">
+    <section id="contact" className="pt-6 sm:pt-8 pb-16 sm:pb-20 bg-[#F7F2EB] border-t border-[#E3DACD] relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
         
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 items-start">
           
           {/* Left Column: Direct Contact & Info (5 cols) */}
-          <div className="lg:col-span-5 flex flex-col gap-6">
+          <div className="lg:col-span-5 flex flex-col gap-5 sm:gap-6">
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber/20 text-charcoal text-xs font-mono font-bold uppercase tracking-wider mb-3">
                 <Mail className="w-3.5 h-3.5 text-amber-dark" />
@@ -162,25 +162,29 @@ export const ContactSection: React.FC = () => {
               </p>
             </div>
 
-            {/* Quick Email Copy Card */}
-            <div className="p-5 rounded-2xl bg-[#F7F2EB] border border-[#E3DACD] shadow-sm flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-amber/15 text-amber-dark flex items-center justify-center font-bold">
+            {/* Quick Email Copy Card - Responsive Mobile Safe */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-[#F7F2EB] border border-[#E3DACD] shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 overflow-hidden">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-xl bg-amber/15 text-amber-dark flex items-center justify-center font-bold shrink-0">
                   <Mail className="w-5 h-5" />
                 </div>
-                <div>
+                <div className="min-w-0 flex-1">
                   <span className="text-[10px] font-mono text-charcoal-muted uppercase tracking-wider block">
                     Direct Email
                   </span>
-                  <span className="text-sm font-bold text-charcoal font-mono">
+                  <a 
+                    href={`mailto:${personalInfo.email}`}
+                    className="text-xs sm:text-sm font-bold text-charcoal font-mono truncate block hover:text-amber-dark transition-colors"
+                    title={personalInfo.email}
+                  >
                     {personalInfo.email}
-                  </span>
+                  </a>
                 </div>
               </div>
 
               <button
                 onClick={copyEmail}
-                className="p-2.5 rounded-xl border border-[#E3DACD] hover:bg-ecru-200 text-charcoal-muted hover:text-charcoal transition-all flex items-center gap-1.5 text-xs font-semibold"
+                className="w-full sm:w-auto justify-center px-3.5 py-2 sm:py-2.5 rounded-xl border border-[#E3DACD] hover:bg-ecru-200 text-charcoal-muted hover:text-charcoal transition-all flex items-center gap-1.5 text-xs font-semibold shrink-0"
                 title="Copy Email to Clipboard"
               >
                 {copied ? (
@@ -260,21 +264,18 @@ export const ContactSection: React.FC = () => {
 
           {/* Right Column: Contact Message Form (7 cols) */}
           <div className="lg:col-span-7">
-            <div className="p-6 sm:p-8 rounded-3xl bg-[#F7F2EB] border border-[#E3DACD] shadow-elevated">
+            <div className="p-5 sm:p-7 md:p-8 rounded-3xl bg-[#F7F2EB] border border-[#E3DACD] shadow-elevated">
               
               <div className="flex items-center justify-between pb-4 border-b border-[#EAE2D5] mb-6">
                 <div>
-                  <h3 className="text-lg font-bold text-charcoal font-sans flex items-center gap-2">
-                    <span>Send a Direct Note</span>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-amber/15 text-amber-dark border border-amber/20 font-bold">
-                      EmailJS Powered
-                    </span>
+                  <h3 className="text-lg font-bold text-charcoal font-sans">
+                    Send a Direct Note
                   </h3>
                   <p className="text-xs text-charcoal-muted font-mono mt-0.5">
                     Direct dispatch straight to Dhiraj's personal inbox
                   </p>
                 </div>
-                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
               </div>
 
               {submitted ? (

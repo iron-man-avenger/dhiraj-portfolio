@@ -3,11 +3,11 @@ import { skillCategories } from '../data/portfolioData';
 
 export const SkillsMatrix: React.FC = () => {
   return (
-    <section id="skills" className="py-24 bg-[#F7F2EB] border-t border-[#E3DACD]/60 relative">
+    <section id="skills" className="pt-6 sm:pt-8 pb-16 sm:pb-20 bg-[#F7F2EB] border-t border-[#E3DACD]/60 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
         
         {/* Header */}
-        <div className="mb-16">
+        <div className="mb-8 sm:mb-10">
           <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#2B302C] flex items-center gap-2 mb-2">
             <span className="w-1.5 h-1.5 rounded-full bg-[#2B302C]" />
             <span>Technical Stack</span>

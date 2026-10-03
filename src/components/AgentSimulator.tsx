@@ -330,11 +330,11 @@ export const AgentSimulator: React.FC = () => {
   };
 
   return (
-    <section id="simulator" className="py-20 md:py-24 bg-[#F7F2EB] border-t border-[#E3DACD]/60 relative z-0">
+    <section id="simulator" className="pt-6 sm:pt-8 pb-16 sm:pb-20 bg-[#F7F2EB] border-t border-[#E3DACD]/60 relative z-0">
       <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 relative z-10">
         
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 sm:mb-8 gap-5 sm:gap-6">
           <div>
             <span className="text-xs font-mono font-bold uppercase tracking-widest text-amber-dark flex items-center gap-1.5 mb-2">
               <Sparkles className="w-3.5 h-3.5" />
@@ -370,7 +370,7 @@ export const AgentSimulator: React.FC = () => {
         </div>
 
         {/* Main Simulator Card (Warm Glassmorphism & High-Visual Architecture) */}
-        <div className="rounded-3xl bg-[#F7F2EB] border border-[#E3DACD] shadow-sm p-6 sm:p-8 backdrop-blur-md transition-all duration-300">
+        <div className="rounded-3xl bg-[#F7F2EB] border border-[#E3DACD] shadow-sm p-4 sm:p-6 md:p-8 backdrop-blur-md transition-all duration-300">
           
           {/* Top Bar: Input Query & Primary Action */}
           <div className="flex flex-col md:flex-row md:items-center justify-between pb-6 mb-8 border-b border-[#E3DACD]/80 gap-5">

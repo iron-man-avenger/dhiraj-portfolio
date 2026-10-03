@@ -38,6 +38,19 @@ class SoundManager {
     }
   }
 
+  public unlockAudio() {
+    this.initCtx();
+    if (this.ctx && this.ctx.state === 'suspended') {
+      this.ctx.resume().catch(() => {});
+    }
+    if (!this.themeAudio && typeof window !== 'undefined') {
+      try {
+        this.themeAudio = new Audio('/audio/interstellar-theme.mp3');
+        this.themeAudio.volume = 0.80;
+      } catch {}
+    }
+  }
+
   public toggleMute(): boolean {
     this.isMuted = !this.isMuted;
     localStorage.setItem('dk_portfolio_sound_muted', String(this.isMuted));
@@ -448,7 +461,7 @@ class SoundManager {
       if (!this.themeAudio && typeof window !== 'undefined') {
         this.themeAudio = new Audio('/audio/interstellar-theme.mp3');
         try {
-          this.themeAudio.volume = 0.35;
+          this.themeAudio.volume = 0.80;
         } catch {}
       }
 
