@@ -396,7 +396,43 @@ class SoundManager {
     } catch {}
   }
 
-  // Play the actual downloaded original Hans Zimmer Interstellar theme audio file (trimmed starting at 20s motif)
+  // Play full synthetic Interstellar organ sequence (guaranteed mobile & offline fallback)
+  public playSyntheticTheme(
+    onStep?: (barIdx: number) => void,
+    onComplete?: () => void
+  ): () => void {
+    if (this.isMuted) {
+      if (onComplete) onComplete();
+      return () => {};
+    }
+    this.initCtx();
+    const patternSeq = [1, 2, 3, 4, 5, 1];
+    let cancelled = false;
+    let currentIdx = 0;
+    let cancelCurrent: (() => void) | null = null;
+
+    const runNext = () => {
+      if (cancelled || currentIdx >= patternSeq.length) {
+        if (!cancelled && onComplete) onComplete();
+        return;
+      }
+      const patId = patternSeq[currentIdx];
+      currentIdx++;
+      cancelCurrent = this.playInterstellarPattern(patId, onStep, () => {
+        if (!cancelled) runNext();
+      });
+    };
+
+    runNext();
+
+    return () => {
+      cancelled = true;
+      if (cancelCurrent) cancelCurrent();
+      if (onComplete) onComplete();
+    };
+  }
+
+  // Play the actual downloaded original Hans Zimmer Interstellar theme audio file with seamless mobile fallback
   public playOriginalTheme(
     onProgress?: (barIdx: number) => void,
     onComplete?: () => void
@@ -406,28 +442,44 @@ class SoundManager {
       return () => {};
     }
 
+    this.initCtx();
+
     try {
       if (!this.themeAudio && typeof window !== 'undefined') {
         this.themeAudio = new Audio('/audio/interstellar-theme.mp3');
-        this.themeAudio.volume = 0.25; // Gentle atmospheric background volume
+        try {
+          this.themeAudio.volume = 0.35;
+        } catch {}
       }
 
       if (this.themeAudio) {
-        const executePlay = () => {
-          if (!this.themeAudio) return;
-          this.themeAudio.currentTime = 0;
-          this.themeAudio.play().then(() => {
-            this.isThemeAudioPlaying = true;
-          }).catch(() => {});
-        };
+        let cancelFallback: (() => void) | null = null;
+        let isCancelled = false;
+        const timers: (ReturnType<typeof setTimeout>)[] = [];
 
-        if (this.themeAudio.readyState >= 2) {
-          executePlay();
-        } else {
-          this.themeAudio.addEventListener('canplay', () => {
-            executePlay();
-          }, { once: true });
-          this.themeAudio.load();
+        this.themeAudio.currentTime = 0;
+        // Direct synchronous trigger inside user gesture for mobile iOS/Android
+        const playPromise = this.themeAudio.play();
+
+        if (playPromise !== undefined) {
+          playPromise.then(() => {
+            this.isThemeAudioPlaying = true;
+            const visualSequence = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 4, 5, 6, 7, 0, 1, 2, 3];
+            const stepTime = 580;
+            visualSequence.forEach((barIdx, step) => {
+              const t = setTimeout(() => {
+                if (this.isThemeAudioPlaying && onProgress) {
+                  onProgress(barIdx);
+                }
+              }, step * stepTime);
+              timers.push(t);
+            });
+          }).catch((err) => {
+            console.warn('HTMLAudio blocked or unsupported on mobile, falling back to Web Audio synth:', err);
+            if (!isCancelled) {
+              cancelFallback = this.playSyntheticTheme(onProgress, onComplete);
+            }
+          });
         }
 
         this.themeAudio.onended = () => {
@@ -435,37 +487,26 @@ class SoundManager {
           if (onComplete) onComplete();
         };
 
-        // Synchronize gentle amber visual pulses across the bars to the music tempo
-        const visualSequence = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 4, 5, 6, 7, 0, 1, 2, 3];
-        const stepTime = 580; // majestic tempo matching the recording
-        const timers: (ReturnType<typeof setTimeout>)[] = [];
-
-        visualSequence.forEach((barIdx, step) => {
-          const t = setTimeout(() => {
-            if (this.isThemeAudioPlaying && onProgress) {
-              onProgress(barIdx);
-            }
-          }, step * stepTime);
-          timers.push(t);
-        });
-
         return () => {
+          isCancelled = true;
           if (this.themeAudio) {
             this.themeAudio.pause();
             this.themeAudio.currentTime = 0;
           }
           this.isThemeAudioPlaying = false;
           timers.forEach(t => clearTimeout(t));
+          if (cancelFallback) cancelFallback();
           if (onComplete) onComplete();
         };
       }
-    } catch {}
+    } catch {
+      return this.playSyntheticTheme(onProgress, onComplete);
+    }
 
-    if (onComplete) onComplete();
-    return () => {};
+    return this.playSyntheticTheme(onProgress, onComplete);
   }
 
-  // Auto-play the actual Hans Zimmer Interstellar Main Theme (original recording)
+  // Auto-play the Hans Zimmer Interstellar Main Theme (audio file with instant mobile synth fallback)
   public playInterstellarTheme(
     onNoteTrigger?: (index: number) => void,
     onComplete?: () => void

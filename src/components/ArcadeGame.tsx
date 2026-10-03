@@ -506,23 +506,25 @@ export const ArcadeGame: React.FC<ArcadeGameProps> = ({ isOpen, onClose }) => {
 
             {/* Ready Screen Overlay */}
             {gameState === 'ready' && (
-              <div className="absolute inset-0 bg-charcoal/85 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center">
-                <h4 className="text-xl font-extrabold text-white mb-2">
-                  Defend the Multi-Agent Pipeline
+              <div className="absolute inset-0 bg-charcoal/90 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center">
+                <div className="w-12 h-12 rounded-2xl bg-amber/20 border border-amber/40 text-amber flex items-center justify-center mb-3">
+                  <Zap className="w-6 h-6 fill-amber" />
+                </div>
+                <h4 className="text-xl sm:text-2xl font-extrabold text-white mb-2">
+                  Agentic Token Defender
                 </h4>
                 <p className="text-xs text-charcoal-faded max-w-sm mb-6 leading-relaxed">
-                  Steer your Agent Drone to catch green <strong className="text-emerald-400">Embedding Tokens</strong> (+100) and golden <strong className="text-amber">MCP Shields</strong> (+250). Shoot or dodge red <strong className="text-red-400">Taxonomy Drift Bugs</strong>!
+                  Steer your agent drone to collect green <strong className="text-emerald-400">Verified Tokens</strong> (+100) and golden <strong className="text-amber">Shields</strong> (+250). Zap or dodge red <strong className="text-red-400">Bug Obstacles</strong>!
                 </p>
 
-                <div className="flex gap-3 text-[11px] font-mono text-charcoal-faded mb-6 bg-charcoal/60 px-4 py-2 rounded-xl border border-charcoal-border">
-                  <span>← / → : Move Drone</span>
-                  <span>•</span>
-                  <span>Spacebar : Fire AST Laser</span>
+                <div className="flex flex-wrap justify-center gap-2 sm:gap-4 text-[11px] font-mono text-charcoal-faded mb-6 bg-charcoal/70 px-4 py-2.5 rounded-xl border border-charcoal-border">
+                  <span className="hidden sm:inline">Desktop: ← / → Move • Spacebar Fire</span>
+                  <span>Mobile: Touch & Drag to Move • Tap to Fire</span>
                 </div>
 
                 <button
                   onClick={startGame}
-                  className="px-6 py-3 rounded-xl bg-amber text-charcoal-deep font-bold text-xs flex items-center gap-2 hover:bg-amber-light transition-transform hover:scale-105 shadow-glow-amber"
+                  className="px-7 py-3 rounded-xl bg-amber text-charcoal-deep font-bold text-xs sm:text-sm flex items-center gap-2 hover:bg-amber-light transition-all active:scale-95 shadow-glow-amber"
                 >
                   <Play className="w-4 h-4 fill-charcoal-deep" />
                   <span>Start Game</span>
@@ -535,40 +537,76 @@ export const ArcadeGame: React.FC<ArcadeGameProps> = ({ isOpen, onClose }) => {
               <div className="absolute inset-0 bg-charcoal/90 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center">
                 <div className="text-3xl mb-1">💥</div>
                 <h4 className="text-xl font-extrabold text-white mb-1">
-                  Pipeline Halted!
+                  Pipeline Complete!
                 </h4>
                 <p className="text-xs text-charcoal-faded mb-4">
-                  Taxonomy drift penetrated the verification layer.
+                  Bug detected in verification layer. Great run!
                 </p>
 
                 <div className="p-4 rounded-xl bg-charcoal border border-charcoal-border mb-6 w-52">
-                  <span className="text-[10px] font-mono text-charcoal-faded block">FINAL VERIFIED SCORE</span>
+                  <span className="text-[10px] font-mono text-charcoal-faded block">FINAL SCORE</span>
                   <span className="text-2xl font-bold font-mono text-amber">{score}</span>
                 </div>
 
                 <div className="flex gap-3">
                   <button
                     onClick={startGame}
-                    className="px-5 py-2.5 rounded-xl bg-amber text-charcoal-deep font-bold text-xs flex items-center gap-2 hover:bg-amber-light"
+                    className="px-5 py-2.5 rounded-xl bg-amber text-charcoal-deep font-bold text-xs flex items-center gap-2 hover:bg-amber-light active:scale-95"
                   >
                     <RotateCcw className="w-4 h-4" />
                     <span>Play Again</span>
                   </button>
                   <button
                     onClick={onClose}
-                    className="px-4 py-2.5 rounded-xl border border-charcoal-border text-white text-xs hover:bg-charcoal"
+                    className="px-4 py-2.5 rounded-xl border border-charcoal-border text-white text-xs hover:bg-charcoal active:scale-95"
                   >
-                    Return to Portfolio
+                    Close
                   </button>
                 </div>
               </div>
             )}
           </div>
 
+          {/* Mobile Tactile Action Bar (Only visible when playing on mobile) */}
+          {gameState === 'playing' && (
+            <div className="w-full mt-3 flex items-center justify-between gap-2.5 sm:hidden">
+              <div className="flex gap-2">
+                <button
+                  onTouchStart={(e) => { e.preventDefault(); keysRef.current['ArrowLeft'] = true; }}
+                  onTouchEnd={(e) => { e.preventDefault(); keysRef.current['ArrowLeft'] = false; }}
+                  onMouseDown={() => { keysRef.current['ArrowLeft'] = true; }}
+                  onMouseUp={() => { keysRef.current['ArrowLeft'] = false; }}
+                  className="w-14 h-12 rounded-xl bg-white/10 active:bg-amber/30 border border-white/20 text-white font-bold flex items-center justify-center select-none text-base"
+                  aria-label="Move Left"
+                >
+                  ◀
+                </button>
+                <button
+                  onTouchStart={(e) => { e.preventDefault(); keysRef.current['ArrowRight'] = true; }}
+                  onTouchEnd={(e) => { e.preventDefault(); keysRef.current['ArrowRight'] = false; }}
+                  onMouseDown={() => { keysRef.current['ArrowRight'] = true; }}
+                  onMouseUp={() => { keysRef.current['ArrowRight'] = false; }}
+                  className="w-14 h-12 rounded-xl bg-white/10 active:bg-amber/30 border border-white/20 text-white font-bold flex items-center justify-center select-none text-base"
+                  aria-label="Move Right"
+                >
+                  ▶
+                </button>
+              </div>
+              <button
+                onClick={fireLaser}
+                onTouchStart={(e) => { e.preventDefault(); fireLaser(); }}
+                className="flex-1 h-12 rounded-xl bg-amber text-charcoal font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm active:scale-95 select-none"
+              >
+                <Zap className="w-4 h-4 fill-charcoal" />
+                <span>FIRE LASER</span>
+              </button>
+            </div>
+          )}
+
           {/* Footer Controls Info */}
-          <div className="w-full mt-4 flex items-center justify-between text-[11px] font-mono text-charcoal-faded">
-            <span>Desktop: Arrow Keys + Spacebar</span>
-            <span>Mobile: Touch & Drag to Move</span>
+          <div className="w-full mt-3 flex items-center justify-between text-[11px] font-mono text-charcoal-faded">
+            <span className="hidden sm:inline">Desktop: Arrow Keys + Spacebar</span>
+            <span>Mobile: Touch buttons or drag on screen to move</span>
           </div>
 
         </motion.div>

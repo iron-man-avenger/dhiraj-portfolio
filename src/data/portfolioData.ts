@@ -229,6 +229,48 @@ export const projects: Project[] = [
     ]
   },
   {
+    id: "pharma-ocr",
+    title: "PharmaAI: Agreement OCR to Multi-Currency Invoice Engine",
+    subtitle: "Enterprise Contract Extraction & Multi-Currency Export Billing Engine",
+    company: "Pharmazone / PIYTECH Solutions",
+    period: "Oct 2025 – Present",
+    category: "Document AI",
+    summary: "Production document automation engine that ingests signed pharmaceutical Master Service Agreements (MSAs), Statements of Work (SOWs), Quotations, and Purchase Orders to extract commercial terms, milestone schedules, and CRO scopes, automatically generating compliant GST/LUT multi-currency export invoices.",
+    metrics: [
+      { label: "Agreements Mapped", value: "14 Live Contracts" },
+      { label: "Extraction Accuracy", value: "100% Milestones & Tax" },
+      { label: "Unit Economics", value: "~$0.04 / Document" },
+      { label: "Currencies Supported", value: "USD, EUR, INR (SWIFT)" }
+    ],
+    highlight: "Designed an automated milestone derivation engine that matches signed contract payment terms (e.g. 50% on signing, 50% on draft report), maps project codes to HSN 998113 regulatory service lines, and auto-routes bank details to currency-specific HDFC international SWIFT accounts.",
+    bullets: [
+      "Engineered a multi-page PDF agreement extraction pipeline combining Azure Document Intelligence layout extraction with focused GPT-4o vision verification.",
+      "Derived automated milestone tracking (e.g. 50% signing, 50% draft report) with deterministic cross-verification against original contract values.",
+      "Implemented multi-currency banking dispatch automatically routing USD, EUR, and INR invoices to corresponding HDFC international SWIFT accounts.",
+      "Automated Indian GST regulatory compliance distinguishing export invoices under Letter of Undertaking (LUT with 0% tax) with live forex conversion versus domestic 18% CGST/SGST.",
+      "Built interactive web review interface in React and FastAPI allowing finance controllers to review auto-extracted milestone invoices with one-click export."
+    ],
+    techStack: [
+      "Azure Document Intelligence", "Azure OpenAI (GPT-4o)", "FastAPI", "Python", "React 19", "TypeScript", "Tailwind CSS", "GST / LUT Invariant Engine"
+    ],
+    keyLessons: [
+      {
+        concept: "Deterministic Financial Invariants",
+        meaning: "Never ask an LLM to guess currency conversions or GST percentages. Extract the raw milestone numbers, and compute the tax, currency exchange, and net totals in deterministic verified code."
+      },
+      {
+        concept: "Contract Scope Boundary Derivation",
+        meaning: "Pharmaceutical agreements often embed multi-site monitoring fees. Decoupling fixed milestone advances from pass-through investigator expenses prevents costly billing oversights."
+      }
+    ],
+    architectureBreakdown: {
+      input: "Signed Pharmaceutical Contracts (PDF): MSAs, SOWs, Quotations, and Purchase Orders (USD, EUR, INR)",
+      orchestration: "Azure Document Intelligence -> GPT-4o Vision Pass -> Milestone Derivation Engine -> GST/LUT Tax Validator",
+      verification: "Deterministic milestone % cross-check -> Forex valuation check -> HSN 998113 validation -> HDFC SWIFT account match",
+      output: "Official PDF and structured JSON export invoices compliant with Indian Customs LUT and client accounting standards"
+    }
+  },
+  {
     id: "promoters-copilot",
     title: "Promoter's Copilot: Financial Extraction & Forecasting",
     subtitle: "AI Tool for Structured Financial Extraction and Predictive Analytics",

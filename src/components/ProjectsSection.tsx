@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, 
-  ArrowUpRight
+  ArrowUpRight,
+  Sparkles
 } from 'lucide-react';
 import { projects } from '../data/portfolioData';
 import type { Project } from '../types';
@@ -78,11 +79,11 @@ export const ProjectsSection: React.FC = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: idx * 0.05 }}
-              className="p-8 rounded-3xl bg-white/80 border border-[#E3DACD]/90 hover:bg-white hover:border-amber/40 hover:shadow-glow-amber/5 transition-all duration-300 flex flex-col justify-between group"
+              className="p-7 sm:p-8 rounded-3xl bg-white/90 border border-[#E3DACD] hover:border-amber/50 hover:shadow-lg transition-all duration-300 flex flex-col justify-between group"
             >
               <div>
                 {/* Meta Top Line with Primary Amber Category Pill */}
-                <div className="flex items-center justify-between text-xs font-mono text-charcoal-muted mb-4">
+                <div className="flex items-center justify-between text-xs font-mono text-charcoal-muted mb-3.5">
                   <span className="font-semibold text-charcoal">{project.company}</span>
                   <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-amber/10 text-amber-dark border border-amber/25">
                     {project.category}
@@ -90,21 +91,37 @@ export const ProjectsSection: React.FC = () => {
                 </div>
 
                 {/* Title */}
-                <h3 className="text-xl font-bold text-charcoal font-sans leading-snug group-hover:text-amber-dark transition-colors mb-3">
+                <h3 className="text-xl font-bold text-charcoal font-sans leading-snug group-hover:text-amber-dark transition-colors mb-1.5">
                   {project.title}
                 </h3>
 
+                {/* Subtitle / Architectural Role */}
+                <p className="text-xs font-mono text-amber-dark font-medium mb-3">
+                  {project.subtitle}
+                </p>
+
                 {/* Summary */}
-                <p className="text-xs sm:text-sm text-charcoal-muted leading-relaxed mb-6 font-normal">
+                <p className="text-xs sm:text-sm text-charcoal-muted leading-relaxed mb-4 font-normal">
                   {project.summary}
                 </p>
 
-                {/* Clean Metrics Ticker with Highlighted Metric Values */}
-                <div className="pt-4 border-t border-[#EAE2D5] flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-mono mb-6">
-                  {project.metrics.slice(0, 3).map((m, mIdx) => (
-                    <div key={mIdx} className="flex items-center gap-1.5">
-                      <span className="text-charcoal-muted">{m.label}:</span>
-                      <strong className="text-charcoal font-bold group-hover:text-amber-dark transition-colors">
+                {/* Architectural Differentiator Highlight Box (Instant Scannability) */}
+                <div className="p-3.5 rounded-2xl bg-[#FAF7F2] border border-[#E3DACD]/80 mb-5">
+                  <div className="text-[10px] font-mono uppercase tracking-wider text-charcoal-muted font-bold mb-1 flex items-center gap-1.5">
+                    <Sparkles className="w-3 h-3 text-amber" />
+                    <span>Architectural Differentiator</span>
+                  </div>
+                  <p className="text-xs text-charcoal font-medium leading-relaxed">
+                    {project.highlight}
+                  </p>
+                </div>
+
+                {/* Clean Metrics Grid with Highlighted Metric Values */}
+                <div className="pt-3 border-t border-[#EAE2D5] grid grid-cols-2 gap-2 text-xs font-mono mb-5">
+                  {project.metrics.slice(0, 4).map((m, mIdx) => (
+                    <div key={mIdx} className="p-2 rounded-xl bg-white border border-[#E5DDCF]/70">
+                      <span className="text-[10px] text-charcoal-muted block truncate">{m.label}</span>
+                      <strong className="text-xs font-bold text-charcoal group-hover:text-amber-dark transition-colors truncate block">
                         {m.value}
                       </strong>
                     </div>
@@ -117,9 +134,9 @@ export const ProjectsSection: React.FC = () => {
                 onClick={() => handleOpenModal(project)}
                 className="inline-flex items-center gap-2 text-xs font-bold text-charcoal hover:text-amber-dark transition-colors pt-2 self-start group/btn"
               >
-                <span>Examine System Architecture</span>
-                <div className="w-5 h-5 rounded-full bg-amber/10 flex items-center justify-center text-amber-dark group-hover/btn:bg-amber group-hover/btn:text-charcoal transition-colors">
-                  <ArrowUpRight className="w-3 h-3 transition-transform group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
+                <span>Examine System Architecture & Case Study</span>
+                <div className="w-6 h-6 rounded-full bg-amber/15 flex items-center justify-center text-amber-dark group-hover/btn:bg-amber group-hover/btn:text-charcoal transition-colors">
+                  <ArrowUpRight className="w-3.5 h-3.5 transition-transform group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
                 </div>
               </button>
             </motion.div>

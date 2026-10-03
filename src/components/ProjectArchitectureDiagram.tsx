@@ -179,6 +179,45 @@ export const ProjectArchitectureDiagram: React.FC<ProjectArchitectureDiagramProp
           verificationHighlight: "Tracking the camera trajectory instead of individual chaotic bottles prevents double-counting."
         };
 
+      case 'pharma-ocr':
+        return {
+          title: "PharmaAI: Agreement-to-Invoice System Architecture",
+          summary: "Automated pharmaceutical contract terms extraction and multi-currency export billing engine.",
+          stages: [
+            {
+              num: "01",
+              label: "Multi-Page Contract Intake",
+              tech: "Azure Document Intelligence",
+              details: "Extracts signed milestone schedules (50% advance, 50% report), currency terms, and CRO study scopes."
+            },
+            {
+              num: "02",
+              label: "Entity & Scope Derivation",
+              tech: "GPT-4o Vision + Regulatory Rules",
+              details: "Disambiguates sponsor vs CRO, protocol IDs, and maps services to HSN/SAC 998113 regulatory codes."
+            },
+            {
+              num: "03",
+              label: "Milestone Math Invariant",
+              tech: "Deterministic Calculation",
+              details: "Verifies milestone percentage amounts reconcile mathematically against total signed proposal value."
+            },
+            {
+              num: "04",
+              label: "GST & LUT Tax Invariant",
+              tech: "0% Export LUT Engine",
+              details: "Applies 0% IGST under Letter of Undertaking (LUT) with live forex conversion for foreign sponsors."
+            },
+            {
+              num: "05",
+              label: "SWIFT Banking Auto-Router",
+              tech: "Multi-Currency Banking Dispatch",
+              details: "Auto-routes invoice remittance instructions to currency-specific HDFC accounts (USD, EUR, INR SWIFT)."
+            }
+          ],
+          verificationHighlight: "Guarantees 100% tax and milestone invoice accuracy without relying on LLM arithmetic hallucinations."
+        };
+
       case 'promoters-copilot':
         return {
           title: "Promoter's Copilot Extraction & Forecast Flow",
