@@ -148,47 +148,47 @@ export const ProjectsSection: React.FC = () => {
       {/* Deep-Dive Case Study Modal (Editorial, Spacious, Zero Garbage Clutter) */}
       <AnimatePresence>
         {activeModalProject && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-charcoal/70 backdrop-blur-md overflow-y-auto">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 md:p-6 bg-charcoal/70 backdrop-blur-md overflow-y-auto">
             <motion.div
               initial={{ opacity: 0, scale: 0.96, y: 15 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.96, y: 15 }}
-              className="relative w-full max-w-4xl bg-[#F7F2EB] rounded-3xl border border-[#E3DACD] shadow-2xl p-5 sm:p-8 md:p-10 max-h-[90vh] overflow-y-auto my-auto"
+              className="relative w-full max-w-4xl bg-[#F7F2EB] rounded-2xl sm:rounded-3xl border border-[#E3DACD] shadow-2xl p-4 sm:p-7 md:p-10 max-h-[92vh] sm:max-h-[90vh] overflow-y-auto my-auto"
             >
               {/* Close Button */}
               <button
                 onClick={handleCloseModal}
-                className="absolute top-4 sm:top-6 right-4 sm:right-6 p-2 rounded-full border border-[#E5DDCF] bg-[#F7F2EB] text-charcoal-muted hover:text-charcoal hover:bg-ecru-200 transition-colors"
+                className="absolute top-3.5 right-3.5 sm:top-5 sm:right-5 p-2 rounded-full border border-[#E5DDCF] bg-[#F7F2EB] text-charcoal-muted hover:text-charcoal hover:bg-ecru-200 transition-colors z-20 shadow-2xs"
                 aria-label="Close"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
 
               {/* Header */}
-              <div className="pr-12 mb-8">
-                <div className="flex items-center gap-3 text-xs font-mono text-charcoal-muted mb-2">
+              <div className="pr-10 sm:pr-14 mb-6 sm:mb-8">
+                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-mono text-charcoal-muted mb-2">
                   <span className="text-amber-dark font-bold">{activeModalProject.category}</span>
                   <span>•</span>
-                  <span>{activeModalProject.company}</span>
+                  <span className="font-semibold text-charcoal">{activeModalProject.company}</span>
                   <span>•</span>
                   <span>{activeModalProject.period}</span>
                 </div>
-                <h3 className="text-2xl sm:text-3xl font-extrabold text-charcoal font-sans tracking-tight">
+                <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-charcoal font-sans tracking-tight leading-tight">
                   {activeModalProject.title}
                 </h3>
-                <p className="text-xs sm:text-sm text-charcoal-muted mt-2 font-mono">
+                <p className="text-xs sm:text-sm text-charcoal-muted mt-1.5 font-mono leading-relaxed">
                   {activeModalProject.subtitle}
                 </p>
               </div>
 
-              {/* Clean Inline Stats Row (No heavy boxed grid) */}
-              <div className="py-4 border-y border-[#E3DACD]/80 grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+              {/* Clean Inline Stats Row - Responsive Mobile Safe */}
+              <div className="py-3 sm:py-4 border-y border-[#E3DACD]/80 grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-4 mb-6 sm:mb-8">
                 {activeModalProject.metrics.map((m, idx) => (
-                  <div key={idx}>
-                    <span className="text-[10px] font-mono uppercase tracking-wider text-charcoal-muted block">
+                  <div key={idx} className="p-2 sm:p-0 rounded-xl bg-black/[0.02] sm:bg-transparent min-w-0">
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-charcoal-muted block truncate mb-0.5">
                       {m.label}
                     </span>
-                    <span className="text-base font-bold text-charcoal font-mono mt-0.5 block">
+                    <span className="text-xs sm:text-sm md:text-base font-bold text-charcoal font-mono leading-snug block break-words">
                       {m.value}
                     </span>
                   </div>

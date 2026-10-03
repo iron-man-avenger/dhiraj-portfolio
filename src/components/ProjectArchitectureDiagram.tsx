@@ -323,15 +323,15 @@ export const ProjectArchitectureDiagram: React.FC<ProjectArchitectureDiagramProp
   const flow = getFlowData();
 
   return (
-    <div className="mb-8 p-6 rounded-2xl bg-[#F7F2EB] border border-[#E3DACD]">
+    <div className="mb-6 sm:mb-8 p-3.5 sm:p-5 md:p-6 rounded-2xl bg-[#F7F2EB] border border-[#E3DACD]">
       
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-baseline justify-between pb-4 mb-6 border-b border-[#E3DACD]/70 gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-baseline justify-between pb-3.5 mb-4 sm:mb-5 border-b border-[#E3DACD]/70 gap-2">
         <div>
           <span className="text-[10px] font-mono uppercase tracking-widest text-amber-dark font-bold block mb-1">
             System Architecture
           </span>
-          <h4 className="text-base font-bold text-charcoal font-sans">
+          <h4 className="text-sm sm:text-base font-bold text-charcoal font-sans">
             {flow.title}
           </h4>
         </div>
@@ -340,36 +340,38 @@ export const ProjectArchitectureDiagram: React.FC<ProjectArchitectureDiagramProp
         </p>
       </div>
 
-      {/* Clean Horizontal Pipeline (Minimalist, calm, zero colored box clutter) */}
+      {/* Responsive Pipeline: Full-Width Clean Cards on Mobile, 5-Col Grid on Desktop */}
       <div className="relative">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 relative">
+        <div className="flex flex-col md:grid md:grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-3.5 relative">
           {flow.stages.map((stage, idx) => (
             <div 
               key={idx} 
-              className="relative p-3.5 rounded-xl bg-[#F7F2EB] border border-[#E5DDCF] flex flex-col justify-between hover:bg-[#F7F2EB] hover:border-amber/50 transition-all group"
+              className="relative p-3 sm:p-3.5 md:p-4 rounded-xl bg-[#F7F2EB] border border-[#E5DDCF] flex flex-col justify-between hover:border-amber/50 transition-all group shadow-2xs"
             >
               <div>
-                {/* Step indicator */}
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] font-mono font-bold text-charcoal-muted">
-                    {stage.num}
-                  </span>
+                {/* Step indicator & Tech Badge */}
+                <div className="flex items-center justify-between mb-1.5 flex-wrap gap-1">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] font-mono font-bold text-amber-dark px-2 py-0.5 rounded bg-amber/15 border border-amber/25">
+                      Stage {stage.num}
+                    </span>
+                    <span className="text-[10px] font-mono font-medium text-charcoal-muted truncate max-w-[170px] sm:max-w-none">
+                      {stage.tech}
+                    </span>
+                  </div>
+
                   {idx < flow.stages.length - 1 ? (
                     <ArrowRight className="w-3.5 h-3.5 text-amber/60 group-hover:text-amber transition-colors hidden lg:block" />
                   ) : (
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
                   )}
                 </div>
 
-                <h5 className="text-xs font-bold text-charcoal leading-snug font-sans">
+                <h5 className="text-xs sm:text-sm font-bold text-charcoal leading-snug font-sans mt-1">
                   {stage.label}
                 </h5>
 
-                <span className="text-[10px] font-mono font-medium text-amber-dark block mt-1">
-                  {stage.tech}
-                </span>
-
-                <p className="text-[11px] text-charcoal-muted leading-relaxed mt-2 font-sans">
+                <p className="text-xs text-charcoal-muted leading-relaxed mt-1 font-sans">
                   {stage.details}
                 </p>
               </div>
@@ -379,7 +381,7 @@ export const ProjectArchitectureDiagram: React.FC<ProjectArchitectureDiagramProp
       </div>
 
       {/* Subtle Verification Callout */}
-      <div className="mt-4 pt-3 border-t border-[#E3DACD]/60 flex items-center gap-2 text-xs text-charcoal font-medium">
+      <div className="mt-3.5 pt-3 border-t border-[#E3DACD]/60 flex items-center gap-2 text-xs text-charcoal font-medium">
         <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
         <span><strong className="text-charcoal font-bold">Reliability Guarantee:</strong> {flow.verificationHighlight}</span>
       </div>
