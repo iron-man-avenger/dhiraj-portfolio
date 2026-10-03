@@ -3,7 +3,7 @@ import { skillCategories } from '../data/portfolioData';
 
 export const SkillsMatrix: React.FC = () => {
   return (
-    <section id="skills" className="py-24 bg-[#FAF7F2] border-t border-[#E3DACD]/60 relative">
+    <section id="skills" className="py-24 bg-[#F7F2EB] border-t border-[#E3DACD]/60 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
         
         {/* Header */}
@@ -48,7 +48,7 @@ export const SkillsMatrix: React.FC = () => {
                       className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono transition-all shadow-2xs group ${
                         isExpert
                           ? 'bg-amber/[0.12] border border-amber/40 text-[#2B302C] hover:border-amber hover:bg-amber/20'
-                          : 'bg-white/80 border border-[#E3DACD] text-charcoal hover:border-amber/50 hover:bg-white hover:text-amber-dark'
+                          : 'bg-[#F7F2EB] border border-[#E3DACD] text-charcoal hover:border-amber/50 hover:bg-[#F7F2EB] hover:text-amber-dark'
                       }`}
                     >
                       <span className={`font-semibold ${isExpert ? 'text-[#2B302C] font-bold' : ''}`}>

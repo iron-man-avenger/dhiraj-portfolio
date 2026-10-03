@@ -51,7 +51,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenArcade }) => {
         {/* Right Watermark Logo: Large-Scale & Light-Shade, Shifted Down & Right as before (Responsive Mobile Safe) */}
         <div className="absolute -right-4 sm:-right-10 md:right-[-8%] lg:right-[-12%] xl:right-[-15%] top-1/2 -translate-y-[35%] w-[260px] sm:w-[420px] md:w-[620px] lg:w-[720px] xl:w-[800px] aspect-square pointer-events-none select-none z-0 opacity-15 sm:opacity-20 md:opacity-25 transition-all duration-500">
           {/* Subtle Ambient Radial Lighting */}
-          <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-amber/[0.15] via-[#FAF7F2]/40 to-transparent blur-3xl" />
+          <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-amber/[0.15] via-[#F7F2EB]/40 to-transparent blur-3xl" />
           
           <DhirajLogo 
             variant="light" 
@@ -95,7 +95,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenArcade }) => {
             <a
               href="#simulator"
               onClick={() => sounds.playTap()}
-              className="px-5 py-3 rounded-full bg-white/80 border border-[#E3DACD] text-charcoal font-semibold text-xs hover:border-charcoal hover:bg-white transition-all shadow-sm"
+              className="px-5 py-3 rounded-full bg-[#F7F2EB] border border-[#E3DACD] text-charcoal font-semibold text-xs hover:border-charcoal hover:bg-[#F7F2EB] transition-all shadow-sm"
             >
               <span>Agent Simulator</span>
             </a>
@@ -106,7 +106,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenArcade }) => {
               className={`px-4 py-2.5 rounded-full border text-xs font-mono font-semibold transition-all duration-200 flex items-center gap-2 shadow-2xs ${
                 isPlayingTheme
                   ? 'bg-amber text-charcoal border-amber shadow-glow-amber animate-pulse'
-                  : 'bg-white/80 border-[#E3DACD] text-charcoal hover:border-amber hover:text-amber-dark hover:bg-white'
+                  : 'bg-[#F7F2EB] border-[#E3DACD] text-charcoal hover:border-amber hover:text-amber-dark hover:bg-[#F7F2EB]'
               }`}
               title={isPlayingTheme ? "Pause Interstellar Theme" : "Play Hans Zimmer Interstellar Theme"}
             >

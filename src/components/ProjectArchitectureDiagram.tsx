@@ -323,7 +323,7 @@ export const ProjectArchitectureDiagram: React.FC<ProjectArchitectureDiagramProp
   const flow = getFlowData();
 
   return (
-    <div className="mb-8 p-6 rounded-2xl bg-[#F4EFE6]/80 border border-[#E3DACD]">
+    <div className="mb-8 p-6 rounded-2xl bg-[#F7F2EB] border border-[#E3DACD]">
       
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-baseline justify-between pb-4 mb-6 border-b border-[#E3DACD]/70 gap-2">
@@ -346,7 +346,7 @@ export const ProjectArchitectureDiagram: React.FC<ProjectArchitectureDiagramProp
           {flow.stages.map((stage, idx) => (
             <div 
               key={idx} 
-              className="relative p-3.5 rounded-xl bg-white/70 border border-[#E5DDCF] flex flex-col justify-between hover:bg-white hover:border-amber/50 transition-all group"
+              className="relative p-3.5 rounded-xl bg-[#F7F2EB] border border-[#E5DDCF] flex flex-col justify-between hover:bg-[#F7F2EB] hover:border-amber/50 transition-all group"
             >
               <div>
                 {/* Step indicator */}

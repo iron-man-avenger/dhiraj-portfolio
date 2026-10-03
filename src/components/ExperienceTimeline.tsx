@@ -3,7 +3,7 @@ import { workExperience, awards, certifications } from '../data/portfolioData';
 
 export const ExperienceTimeline: React.FC = () => {
   return (
-    <section id="journey" className="py-24 bg-[#FAF7F2] border-t border-[#E3DACD]/60 relative">
+    <section id="journey" className="py-24 bg-[#F7F2EB] border-t border-[#E3DACD]/60 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
         
         {/* Header */}
@@ -65,7 +65,7 @@ export const ExperienceTimeline: React.FC = () => {
                   {exp.skills.map((s) => (
                     <span 
                       key={s} 
-                      className="px-2 py-0.5 rounded-md bg-white/90 border border-[#E3DACD] text-[10px] font-mono text-charcoal hover:border-amber/50 hover:text-amber-dark transition-colors"
+                      className="px-2 py-0.5 rounded-md bg-[#F7F2EB] border border-[#E3DACD] text-[10px] font-mono text-charcoal hover:border-amber/50 hover:text-amber-dark transition-colors"
                     >
                       {s}
                     </span>

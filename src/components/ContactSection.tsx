@@ -142,7 +142,7 @@ export const ContactSection: React.FC = () => {
   };
 
   return (
-    <section id="contact" className="py-24 bg-[#FAF7F2] border-t border-[#E3DACD] relative">
+    <section id="contact" className="py-24 bg-[#F7F2EB] border-t border-[#E3DACD] relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
         
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
@@ -163,7 +163,7 @@ export const ContactSection: React.FC = () => {
             </div>
 
             {/* Quick Email Copy Card */}
-            <div className="p-5 rounded-2xl bg-white border border-[#E5DDCF] shadow-sm flex items-center justify-between">
+            <div className="p-5 rounded-2xl bg-[#F7F2EB] border border-[#E3DACD] shadow-sm flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-amber/15 text-amber-dark flex items-center justify-center font-bold">
                   <Mail className="w-5 h-5" />
@@ -180,7 +180,7 @@ export const ContactSection: React.FC = () => {
 
               <button
                 onClick={copyEmail}
-                className="p-2.5 rounded-xl border border-[#E5DDCF] hover:bg-ecru-100 text-charcoal-muted hover:text-charcoal transition-all flex items-center gap-1.5 text-xs font-semibold"
+                className="p-2.5 rounded-xl border border-[#E3DACD] hover:bg-ecru-200 text-charcoal-muted hover:text-charcoal transition-all flex items-center gap-1.5 text-xs font-semibold"
                 title="Copy Email to Clipboard"
               >
                 {copied ? (
@@ -199,7 +199,7 @@ export const ContactSection: React.FC = () => {
 
             {/* Location & Languages */}
             <div className="grid grid-cols-2 gap-3">
-              <div className="p-4 rounded-2xl bg-white border border-[#E5DDCF]">
+              <div className="p-4 rounded-2xl bg-[#F7F2EB] border border-[#E3DACD]">
                 <div className="flex items-center gap-2 text-charcoal-muted mb-1 text-xs">
                   <MapPin className="w-4 h-4 text-amber-dark" />
                   <span>Location</span>
@@ -209,7 +209,7 @@ export const ContactSection: React.FC = () => {
                 </span>
               </div>
 
-              <div className="p-4 rounded-2xl bg-white border border-[#E5DDCF]">
+              <div className="p-4 rounded-2xl bg-[#F7F2EB] border border-[#E3DACD]">
                 <div className="flex items-center gap-2 text-charcoal-muted mb-1 text-xs">
                   <Languages className="w-4 h-4 text-amber-dark" />
                   <span>Languages</span>
@@ -231,7 +231,7 @@ export const ContactSection: React.FC = () => {
                   target="_blank"
                   rel="noreferrer"
                   onClick={() => sounds.playTap()}
-                  className="px-4 py-2.5 rounded-xl bg-white border border-[#E5DDCF] text-charcoal text-xs font-semibold flex items-center gap-2 hover:border-charcoal transition-all shadow-sm"
+                  className="px-4 py-2.5 rounded-xl bg-[#F7F2EB] border border-[#E3DACD] text-charcoal text-xs font-semibold flex items-center gap-2 hover:border-charcoal transition-all shadow-sm"
                 >
                   <svg className="w-4 h-4 fill-[#D4A066]" viewBox="0 0 24 24">
                     <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 8.76c-.97 0-1.75-.79-1.75-1.76s.78-1.75 1.75-1.75 1.75.78 1.75 1.75-.78 1.76-1.75 1.76m1.39 9.74v-8.37H5.07v8.37h2.78z" />
@@ -245,7 +245,7 @@ export const ContactSection: React.FC = () => {
                   target="_blank"
                   rel="noreferrer"
                   onClick={() => sounds.playTap()}
-                  className="px-4 py-2.5 rounded-xl bg-white border border-[#E5DDCF] text-charcoal text-xs font-semibold flex items-center gap-2 hover:border-charcoal transition-all shadow-sm"
+                  className="px-4 py-2.5 rounded-xl bg-[#F7F2EB] border border-[#E3DACD] text-charcoal text-xs font-semibold flex items-center gap-2 hover:border-charcoal transition-all shadow-sm"
                 >
                   <svg className="w-4 h-4 fill-[#D4A066]" viewBox="0 0 24 24">
                     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
@@ -260,7 +260,7 @@ export const ContactSection: React.FC = () => {
 
           {/* Right Column: Contact Message Form (7 cols) */}
           <div className="lg:col-span-7">
-            <div className="p-6 sm:p-8 rounded-3xl bg-white border border-[#E3DACD] shadow-elevated">
+            <div className="p-6 sm:p-8 rounded-3xl bg-[#F7F2EB] border border-[#E3DACD] shadow-elevated">
               
               <div className="flex items-center justify-between pb-4 border-b border-[#EAE2D5] mb-6">
                 <div>
@@ -326,7 +326,7 @@ export const ContactSection: React.FC = () => {
                     <a
                       href={directPrompt.mailtoUrl}
                       onClick={() => sounds.playTap()}
-                      className="px-5 py-3 rounded-xl bg-white border border-[#E5DDCF] text-charcoal font-semibold text-xs flex items-center justify-center gap-2 hover:border-charcoal shadow-sm transition-all"
+                      className="px-5 py-3 rounded-xl bg-[#F7F2EB] border border-[#E3DACD] text-charcoal font-semibold text-xs flex items-center justify-center gap-2 hover:border-charcoal shadow-sm transition-all"
                     >
                       <span>Default Email Client</span>
                       <ArrowUpRight className="w-3.5 h-3.5 text-charcoal-muted" />
@@ -380,7 +380,7 @@ export const ContactSection: React.FC = () => {
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         placeholder="e.g. Alex Morgan"
-                        className="w-full px-4 py-2.5 rounded-xl border border-[#E5DDCF] bg-ecru-50 text-xs text-charcoal focus:outline-none focus:ring-2 focus:ring-amber/50 font-sans"
+                        className="w-full px-4 py-2.5 rounded-xl border border-[#E3DACD] bg-[#F7F2EB] text-xs text-charcoal focus:outline-none focus:ring-2 focus:ring-amber/50 font-sans"
                       />
                     </div>
 
@@ -394,7 +394,7 @@ export const ContactSection: React.FC = () => {
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         placeholder="alex@company.com"
-                        className="w-full px-4 py-2.5 rounded-xl border border-[#E5DDCF] bg-ecru-50 text-xs text-charcoal focus:outline-none focus:ring-2 focus:ring-amber/50 font-sans"
+                        className="w-full px-4 py-2.5 rounded-xl border border-[#E3DACD] bg-[#F7F2EB] text-xs text-charcoal focus:outline-none focus:ring-2 focus:ring-amber/50 font-sans"
                       />
                     </div>
                   </div>
@@ -409,7 +409,7 @@ export const ContactSection: React.FC = () => {
                       value={formData.inquiryType}
                       onChange={(e) => setFormData({ ...formData, inquiryType: e.target.value })}
                       placeholder="e.g. Multi-Agent Systems, Custom RAG, Vision AI, Full-Stack AI, or your project idea..."
-                      className="w-full px-4 py-2.5 rounded-xl border border-[#E5DDCF] bg-ecru-50 text-xs text-charcoal focus:outline-none focus:ring-2 focus:ring-amber/50 font-sans"
+                      className="w-full px-4 py-2.5 rounded-xl border border-[#E3DACD] bg-[#F7F2EB] text-xs text-charcoal focus:outline-none focus:ring-2 focus:ring-amber/50 font-sans"
                     />
                     <datalist id="domain-suggestions">
                       <option value="Multi-Agent Systems & Verification" />
@@ -435,7 +435,7 @@ export const ContactSection: React.FC = () => {
                       value={formData.message}
                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                       placeholder="Share details regarding your technical challenge, platform, or project scope..."
-                      className="w-full px-4 py-2.5 rounded-xl border border-[#E5DDCF] bg-ecru-50 text-xs text-charcoal focus:outline-none focus:ring-2 focus:ring-amber/50 font-sans resize-none"
+                      className="w-full px-4 py-2.5 rounded-xl border border-[#E3DACD] bg-[#F7F2EB] text-xs text-charcoal focus:outline-none focus:ring-2 focus:ring-amber/50 font-sans resize-none"
                     />
                   </div>
 

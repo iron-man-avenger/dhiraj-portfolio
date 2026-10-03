@@ -50,7 +50,7 @@ export const ProjectsSection: React.FC = () => {
           </div>
 
           {/* Minimalist Filter Tabs */}
-          <div className="flex flex-wrap gap-1 p-1 bg-white/70 rounded-2xl md:rounded-full border border-[#E3DACD] self-start md:self-auto shadow-sm">
+          <div className="flex flex-wrap gap-1 p-1 bg-[#F7F2EB] rounded-2xl md:rounded-full border border-[#E3DACD] self-start md:self-auto shadow-sm">
             {categories.map((cat) => (
               <button
                 key={cat}
@@ -79,7 +79,7 @@ export const ProjectsSection: React.FC = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: idx * 0.05 }}
-              className="p-7 sm:p-8 rounded-3xl bg-white/90 border border-[#E3DACD] hover:border-amber/50 hover:shadow-lg transition-all duration-300 flex flex-col justify-between group"
+              className="p-7 sm:p-8 rounded-3xl bg-[#F7F2EB] border border-[#E3DACD] hover:border-amber/50 hover:shadow-lg transition-all duration-300 flex flex-col justify-between group"
             >
               <div>
                 {/* Meta Top Line with Primary Amber Category Pill */}
@@ -106,7 +106,7 @@ export const ProjectsSection: React.FC = () => {
                 </p>
 
                 {/* Architectural Differentiator Highlight Box (Instant Scannability) */}
-                <div className="p-3.5 rounded-2xl bg-[#FAF7F2] border border-[#E3DACD]/80 mb-5">
+                <div className="p-3.5 rounded-2xl bg-[#F7F2EB] border border-[#E3DACD]/80 mb-5">
                   <div className="text-[10px] font-mono uppercase tracking-wider text-charcoal-muted font-bold mb-1 flex items-center gap-1.5">
                     <Sparkles className="w-3 h-3 text-amber" />
                     <span>Architectural Differentiator</span>
@@ -119,7 +119,7 @@ export const ProjectsSection: React.FC = () => {
                 {/* Clean Metrics Grid with Highlighted Metric Values */}
                 <div className="pt-3 border-t border-[#EAE2D5] grid grid-cols-2 gap-2 text-xs font-mono mb-5">
                   {project.metrics.slice(0, 4).map((m, mIdx) => (
-                    <div key={mIdx} className="p-2 rounded-xl bg-white border border-[#E5DDCF]/70">
+                    <div key={mIdx} className="p-2 rounded-xl bg-[#F7F2EB] border border-[#E5DDCF]/70">
                       <span className="text-[10px] text-charcoal-muted block truncate">{m.label}</span>
                       <strong className="text-xs font-bold text-charcoal group-hover:text-amber-dark transition-colors truncate block">
                         {m.value}
@@ -153,12 +153,12 @@ export const ProjectsSection: React.FC = () => {
               initial={{ opacity: 0, scale: 0.96, y: 15 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.96, y: 15 }}
-              className="relative w-full max-w-4xl bg-[#FAF8F5] rounded-3xl border border-[#E3DACD] shadow-2xl p-6 sm:p-10 max-h-[90vh] overflow-y-auto my-auto"
+              className="relative w-full max-w-4xl bg-[#F7F2EB] rounded-3xl border border-[#E3DACD] shadow-2xl p-6 sm:p-10 max-h-[90vh] overflow-y-auto my-auto"
             >
               {/* Close Button */}
               <button
                 onClick={handleCloseModal}
-                className="absolute top-6 right-6 p-2 rounded-full border border-[#E5DDCF] bg-white text-charcoal-muted hover:text-charcoal hover:bg-ecru-100 transition-colors"
+                className="absolute top-6 right-6 p-2 rounded-full border border-[#E5DDCF] bg-[#F7F2EB] text-charcoal-muted hover:text-charcoal hover:bg-ecru-200 transition-colors"
                 aria-label="Close"
               >
                 <X className="w-5 h-5" />
@@ -221,7 +221,7 @@ export const ProjectsSection: React.FC = () => {
                   </h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {activeModalProject.keyLessons.map((lesson, idx) => (
-                      <div key={idx} className="p-4 rounded-2xl bg-white/80 border border-[#E5DDCF]">
+                      <div key={idx} className="p-4 rounded-2xl bg-[#F7F2EB] border border-[#E5DDCF]">
                         <span className="text-xs font-bold text-charcoal font-sans block mb-1">
                           {lesson.concept}
                         </span>
@@ -240,7 +240,7 @@ export const ProjectsSection: React.FC = () => {
                 {activeModalProject.techStack.map((tech, idx) => (
                   <span 
                     key={idx}
-                    className="text-xs font-mono text-charcoal px-2.5 py-1 rounded-md bg-white border border-[#E5DDCF]"
+                    className="text-xs font-mono text-charcoal px-2.5 py-1 rounded-md bg-[#F7F2EB] border border-[#E5DDCF]"
                   >
                     {tech}
                   </span>

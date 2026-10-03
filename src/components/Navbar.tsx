@@ -31,7 +31,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenArcade, soundMuted, onTogg
   return (
     <header className="fixed top-3 sm:top-4 left-0 right-0 z-50 flex justify-center px-3 sm:px-6 pointer-events-none">
       <div className="w-full max-w-7xl pointer-events-auto">
-        <nav className="bg-white/95 backdrop-blur-md rounded-2xl px-3.5 sm:px-6 md:px-7 py-2 sm:py-2.5 md:py-3 flex items-center justify-between border border-[#E3DACD] shadow-sm transition-all duration-300">
+        <nav className="bg-[#F7F2EB]/95 backdrop-blur-md rounded-2xl px-3.5 sm:px-6 md:px-7 py-2 sm:py-2.5 md:py-3 flex items-center justify-between border border-[#E3DACD] shadow-sm transition-all duration-300">
           
           {/* Left: Brand Logo + Name (Direct, No Box) */}
           <a 
@@ -80,7 +80,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenArcade, soundMuted, onTogg
               }}
               className={`w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-xl border transition-all duration-200 flex items-center justify-center shrink-0 ${
                 soundMuted 
-                  ? 'border-[#E3DACD] bg-white text-charcoal-muted hover:text-[#2B302C] hover:border-[#2B302C]' 
+                  ? 'border-[#E3DACD] bg-[#F7F2EB] text-charcoal-muted hover:text-[#2B302C] hover:border-[#2B302C]' 
                   : 'border-[#2B302C] bg-[#2B302C]/5 text-[#2B302C]'
               }`}
               title={soundMuted ? "Unmute Interstellar Soundtrack" : "Mute Audio FX"}
@@ -132,7 +132,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenArcade, soundMuted, onTogg
         {/* Mobile Menu Drawer */}
         {mobileMenuOpen && (
           <div className="md:hidden mt-2">
-            <div className="bg-white/95 backdrop-blur-xl rounded-2xl p-5 border border-[#E3DACD] shadow-elevated flex flex-col gap-2">
+            <div className="bg-[#F7F2EB]/98 backdrop-blur-xl rounded-2xl p-5 border border-[#E3DACD] shadow-elevated flex flex-col gap-2">
               {navLinks.map((link) => (
                 <a
                   key={link.label}

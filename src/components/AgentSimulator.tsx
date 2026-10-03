@@ -330,7 +330,7 @@ export const AgentSimulator: React.FC = () => {
   };
 
   return (
-    <section id="simulator" className="py-20 md:py-24 bg-[#FAF7F2] border-t border-[#E3DACD]/60 relative z-0">
+    <section id="simulator" className="py-20 md:py-24 bg-[#F7F2EB] border-t border-[#E3DACD]/60 relative z-0">
       <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 relative z-10">
         
         {/* Section Header */}
@@ -349,7 +349,7 @@ export const AgentSimulator: React.FC = () => {
           </div>
 
           {/* Scenario Selector Pills */}
-          <div className="inline-flex items-center gap-1 p-1.5 bg-white/90 rounded-2xl border border-[#E3DACD] shadow-sm max-w-full overflow-x-auto self-start md:self-auto">
+          <div className="inline-flex items-center gap-1 p-1.5 bg-[#F7F2EB] rounded-2xl border border-[#E3DACD] shadow-sm max-w-full overflow-x-auto self-start md:self-auto">
             {scenarios.map((s) => {
               const isSelected = selectedScenario.id === s.id;
               return (
@@ -370,7 +370,7 @@ export const AgentSimulator: React.FC = () => {
         </div>
 
         {/* Main Simulator Card (Warm Glassmorphism & High-Visual Architecture) */}
-        <div className="rounded-3xl bg-white/90 border border-[#E3DACD] shadow-sm p-6 sm:p-8 backdrop-blur-md transition-all duration-300">
+        <div className="rounded-3xl bg-[#F7F2EB] border border-[#E3DACD] shadow-sm p-6 sm:p-8 backdrop-blur-md transition-all duration-300">
           
           {/* Top Bar: Input Query & Primary Action */}
           <div className="flex flex-col md:flex-row md:items-center justify-between pb-6 mb-8 border-b border-[#E3DACD]/80 gap-5">
@@ -420,7 +420,7 @@ export const AgentSimulator: React.FC = () => {
                   setIsRunning(false);
                   setCompleted(false);
                 }}
-                className="p-2.5 rounded-full border border-[#E3DACD] bg-white text-charcoal-muted hover:text-charcoal hover:border-charcoal transition-colors"
+                className="p-2.5 rounded-full border border-[#E3DACD] bg-[#F7F2EB] text-charcoal-muted hover:text-charcoal hover:border-charcoal transition-colors"
                 title="Reset Pipeline"
                 aria-label="Reset"
               >
@@ -428,7 +428,7 @@ export const AgentSimulator: React.FC = () => {
               </button>
 
               {/* View Mode Toggle Button */}
-              <div className="hidden sm:inline-flex items-center p-0.5 bg-[#FAF7F2] rounded-full border border-[#E3DACD] text-[11px] font-mono ml-1">
+              <div className="hidden sm:inline-flex items-center p-0.5 bg-[#F7F2EB] rounded-full border border-[#E3DACD] text-[11px] font-mono ml-1">
                 <button
                   onClick={() => {
                     sounds.playPillSelect();
@@ -436,7 +436,7 @@ export const AgentSimulator: React.FC = () => {
                   }}
                   className={`px-3 py-1 rounded-full transition-all font-semibold ${
                     viewMode === 'visual'
-                      ? 'bg-white text-charcoal shadow-2xs font-bold'
+                      ? 'bg-[#F7F2EB] text-charcoal shadow-2xs font-bold border border-[#E3DACD]'
                       : 'text-charcoal-muted hover:text-charcoal'
                   }`}
                 >
@@ -449,7 +449,7 @@ export const AgentSimulator: React.FC = () => {
                   }}
                   className={`px-3 py-1 rounded-full transition-all font-semibold ${
                     viewMode === 'telemetry'
-                      ? 'bg-white text-charcoal shadow-2xs font-bold'
+                      ? 'bg-[#F7F2EB] text-charcoal shadow-2xs font-bold border border-[#E3DACD]'
                       : 'text-charcoal-muted hover:text-charcoal'
                   }`}
                 >
@@ -481,7 +481,7 @@ export const AgentSimulator: React.FC = () => {
                           ? 'border-amber bg-amber/[0.08] shadow-md ring-2 ring-amber/20 scale-[1.02]'
                           : isPast
                           ? 'border-emerald-500/30 bg-emerald-50/40 shadow-2xs'
-                          : 'border-[#E3DACD]/70 bg-white/60 opacity-60'
+                          : 'border-[#E3DACD]/70 bg-[#F7F2EB] opacity-60'
                       }`}
                     >
                       {/* Node Header: Step Number & Live Status Badge */}
@@ -546,7 +546,7 @@ export const AgentSimulator: React.FC = () => {
                     initial={{ opacity: 0, scale: 0.98, y: 10 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.98 }}
-                    className="p-6 sm:p-7 rounded-2xl bg-gradient-to-br from-emerald-500/[0.06] via-white to-amber/[0.06] border-2 border-emerald-500/30 shadow-sm"
+                    className="p-6 sm:p-7 rounded-2xl bg-gradient-to-br from-emerald-500/[0.06] via-[#F7F2EB] to-amber/[0.06] border-2 border-emerald-500/30 shadow-sm"
                   >
                     {/* Header Stamp */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-emerald-500/15 gap-2 mb-4">
@@ -571,7 +571,7 @@ export const AgentSimulator: React.FC = () => {
                     {/* KPI Metric Chips */}
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                       {selectedScenario.finalOutput.stats.map((stat, sIdx) => (
-                        <div key={sIdx} className="p-3 rounded-xl bg-white/90 border border-[#E3DACD] shadow-2xs">
+                        <div key={sIdx} className="p-3 rounded-xl bg-[#F7F2EB] border border-[#E3DACD] shadow-2xs">
                           <span className="text-[10px] font-mono uppercase tracking-wider text-charcoal-muted block mb-0.5">
                             {stat.label}
                           </span>
@@ -583,7 +583,7 @@ export const AgentSimulator: React.FC = () => {
                     </div>
                   </motion.div>
                 ) : (
-                  <div className="p-4 rounded-xl bg-[#FAF7F2] border border-dashed border-[#E3DACD] text-center text-xs font-mono text-charcoal-muted flex items-center justify-center gap-2">
+                  <div className="p-4 rounded-xl bg-[#F7F2EB] border border-dashed border-[#E3DACD] text-center text-xs font-mono text-charcoal-muted flex items-center justify-center gap-2">
                     <Activity className="w-4 h-4 text-amber" />
                     <span>{isRunning ? 'Validating pipeline stages...' : 'Press "Run Pipeline" to visualize data flow and verification proof.'}</span>
                   </div>
