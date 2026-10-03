@@ -232,7 +232,7 @@ export const projects: Project[] = [
     id: "pharma-ocr",
     title: "PharmaAI: Agreement OCR to Multi-Currency Invoice Engine",
     subtitle: "Enterprise Contract Extraction & Multi-Currency Export Billing Engine",
-    company: "Pharmazone / PIYTECH Solutions",
+    company: "atQor",
     period: "Oct 2025 – Present",
     category: "Document AI",
     summary: "Production document automation engine that ingests signed pharmaceutical Master Service Agreements (MSAs), Statements of Work (SOWs), Quotations, and Purchase Orders to extract commercial terms, milestone schedules, and CRO scopes, automatically generating compliant GST/LUT multi-currency export invoices.",
