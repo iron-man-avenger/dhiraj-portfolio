@@ -1,6 +1,8 @@
-// Logical playfield size; the canvas is scaled to fit and to the screen's pixel density
+// Logical playfield width; the canvas is scaled to fit and to the screen's pixel density.
+// The height follows the screen (taller in full screen on a phone), never below H.
 export const W = 520;
 export const H = 460;
+const MAX_H = 1100;
 
 export type EntityKind = 'token' | 'mcp' | 'bug' | 'hallucination';
 
@@ -85,7 +87,6 @@ const FIRE_COOLDOWN = 0.2;
 const SHIELD_TIME = 6;
 const LAYER_SECONDS = 25;
 const PLAYER_SIZE = 50;
-const PLAYER_Y = H - 52;
 /** Distance of each wing gun from the jet's centre line */
 const GUN_OFFSET = 13;
 
@@ -105,11 +106,22 @@ export class Engine {
   private flash = 0;
   private hitStop = 0;
   private clock = 0;
+  /** Playfield height in logical units */
+  height = H;
   /** Seconds survived this run; layers advance on time, not score, so combos can't skip them */
   private elapsed = 0;
 
   private freshStats(): Stats {
     return { score: 0, lives: 3, shield: 0, combo: 0, bestCombo: 0, tokens: 0, zapped: 0, layer: 1 };
+  }
+
+  /** Match the playfield to the screen's shape: width stays W, height grows with a taller screen. */
+  resize(width: number, heightPx: number) {
+    this.height = Math.round(Math.max(H, Math.min(MAX_H, (W * heightPx) / Math.max(width, 1))));
+  }
+
+  private get playerY() {
+    return this.height - 52;
   }
 
   reset() {
@@ -165,7 +177,7 @@ export class Engine {
     if (input.fire && p.cooldown === 0) {
       p.cooldown = FIRE_COOLDOWN;
       p.gun = -p.gun;
-      this.shots.push({ x: p.x + p.gun * GUN_OFFSET, y: PLAYER_Y - 6, trail: [] });
+      this.shots.push({ x: p.x + p.gun * GUN_OFFSET, y: this.playerY - 6, trail: [] });
       events.push({ type: 'fire' });
     }
 
@@ -220,7 +232,7 @@ export class Engine {
         continue;
       }
 
-      const touching = Math.abs(e.x - p.x) < (e.size + PLAYER_SIZE) / 2 - 8 && Math.abs(e.y - PLAYER_Y) < (e.size + PLAYER_SIZE) / 2 - 10;
+      const touching = Math.abs(e.x - p.x) < (e.size + PLAYER_SIZE) / 2 - 8 && Math.abs(e.y - this.playerY) < (e.size + PLAYER_SIZE) / 2 - 10;
       if (touching) {
         this.entities.splice(i, 1);
         if (e.kind === 'token') {
@@ -243,7 +255,7 @@ export class Engine {
           s.lives -= 1;
           s.combo = 0;
           p.invulnerable = 1.4;
-          this.burst(p.x, PLAYER_Y, COLORS.danger, 26);
+          this.burst(p.x, this.playerY, COLORS.danger, 26);
           this.shake = 12;
           this.flash = 1;
           this.hitStop = 0.09;
@@ -256,7 +268,7 @@ export class Engine {
         continue;
       }
 
-      if (e.y > H + 40) {
+      if (e.y > this.height + 40) {
         this.entities.splice(i, 1);
         // Letting good data through breaks the streak
         if (e.kind === 'token') s.combo = 0;
@@ -319,9 +331,9 @@ export class Engine {
 
     // Data-stream backdrop: a dot grid drifting down, faster on deeper layers
     ctx.fillStyle = COLORS.bg;
-    ctx.fillRect(-20, -20, W + 40, H + 40);
+    ctx.fillRect(-20, -20, W + 40, this.height + 40);
     ctx.fillStyle = COLORS.grid;
-    for (let y = -32 + this.scroll; y < H + 32; y += 32) {
+    for (let y = -32 + this.scroll; y < this.height + 32; y += 32) {
       for (let x = 16; x < W; x += 32) ctx.fillRect(x - 1, y - 1, 2, 2);
     }
 
@@ -366,11 +378,12 @@ export class Engine {
 
     // Damage: a danger-coloured vignette that fades out
     if (this.flash > 0 && !calm) {
-      const g = ctx.createRadialGradient(W / 2, H / 2, H * 0.3, W / 2, H / 2, H * 0.8);
+      const h = this.height;
+      const g = ctx.createRadialGradient(W / 2, h / 2, h * 0.3, W / 2, h / 2, h * 0.8);
       g.addColorStop(0, 'rgba(194, 87, 62, 0)');
       g.addColorStop(1, `rgba(194, 87, 62, ${0.45 * this.flash})`);
       ctx.fillStyle = g;
-      ctx.fillRect(0, 0, W, H);
+      ctx.fillRect(0, 0, W, this.height);
     }
   }
 
@@ -382,7 +395,7 @@ export class Engine {
     if (p.invulnerable > 0 && Math.floor(p.invulnerable * 12) % 2 === 0) return;
 
     ctx.save();
-    ctx.translate(p.x, PLAYER_Y);
+    ctx.translate(p.x, this.playerY);
     ctx.rotate(Math.max(-0.35, Math.min(0.35, p.vx * 0.0007)));
 
     if (s.shield > 0) {

@@ -129,7 +129,12 @@ Built from the primitives in `src/components/motion/`. Reach for these before wr
   - The score bumps on every change, and lives are amber balls that drop away when lost.
   - Layer banners rise through a mask with a drawn amber rule.
   - The final score counts up, and "NEW BEST" pops in with amber and ecru confetti.
-- **Physics** use real time (dt, capped at 33ms), so the game plays the same at 60Hz and 120Hz. The canvas renders at device pixel ratio (up to 2×) inside a fixed 26:23 frame, so nothing stretches.
+- **Full screen:**
+  - Phones open the arcade full screen (100dvh, with safe-area padding), with collapse and close buttons at the top right.
+  - Larger screens open windowed, with an expand button. The switch animates as a layout morph (0.5s, `expo.inOut`).
+  - In full screen the playfield keeps its 520-unit width and grows taller with the screen, up to 520×1100. That gives more reaction room on a tall phone, and it never stretches.
+  - The page behind can't scroll while the arcade is open.
+- **Physics** use real time (dt, capped at 33ms), so the game plays the same at 60Hz and 120Hz. The canvas renders at device pixel ratio (up to 2×), and its size always follows the box's layout size, so nothing stretches.
 - **Reduced motion:** no camera shake or damage flash. Everything else still plays, because the game needs it.
 - **Controls:**
   - Keyboard: arrows or A/D, Space to fire, P to pause, Esc to close, Enter to start.

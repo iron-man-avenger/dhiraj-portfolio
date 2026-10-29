@@ -1,12 +1,14 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import { X, Play, RotateCcw, Pause, Trophy } from 'lucide-react';
+import { X, Play, RotateCcw, Pause, Trophy, Maximize2, Minimize2 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { sounds } from '../utils/soundEffects';
 import { DhirajLogo } from './DhirajLogo';
 import { CountUpText, MaskedWords } from './motion/primitives';
 import { BACK_OUT, EXPO_IN_OUT, EXPO_OUT } from './motion/tokens';
 import { COLORS, Engine, H, W, drawEntity } from './arcade/engine';
+
+const MAX_FIELD_H = 1100;
 import type { EntityKind, Input, Stats } from './arcade/engine';
 
 interface ArcadeGameProps {
@@ -58,7 +60,10 @@ export const ArcadeGame: React.FC<ArcadeGameProps> = ({ isOpen, onClose }) => (
 const ArcadePanel: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const reduce = useReducedMotion();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const screenRef = useRef<HTMLDivElement | null>(null);
   const [engine] = useState(() => new Engine());
+  // Phones open straight into full screen; larger screens open windowed with an expand button
+  const [expanded, setExpanded] = useState(() => window.matchMedia('(max-width: 639px)').matches);
   const inputRef = useRef<Input>({ left: false, right: false, targetX: null, fire: false });
   const phaseRef = useRef<Phase>('ready');
 
@@ -89,6 +94,39 @@ const ArcadePanel: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     sounds.playTap();
     onClose();
   }, [onClose]);
+
+  const toggleExpanded = () => {
+    sounds.playTap();
+    setExpanded((v) => !v);
+  };
+
+  // The page behind stays put while the arcade is open
+  useEffect(() => {
+    const root = document.documentElement;
+    const prev = root.style.overflow;
+    root.style.overflow = 'hidden';
+    return () => {
+      root.style.overflow = prev;
+    };
+  }, []);
+
+  // Size the canvas to the screen box: width stays W, the playfield grows taller in a tall full screen
+  useEffect(() => {
+    const screen = screenRef.current;
+    const canvas = canvasRef.current;
+    if (!screen || !canvas) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const fit = () => {
+      // Layout size, not getBoundingClientRect: the expand animation scales the box mid-flight
+      engine.resize(screen.clientWidth, screen.clientHeight);
+      canvas.width = W * dpr;
+      canvas.height = engine.height * dpr;
+    };
+    fit();
+    const observer = new ResizeObserver(fit);
+    observer.observe(screen);
+    return () => observer.disconnect();
+  }, [engine]);
 
   // 3-2-1 before play
   useEffect(() => {
@@ -150,9 +188,6 @@ const ArcadePanel: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     if (!canvas || !ctx) return;
 
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width = W * dpr;
-    canvas.height = H * dpr;
-
     let frame = 0;
     let last = performance.now();
     let lastHud = '';
@@ -248,22 +283,28 @@ const ArcadePanel: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0, transition: { duration: 0.3, delay: 0.1 } }}
           onClick={(e) => e.target === e.currentTarget && close()}
-          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-charcoal/70 backdrop-blur-md"
+          className={`fixed inset-0 z-50 flex items-center justify-center bg-charcoal/70 backdrop-blur-md ${expanded ? 'p-0' : 'p-3 sm:p-6'}`}
         >
           <motion.div
+            layout
             initial={{ opacity: 0, y: 40, scale: 0.94 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 30, scale: 0.96 }}
-            transition={{ duration: 0.6, ease: EXPO_IN_OUT }}
-            className="relative w-full max-w-[600px] max-h-[96vh] overflow-y-auto bg-[#F7F2EB] rounded-3xl border border-[#E3DACD] shadow-2xl p-4 sm:p-6"
+            transition={{ duration: 0.6, ease: EXPO_IN_OUT, layout: { duration: 0.5, ease: EXPO_IN_OUT } }}
+            style={{ borderRadius: expanded ? 0 : 24 }}
+            className={`relative w-full bg-[#F7F2EB] shadow-2xl ${
+              expanded
+                ? 'h-[100dvh] flex flex-col p-3 sm:p-5 pb-[max(0.75rem,env(safe-area-inset-bottom))]'
+                : 'max-w-[600px] max-h-[96vh] overflow-y-auto border border-[#E3DACD] p-4 sm:p-6'
+            }`}
           >
             {/* Header */}
-            <div className="flex items-center justify-between gap-3 pb-4 mb-4 border-b border-[#E3DACD]">
+            <motion.div layout="position" className={`flex items-center justify-between gap-3 border-b border-[#E3DACD] shrink-0 ${expanded ? 'pb-3 mb-3' : 'pb-4 mb-4'}`}>
               <div className="flex items-center gap-3 min-w-0">
                 <DhirajLogo variant="light" className="w-9 h-9 shrink-0" />
                 <div className="min-w-0">
                   <h3 className="font-extrabold text-base sm:text-lg text-charcoal tracking-tight leading-tight truncate">Agentic Token Defender</h3>
-                  <p className="text-[11px] font-mono text-charcoal-muted truncate">Keep the pipeline clean. Catch data, zap bugs.</p>
+                  <p className={`text-[11px] font-mono text-charcoal-muted truncate ${expanded ? 'hidden sm:block' : ''}`}>Keep the pipeline clean. Catch data, zap bugs.</p>
                 </div>
               </div>
               <div className="flex items-center gap-2 shrink-0">
@@ -272,6 +313,14 @@ const ArcadePanel: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   <span>BEST {highScore.toLocaleString()}</span>
                 </div>
                 <button
+                  onClick={toggleExpanded}
+                  className="p-2 rounded-full border border-[#E3DACD] text-charcoal-muted hover:text-charcoal hover:border-charcoal transition-colors"
+                  aria-label={expanded ? 'Exit full screen' : 'Full screen'}
+                  title={expanded ? 'Exit full screen' : 'Full screen'}
+                >
+                  {expanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+                </button>
+                <button
                   onClick={close}
                   className="p-2 rounded-full border border-[#E3DACD] text-charcoal-muted hover:text-charcoal hover:border-charcoal transition-colors"
                   aria-label="Close game"
@@ -279,10 +328,22 @@ const ArcadePanel: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   <X className="w-4 h-4" />
                 </button>
               </div>
-            </div>
+            </motion.div>
 
-            {/* The screen */}
-            <div className="relative w-full aspect-[26/23] rounded-2xl overflow-hidden bg-[#1C201D] border border-charcoal-border select-none touch-none">
+            {/* The screen. Full screen: as large as fits, never wider than 520:460 or taller than 520:1100 */}
+            <div className={expanded ? 'flex-1 min-h-0 flex items-center justify-center [container-type:size]' : ''}>
+            <div
+              ref={screenRef}
+              style={
+                expanded
+                  ? {
+                      width: `min(100cqw, calc(100cqh * ${W} / ${H}))`,
+                      height: `min(100cqh, calc(min(100cqw, 100cqh * ${W} / ${H}) * ${MAX_FIELD_H} / ${W}))`,
+                    }
+                  : undefined
+              }
+              className={`relative rounded-2xl overflow-hidden bg-[#1C201D] border border-charcoal-border select-none touch-none ${expanded ? '' : 'w-full aspect-[26/23]'}`}
+            >
               <canvas
                 ref={canvasRef}
                 onPointerMove={onPointerMove}
@@ -531,10 +592,11 @@ const ArcadePanel: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 )}
               </AnimatePresence>
             </div>
+            </div>
 
             {/* Touch controls while playing */}
             {phase === 'playing' && (
-              <div className="mt-3 flex items-center gap-2 sm:hidden">
+              <div className="mt-3 flex items-center gap-2 sm:hidden shrink-0">
                 <TouchKey label="◀" ariaLabel="Move left" {...hold('left')} />
                 <TouchKey label="▶" ariaLabel="Move right" {...hold('right')} />
                 <button
