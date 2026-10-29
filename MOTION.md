@@ -111,7 +111,7 @@ Built from the primitives in `src/components/motion/`. Reach for these before wr
 `src/components/ArcadeGame.tsx` is the interface. `src/components/arcade/engine.ts` holds the rules and canvas drawing.
 
 - **Palette:** the site's colours, plus one exception. The danger colour `#C2573E` is allowed **only inside the arcade**, for bugs, hallucinations, damage and "WASTED". Good things are ecru (data tokens) or amber (the MCP shield, shots, combos).
-- **The player is the logo.** It is drawn from the real logo geometry. Its ball is the ammunition: it launches as an amber shot and grows back in as the fire cooldown (0.2s) refills.
+- **The player is a jet**, drawn in code (`drawJet` in the engine): an original stealth VTOL jet in the spirit of a superhero team jet, not a copy of any film design. It has a broad blunt body with a wraparound amber windscreen, square-tipped swept wings with spinning lift fans, outward-canted twin tails and flickering amber afterburners. It banks (narrows) into turns. Its two wing guns fire amber shots in turn, every 0.2s, each with a muzzle flash.
 - **Game feel:**
   - Each shot leaves an amber trail.
   - Sparks burst with gravity.

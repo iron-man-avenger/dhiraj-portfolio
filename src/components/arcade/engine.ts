@@ -1,5 +1,3 @@
-import { LOGO_DARK } from '../../data/logoPaths';
-
 // Logical playfield size; the canvas is scaled to fit and to the screen's pixel density
 export const W = 520;
 export const H = 460;
@@ -88,21 +86,15 @@ const SHIELD_TIME = 6;
 const LAYER_SECONDS = 25;
 const PLAYER_SIZE = 50;
 const PLAYER_Y = H - 52;
+/** Distance of each wing gun from the jet's centre line */
+const GUN_OFFSET = 13;
 
-const parseMatrix = (m: string) => m.replace(/[^\d.,-]/g, '').split(',').map(Number) as [number, number, number, number, number, number];
-
-// The logo as canvas paths, so the player can be the brand mark itself
-const LOGO = (['pot', 'bat', 'ball'] as const).map((part) => ({
-  part,
-  path: new Path2D(LOGO_DARK[part].d),
-  matrix: parseMatrix(LOGO_DARK[part].transform),
-}));
 
 const rand = (min: number, max: number) => min + Math.random() * (max - min);
 
 export class Engine {
   stats: Stats = this.freshStats();
-  private player = { x: W / 2, vx: 0, invulnerable: 0, cooldown: 0 };
+  private player = { x: W / 2, vx: 0, invulnerable: 0, cooldown: 0, gun: 1 };
   private entities: Entity[] = [];
   private shots: Shot[] = [];
   private sparks: Spark[] = [];
@@ -122,7 +114,7 @@ export class Engine {
 
   reset() {
     this.stats = this.freshStats();
-    this.player = { x: W / 2, vx: 0, invulnerable: 0, cooldown: 0 };
+    this.player = { x: W / 2, vx: 0, invulnerable: 0, cooldown: 0, gun: 1 };
     this.entities = [];
     this.shots = [];
     this.sparks = [];
@@ -169,10 +161,11 @@ export class Engine {
     p.cooldown = Math.max(0, p.cooldown - dt);
     s.shield = Math.max(0, s.shield - dt);
 
-    // Fire: the logo's ball launches, and reappears as the cooldown refills
+    // Fire: the two wing guns take turns
     if (input.fire && p.cooldown === 0) {
       p.cooldown = FIRE_COOLDOWN;
-      this.shots.push({ x: p.x, y: PLAYER_Y - PLAYER_SIZE * 0.2, trail: [] });
+      p.gun = -p.gun;
+      this.shots.push({ x: p.x + p.gun * GUN_OFFSET, y: PLAYER_Y - 6, trail: [] });
       events.push({ type: 'fire' });
     }
 
@@ -411,30 +404,144 @@ export class Engine {
       ctx.stroke();
     }
 
-    const scale = PLAYER_SIZE / 750;
-    ctx.translate(-PLAYER_SIZE / 2, -PLAYER_SIZE / 2);
-    ctx.scale(scale, scale);
-    for (const { part, path, matrix } of LOGO) {
-      ctx.save();
-      ctx.transform(...matrix);
-      if (part === 'ball') {
-        // The ball is the ammunition: it refills as the cooldown runs out
-        const ready = 1 - p.cooldown / FIRE_COOLDOWN;
-        // The ball's centre in its own path units (logo centre 368, 382 run back through its matrix)
-        const cx = 24.65;
-        const cy = 16.97;
-        ctx.translate(cx, cy);
-        ctx.scale(ready, ready);
-        ctx.translate(-cx, -cy);
-        ctx.fillStyle = COLORS.amber;
-      } else {
-        ctx.fillStyle = COLORS.ecru;
-      }
-      ctx.fill(path);
-      ctx.restore();
-    }
+    // Bank into the turn: the jet narrows as it rolls
+    const bank = Math.max(-1, Math.min(1, p.vx / 500));
+    const muzzle = p.cooldown > FIRE_COOLDOWN * 0.6 ? p.gun : 0;
+    drawJet(ctx, bank, this.clock, muzzle);
     ctx.restore();
   }
+}
+
+/**
+ * The player: an original stealth jet in the spirit of a VTOL team jet.
+ * Top-down, nose up, about 60 units long: a broad blunt body with a wraparound windscreen,
+ * square-tipped swept wings with lift fans, big outward-canted twin tails and twin afterburners.
+ * bank: -1..1 roll; muzzle: which wing gun just fired (-1 left, 1 right, 0 none).
+ */
+export function drawJet(ctx: CanvasRenderingContext2D, bank: number, clock: number, muzzle: number) {
+  ctx.save();
+  ctx.scale(1 - Math.abs(bank) * 0.22, 1);
+
+  // Afterburners first, so the hull sits on top of them
+  for (const side of [-1, 1]) {
+    const flicker = 10 + Math.sin(clock * 38 + side) * 3 + Math.random() * 3;
+    const flame = ctx.createLinearGradient(0, 22, 0, 22 + flicker);
+    flame.addColorStop(0, 'rgba(242, 222, 190, 0.95)');
+    flame.addColorStop(0.35, 'rgba(212, 160, 102, 0.85)');
+    flame.addColorStop(1, 'rgba(212, 160, 102, 0)');
+    ctx.fillStyle = flame;
+    ctx.beginPath();
+    ctx.moveTo(side * 6 - 3.5, 22);
+    ctx.lineTo(side * 6 + 3.5, 22);
+    ctx.lineTo(side * 6, 22 + flicker);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // Hull: a broad, blunt-nosed body blended into swept, square-tipped wings
+  const hull = new Path2D();
+  hull.moveTo(-4, -31);
+  hull.lineTo(4, -31);
+  hull.lineTo(8, -24);
+  hull.lineTo(10, -10);
+  hull.lineTo(30, 7);
+  hull.lineTo(30, 14);
+  hull.lineTo(12, 14);
+  hull.lineTo(11, 22);
+  hull.lineTo(-11, 22);
+  hull.lineTo(-12, 14);
+  hull.lineTo(-30, 14);
+  hull.lineTo(-30, 7);
+  hull.lineTo(-10, -10);
+  hull.lineTo(-8, -24);
+  hull.closePath();
+
+  // Light from the top-left, shifting as the jet banks
+  const shade = ctx.createLinearGradient(-30 + bank * 12, -30, 30 + bank * 12, 30);
+  shade.addColorStop(0, '#6B726C');
+  shade.addColorStop(0.5, '#454B46');
+  shade.addColorStop(1, '#2A2E2A');
+  ctx.fillStyle = shade;
+  ctx.fill(hull);
+  ctx.strokeStyle = 'rgba(247, 242, 235, 0.35)';
+  ctx.lineWidth = 0.8;
+  ctx.stroke(hull);
+
+  // Panel lines: spine, wing roots and the wing-tip edges
+  ctx.strokeStyle = 'rgba(247, 242, 235, 0.16)';
+  ctx.beginPath();
+  ctx.moveTo(0, -8);
+  ctx.lineTo(0, 20);
+  for (const side of [-1, 1]) {
+    ctx.moveTo(side * 10, -6);
+    ctx.lineTo(side * 11, 14);
+    ctx.moveTo(side * 26, 8);
+    ctx.lineTo(side * 26, 14);
+  }
+  ctx.stroke();
+
+  // Lift fans set into each wing: dark discs with a spinning amber ring
+  for (const side of [-1, 1]) {
+    ctx.fillStyle = '#1C201D';
+    ctx.beginPath();
+    ctx.arc(side * 19, 8, 4.6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(212, 160, 102, 0.75)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([2, 1.6]);
+    ctx.lineDashOffset = clock * 30 * side;
+    ctx.beginPath();
+    ctx.arc(side * 19, 8, 3.4, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // Big twin tails, canted outward from the rear of the body
+  ctx.fillStyle = '#5C635D';
+  ctx.strokeStyle = 'rgba(247, 242, 235, 0.3)';
+  ctx.lineWidth = 0.7;
+  for (const side of [-1, 1]) {
+    ctx.beginPath();
+    ctx.moveTo(side * 7, 6);
+    ctx.lineTo(side * 21, 27);
+    ctx.lineTo(side * 16, 28);
+    ctx.lineTo(side * 6, 16);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+  }
+
+  // Engine nozzles
+  ctx.fillStyle = '#1C201D';
+  ctx.fillRect(-9.5, 19, 7, 4);
+  ctx.fillRect(2.5, 19, 7, 4);
+
+  // Wide wraparound windscreen across the blunt nose, glowing amber
+  const glass = ctx.createLinearGradient(0, -30, 0, -16);
+  glass.addColorStop(0, '#F2DEBE');
+  glass.addColorStop(0.5, '#D4A066');
+  glass.addColorStop(1, '#8A6234');
+  ctx.fillStyle = glass;
+  ctx.beginPath();
+  ctx.moveTo(-3.5, -29);
+  ctx.lineTo(3.5, -29);
+  ctx.lineTo(6.5, -22);
+  ctx.lineTo(5, -17);
+  ctx.lineTo(-5, -17);
+  ctx.lineTo(-6.5, -22);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+  ctx.fillRect(-3, -27.5, 2.2, 1.2);
+
+  // Wing gun ports, with a flash on the one that just fired
+  for (const side of [-1, 1]) {
+    ctx.fillStyle = muzzle === side ? '#F2DEBE' : '#D4A066';
+    ctx.beginPath();
+    ctx.arc(side * GUN_OFFSET, -4, muzzle === side ? 3.2 : 1.6, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
 }
 
 /** Draw one falling entity; shared with the legend on the start screen. */
