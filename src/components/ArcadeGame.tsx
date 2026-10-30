@@ -1,616 +1,658 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Play, RotateCcw, Trophy, Shield, Zap } from 'lucide-react';
-
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { X, Play, RotateCcw, Pause, Trophy, Maximize2, Minimize2 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { sounds } from '../utils/soundEffects';
+import { DhirajLogo } from './DhirajLogo';
+import { CountUpText, MaskedWords } from './motion/primitives';
+import { BACK_OUT, EXPO_IN_OUT, EXPO_OUT } from './motion/tokens';
+import { COLORS, Engine, H, W, drawEntity } from './arcade/engine';
+
+const MAX_FIELD_H = 1100;
+import type { EntityKind, Input, Stats } from './arcade/engine';
 
 interface ArcadeGameProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-interface GameObject {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  speed: number;
-  type: 'token' | 'mcp' | 'bug' | 'hallucination';
-  label: string;
-}
+type Phase = 'ready' | 'countdown' | 'playing' | 'paused' | 'gameover';
 
-interface Bullet {
-  x: number;
-  y: number;
-  radius: number;
-  speed: number;
-}
+const HIGH_SCORE_KEY = 'dk_arcade_high_score';
+const LAYER_NAMES = ['Ingestion', 'Grounding', 'Routing', 'Verification', 'Production'];
 
-interface Particle {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  color: string;
-  alpha: number;
-  life: number;
-}
+const readHighScore = () => {
+  try {
+    return parseInt(localStorage.getItem(HIGH_SCORE_KEY) ?? '0', 10) || 0;
+  } catch {
+    return 0;
+  }
+};
 
-export const ArcadeGame: React.FC<ArcadeGameProps> = ({ isOpen, onClose }) => {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  
-  const [gameState, setGameState] = useState<'ready' | 'playing' | 'gameover'>('ready');
-  const [score, setScore] = useState<number>(0);
-  const [highScore, setHighScore] = useState<number>(0);
-  const [lives, setLives] = useState<number>(3);
-  const [hasShield, setHasShield] = useState<boolean>(false);
+const LEGEND: { kind: EntityKind; name: string; note: string }[] = [
+  { kind: 'token', name: 'Data token', note: 'Catch · +100' },
+  { kind: 'mcp', name: 'MCP shield', note: 'Catch · 6s shield' },
+  { kind: 'bug', name: 'Bug', note: 'Zap · +150' },
+  { kind: 'hallucination', name: 'Hallucination', note: 'Zap · it drifts' },
+];
 
-  // References for the game loop
-  const playerRef = useRef({
-    x: 250,
-    y: 420,
-    width: 44,
-    height: 36,
-    speed: 7,
-    shieldUntil: 0
-  });
-
-  const keysRef = useRef<{ [key: string]: boolean }>({});
-  const objectsRef = useRef<GameObject[]>([]);
-  const bulletsRef = useRef<Bullet[]>([]);
-  const particlesRef = useRef<Particle[]>([]);
-  const animFrameIdRef = useRef<number | null>(null);
-  const lastSpawnRef = useRef<number>(0);
-
-  // Load high score
+/** A legend icon drawn by the same code that draws the game, so they always match. */
+const SpriteIcon: React.FC<{ kind: EntityKind }> = ({ kind }) => {
+  const ref = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
-    const saved = localStorage.getItem('dk_arcade_high_score');
-    if (saved) {
-      setHighScore(parseInt(saved, 10));
-    }
+    const canvas = ref.current;
+    const ctx = canvas?.getContext('2d');
+    if (!canvas || !ctx) return;
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = 56 * dpr;
+    canvas.height = 44 * dpr;
+    ctx.scale(dpr, dpr);
+    drawEntity(ctx, kind, 28, 22, kind === 'mcp' ? 28 : 32, 'SQL', 0, 0.3);
+  }, [kind]);
+  return <canvas ref={ref} className="w-11 h-9 sm:w-14 sm:h-11 shrink-0" aria-hidden="true" />;
+};
+
+/** Mounted only while open, so every visit starts from a fresh start screen. */
+export const ArcadeGame: React.FC<ArcadeGameProps> = ({ isOpen, onClose }) => (
+  <AnimatePresence>{isOpen && <ArcadePanel key="arcade" onClose={onClose} />}</AnimatePresence>
+);
+
+const ArcadePanel: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+  const reduce = useReducedMotion();
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const screenRef = useRef<HTMLDivElement | null>(null);
+  const [engine] = useState(() => new Engine());
+  // Phones open straight into full screen; larger screens open windowed with an expand button
+  const [expanded, setExpanded] = useState(() => window.matchMedia('(max-width: 639px)').matches);
+  const inputRef = useRef<Input>({ left: false, right: false, targetX: null, fire: false });
+  const phaseRef = useRef<Phase>('ready');
+
+  const [phase, setPhaseState] = useState<Phase>('ready');
+  const [hud, setHud] = useState<Stats | null>(null);
+  const [highScore, setHighScore] = useState(readHighScore);
+  const [newBest, setNewBest] = useState(false);
+  const [countdown, setCountdown] = useState(3);
+  const [banner, setBanner] = useState<number | null>(null);
+
+  const setPhase = useCallback((next: Phase) => {
+    phaseRef.current = next;
+    setPhaseState(next);
   }, []);
 
-  // Keyboard handlers
-  useEffect(() => {
-    if (!isOpen) return;
 
-    const handleKeyDown = (e: KeyboardEvent) => {
-      keysRef.current[e.key] = true;
-      if (e.key === ' ' || e.key === 'ArrowUp') {
-        e.preventDefault();
-        fireLaser();
-      }
-      if (e.key === 'Escape') {
-        onClose();
-      }
-    };
-
-    const handleKeyUp = (e: KeyboardEvent) => {
-      keysRef.current[e.key] = false;
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
-    };
-  }, [isOpen, gameState]);
-
-  // Touch and mouse steering
-  const handleCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (gameState !== 'playing' || !canvasRef.current) return;
-    const rect = canvasRef.current.getBoundingClientRect();
-    const clientX = e.clientX - rect.left;
-    const scaleX = canvasRef.current.width / rect.width;
-    playerRef.current.x = Math.max(20, Math.min(canvasRef.current.width - 64, clientX * scaleX - 22));
-  };
-
-  const handleCanvasTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
-    if (gameState !== 'playing' || !canvasRef.current || e.touches.length === 0) return;
-    const rect = canvasRef.current.getBoundingClientRect();
-    const clientX = e.touches[0].clientX - rect.left;
-    const scaleX = canvasRef.current.width / rect.width;
-    playerRef.current.x = Math.max(20, Math.min(canvasRef.current.width - 64, clientX * scaleX - 22));
-  };
-
-  const fireLaser = () => {
-    if (gameState !== 'playing') return;
-    sounds.playLaser();
-    const p = playerRef.current;
-    bulletsRef.current.push({
-      x: p.x + p.width / 2,
-      y: p.y - 4,
-      radius: 4,
-      speed: 10
-    });
-  };
-
-  const startGame = () => {
+  const startGame = useCallback(() => {
     sounds.playTap();
-    setScore(0);
-    setLives(3);
-    setHasShield(false);
-    objectsRef.current = [];
-    bulletsRef.current = [];
-    particlesRef.current = [];
-    playerRef.current.x = 260;
-    playerRef.current.shieldUntil = 0;
-    setGameState('playing');
+    engine.reset();
+    setHud({ ...engine.stats });
+    setNewBest(false);
+    setBanner(null);
+    setCountdown(3);
+    setPhase('countdown');
+  }, [engine, setPhase]);
+
+  const close = useCallback(() => {
+    sounds.playTap();
+    onClose();
+  }, [onClose]);
+
+  const toggleExpanded = () => {
+    sounds.playTap();
+    setExpanded((v) => !v);
   };
 
-  // Main game loop
+  // The page behind stays put while the arcade is open
   useEffect(() => {
-    if (gameState !== 'playing' || !canvasRef.current) return;
-
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    let localScore = score;
-    let localLives = 3;
-
-    const gameLoop = (timestamp: number) => {
-      // 1. Clear background (Warm ecru / dark arcade canvas)
-      ctx.fillStyle = '#1E2320';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // Draw faint cyber grid
-      ctx.strokeStyle = 'rgba(212, 160, 102, 0.08)';
-      ctx.lineWidth = 1;
-      for (let x = 0; x < canvas.width; x += 30) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, canvas.height);
-        ctx.stroke();
-      }
-      for (let y = 0; y < canvas.height; y += 30) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvas.width, y);
-        ctx.stroke();
-      }
-
-      // 2. Move player with keys
-      const p = playerRef.current;
-      if (keysRef.current['ArrowLeft'] || keysRef.current['a'] || keysRef.current['A']) {
-        p.x = Math.max(10, p.x - p.speed);
-      }
-      if (keysRef.current['ArrowRight'] || keysRef.current['d'] || keysRef.current['D']) {
-        p.x = Math.min(canvas.width - p.width - 10, p.x + p.speed);
-      }
-
-      const isShieldActive = timestamp < p.shieldUntil;
-      setHasShield(isShieldActive);
-
-      // Draw Player Drone
-      ctx.save();
-      // Shield glow
-      if (isShieldActive) {
-        ctx.strokeStyle = '#D4A066';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.arc(p.x + p.width / 2, p.y + p.height / 2, 32, 0, Math.PI * 2);
-        ctx.stroke();
-      }
-
-      // Drone Body (Charcoal & Amber highlight)
-      ctx.fillStyle = '#D4A066';
-      ctx.beginPath();
-      ctx.moveTo(p.x + p.width / 2, p.y);
-      ctx.lineTo(p.x + p.width, p.y + p.height);
-      ctx.lineTo(p.x + p.width * 0.7, p.y + p.height * 0.75);
-      ctx.lineTo(p.x + p.width * 0.3, p.y + p.height * 0.75);
-      ctx.lineTo(p.x, p.y + p.height);
-      ctx.closePath();
-      ctx.fill();
-
-      // Drone cockpit
-      ctx.fillStyle = '#F7F2EB';
-      ctx.beginPath();
-      ctx.arc(p.x + p.width / 2, p.y + p.height * 0.45, 5, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-
-      // 3. Spawn falling entities
-      if (timestamp - lastSpawnRef.current > 750) {
-        lastSpawnRef.current = timestamp;
-        const rand = Math.random();
-        let type: GameObject['type'] = 'bug';
-        let label = 'Taxonomy Drift';
-
-        if (rand < 0.45) {
-          type = 'token';
-          label = 'Valid Embedding';
-        } else if (rand < 0.60) {
-          type = 'mcp';
-          label = 'MCP Token';
-        } else if (rand < 0.85) {
-          type = 'bug';
-          label = 'Taxonomy Drift';
-        } else {
-          type = 'hallucination';
-          label = 'Hallucination';
-        }
-
-        objectsRef.current.push({
-          x: Math.random() * (canvas.width - 80) + 20,
-          y: -25,
-          width: 38,
-          height: 30,
-          speed: 2.2 + Math.random() * 2,
-          type,
-          label
-        });
-      }
-
-      // 4. Update & Draw Bullets
-      for (let i = bulletsRef.current.length - 1; i >= 0; i--) {
-        const b = bulletsRef.current[i];
-        b.y -= b.speed;
-
-        ctx.fillStyle = '#E2B37F';
-        ctx.shadowColor = '#D4A066';
-        ctx.shadowBlur = 8;
-        ctx.beginPath();
-        ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.shadowBlur = 0;
-
-        if (b.y < -10) {
-          bulletsRef.current.splice(i, 1);
-        }
-      }
-
-      // 5. Update & Draw Objects (Tokens & Bugs)
-      for (let i = objectsRef.current.length - 1; i >= 0; i--) {
-        const obj = objectsRef.current[i];
-        obj.y += obj.speed;
-
-        // Draw Object
-        ctx.save();
-        if (obj.type === 'token') {
-          ctx.fillStyle = '#4ade80'; // Emerald Green
-          ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
-          ctx.fillStyle = '#1E2320';
-          ctx.font = 'bold 9px monospace';
-          ctx.fillText('EMBED', obj.x + 3, obj.y + 18);
-        } else if (obj.type === 'mcp') {
-          ctx.fillStyle = '#D4A066'; // Amber Gold
-          ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
-          ctx.fillStyle = '#1E2320';
-          ctx.font = 'bold 9px monospace';
-          ctx.fillText('MCP★', obj.x + 6, obj.y + 18);
-        } else {
-          ctx.fillStyle = '#f87171'; // Red Bug
-          ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
-          ctx.fillStyle = '#ffffff';
-          ctx.font = 'bold 8px monospace';
-          ctx.fillText('BUG!', obj.x + 7, obj.y + 18);
-        }
-        ctx.restore();
-
-        // Bullet vs Object collision
-        for (let j = bulletsRef.current.length - 1; j >= 0; j--) {
-          const b = bulletsRef.current[j];
-          if (
-            b.x > obj.x &&
-            b.x < obj.x + obj.width &&
-            b.y > obj.y &&
-            b.y < obj.y + obj.height
-          ) {
-            // Explode object
-            sounds.playExplosion();
-            spawnParticles(obj.x + obj.width / 2, obj.y + obj.height / 2, obj.type === 'bug' ? '#f87171' : '#D4A066');
-            
-            if (obj.type === 'bug' || obj.type === 'hallucination') {
-              localScore += 150;
-              setScore(localScore);
-            }
-            objectsRef.current.splice(i, 1);
-            bulletsRef.current.splice(j, 1);
-            break;
-          }
-        }
-
-        // Player vs Object collision
-        if (
-          obj.x < p.x + p.width &&
-          obj.x + obj.width > p.x &&
-          obj.y < p.y + p.height &&
-          obj.y + obj.height > p.y
-        ) {
-          if (obj.type === 'token') {
-            sounds.playTokenCollect();
-            localScore += 100;
-            setScore(localScore);
-            spawnParticles(obj.x + obj.width / 2, obj.y + obj.height / 2, '#4ade80');
-          } else if (obj.type === 'mcp') {
-            sounds.playSuccess();
-            localScore += 250;
-            setScore(localScore);
-            p.shieldUntil = timestamp + 6000; // 6 seconds shield
-            spawnParticles(obj.x + obj.width / 2, obj.y + obj.height / 2, '#D4A066');
-          } else {
-            // Hit a bug!
-            if (!isShieldActive) {
-              sounds.playExplosion();
-              localLives -= 1;
-              setLives(localLives);
-              spawnParticles(p.x + p.width / 2, p.y + p.height / 2, '#f87171');
-              if (localLives <= 0) {
-                endGame(localScore);
-                return;
-              }
-            } else {
-              sounds.playLaser();
-              localScore += 50;
-              setScore(localScore);
-            }
-          }
-          objectsRef.current.splice(i, 1);
-          continue;
-        }
-
-        // Out of bounds
-        if (obj.y > canvas.height + 30) {
-          objectsRef.current.splice(i, 1);
-        }
-      }
-
-      // 6. Update & Draw Particles
-      for (let i = particlesRef.current.length - 1; i >= 0; i--) {
-        const pt = particlesRef.current[i];
-        pt.x += pt.vx;
-        pt.y += pt.vy;
-        pt.alpha -= 0.03;
-
-        ctx.fillStyle = pt.color;
-        ctx.globalAlpha = Math.max(0, pt.alpha);
-        ctx.beginPath();
-        ctx.arc(pt.x, pt.y, 3, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.globalAlpha = 1.0;
-
-        if (pt.alpha <= 0) {
-          particlesRef.current.splice(i, 1);
-        }
-      }
-
-      animFrameIdRef.current = requestAnimationFrame(gameLoop);
-    };
-
-    const spawnParticles = (x: number, y: number, color: string) => {
-      for (let i = 0; i < 14; i++) {
-        const angle = Math.random() * Math.PI * 2;
-        const speed = Math.random() * 4 + 1;
-        particlesRef.current.push({
-          x,
-          y,
-          vx: Math.cos(angle) * speed,
-          vy: Math.sin(angle) * speed,
-          color,
-          alpha: 1.0,
-          life: 30
-        });
-      }
-    };
-
-    const endGame = (finalScore: number) => {
-      setGameState('gameover');
-      sounds.playExplosion();
-      if (finalScore > highScore) {
-        setHighScore(finalScore);
-        localStorage.setItem('dk_arcade_high_score', String(finalScore));
-        try {
-          confetti({
-            particleCount: 80,
-            spread: 70,
-            origin: { y: 0.6 }
-          });
-        } catch {}
-      }
-    };
-
-    animFrameIdRef.current = requestAnimationFrame(gameLoop);
-
+    const root = document.documentElement;
+    const prev = root.style.overflow;
+    root.style.overflow = 'hidden';
     return () => {
-      if (animFrameIdRef.current) {
-        cancelAnimationFrame(animFrameIdRef.current);
-      }
+      root.style.overflow = prev;
     };
-  }, [gameState, highScore]);
+  }, []);
 
-  if (!isOpen) return null;
+  // Size the canvas to the screen box: width stays W, the playfield grows taller in a tall full screen
+  useEffect(() => {
+    const screen = screenRef.current;
+    const canvas = canvasRef.current;
+    if (!screen || !canvas) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const fit = () => {
+      // Layout size, not getBoundingClientRect: the expand animation scales the box mid-flight
+      engine.resize(screen.clientWidth, screen.clientHeight);
+      canvas.width = W * dpr;
+      canvas.height = engine.height * dpr;
+    };
+    fit();
+    const observer = new ResizeObserver(fit);
+    observer.observe(screen);
+    return () => observer.disconnect();
+  }, [engine]);
+
+  // 3-2-1 before play
+  useEffect(() => {
+    if (phase !== 'countdown') return;
+    if (countdown === 0) {
+      const go = setTimeout(() => setPhase('playing'), 450);
+      return () => clearTimeout(go);
+    }
+    const tick = setTimeout(() => {
+      sounds.playTap();
+      setCountdown((c) => c - 1);
+    }, 650);
+    return () => clearTimeout(tick);
+  }, [phase, countdown, setPhase]);
+
+  // Layer banner hides itself
+  useEffect(() => {
+    if (banner === null) return;
+    const hide = setTimeout(() => setBanner(null), 1600);
+    return () => clearTimeout(hide);
+  }, [banner]);
+
+  // Keyboard
+  useEffect(() => {
+    const key = (down: boolean) => (e: KeyboardEvent) => {
+      const k = e.key.toLowerCase();
+      if (k === 'arrowleft' || k === 'a') inputRef.current.left = down;
+      if (k === 'arrowright' || k === 'd') inputRef.current.right = down;
+      if (k === ' ' || k === 'arrowup' || k === 'w') {
+        e.preventDefault();
+        inputRef.current.fire = down;
+      }
+      if (!down) return;
+      if (k === 'escape') close();
+      if (k === 'p') {
+        if (phaseRef.current === 'playing') setPhase('paused');
+        else if (phaseRef.current === 'paused') setPhase('playing');
+      }
+      if (k === 'enter' && (phaseRef.current === 'ready' || phaseRef.current === 'gameover')) startGame();
+    };
+    const onDown = key(true);
+    const onUp = key(false);
+    // Leaving the tab pauses the run
+    const onHide = () => document.hidden && phaseRef.current === 'playing' && setPhase('paused');
+    window.addEventListener('keydown', onDown);
+    window.addEventListener('keyup', onUp);
+    document.addEventListener('visibilitychange', onHide);
+    return () => {
+      window.removeEventListener('keydown', onDown);
+      window.removeEventListener('keyup', onUp);
+      document.removeEventListener('visibilitychange', onHide);
+    };
+  }, [close, startGame, setPhase]);
+
+  // One loop for as long as the arcade is open: the world simulates while playing, and keeps drifting otherwise
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext('2d');
+    if (!canvas || !ctx) return;
+
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    let frame = 0;
+    let last = performance.now();
+    let lastHud = '';
+
+    const loop = (now: number) => {
+      const dt = Math.min(0.033, (now - last) / 1000);
+      last = now;
+
+      if (phaseRef.current === 'playing') {
+        const events = engine.update(dt, inputRef.current);
+        for (const event of events) {
+          if (event.type === 'fire') sounds.playLaser();
+          if (event.type === 'collect') sounds.playTokenCollect();
+          if (event.type === 'shield') sounds.playSuccess();
+          if (event.type === 'zap' || event.type === 'hit') sounds.playExplosion();
+          if (event.type === 'layer') setBanner(event.layer);
+          if (event.type === 'gameover') {
+            const final = engine.stats.score;
+            const best = readHighScore();
+            if (final > best) {
+              setHighScore(final);
+              setNewBest(true);
+              try {
+                localStorage.setItem(HIGH_SCORE_KEY, String(final));
+              } catch { /* storage blocked */ }
+              sounds.playTesseractVictory();
+              try {
+                confetti({ particleCount: 90, spread: 75, origin: { y: 0.55 }, colors: [COLORS.amber, COLORS.ecru, COLORS.amberLight] });
+              } catch { /* no canvas */ }
+            }
+            setPhase('gameover');
+          }
+        }
+      } else {
+        engine.ambient(dt);
+      }
+
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      engine.draw(ctx, !!reduce);
+
+      // Only touch React state when the HUD actually changes
+      const s = engine.stats;
+      const key = `${s.score}|${s.lives}|${Math.ceil(s.shield * 10)}|${s.combo}|${s.layer}`;
+      if (key !== lastHud) {
+        lastHud = key;
+        setHud({ ...s });
+      }
+      frame = requestAnimationFrame(loop);
+    };
+    frame = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(frame);
+  }, [engine, setPhase, reduce]);
+
+  // Pointer steering: drag or hover moves; holding down on touch also fires
+  const toField = (clientX: number) => {
+    const rect = canvasRef.current!.getBoundingClientRect();
+    return ((clientX - rect.left) / rect.width) * W;
+  };
+  const onPointerMove = (e: React.PointerEvent) => {
+    if (phaseRef.current !== 'playing') return;
+    inputRef.current.targetX = toField(e.clientX);
+  };
+  const onPointerDown = (e: React.PointerEvent) => {
+    if (phaseRef.current !== 'playing') return;
+    inputRef.current.targetX = toField(e.clientX);
+    inputRef.current.fire = true;
+  };
+  const onPointerUp = (e: React.PointerEvent) => {
+    inputRef.current.fire = false;
+    if (e.pointerType !== 'mouse') inputRef.current.targetX = null;
+  };
+  const onPointerLeave = () => {
+    inputRef.current.targetX = null;
+    inputRef.current.fire = false;
+  };
+
+  const hold = (field: 'left' | 'right' | 'fire') => ({
+    onPointerDown: (e: React.PointerEvent) => {
+      e.preventDefault();
+      inputRef.current.targetX = null;
+      inputRef.current[field] = true;
+    },
+    onPointerUp: () => (inputRef.current[field] = false),
+    onPointerLeave: () => (inputRef.current[field] = false),
+  });
+
+  const multiplier = hud ? Math.min(4, 1 + Math.floor(hud.combo / 8)) : 1;
+  const showHud = phase === 'playing' || phase === 'paused' || phase === 'countdown';
 
   return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-charcoal/80 backdrop-blur-md">
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.9 }}
-          className="relative w-full max-w-xl bg-charcoal-deep rounded-3xl border border-charcoal-border shadow-2xl p-6 text-white flex flex-col items-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0, transition: { duration: 0.3, delay: 0.1 } }}
+          onClick={(e) => e.target === e.currentTarget && close()}
+          className={`fixed inset-0 z-50 flex items-center justify-center bg-charcoal/70 backdrop-blur-md ${expanded ? 'p-0' : 'p-3 sm:p-6'}`}
         >
-          {/* Modal Header */}
-          <div className="w-full flex items-center justify-between pb-4 border-b border-charcoal-border mb-4">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-amber text-charcoal-deep flex items-center justify-center font-bold">
-                <Zap className="w-4 h-4 fill-charcoal-deep" />
-              </div>
-              <div>
-                <h3 className="font-bold text-sm font-sans tracking-wide">
-                  Agentic Token Defender
-                </h3>
-                <p className="text-[11px] font-mono text-charcoal-faded">
-                  Dhiraj's AI Pipeline Arcade Mini-Game
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-1.5 text-xs font-mono text-amber">
-                <Trophy className="w-4 h-4" />
-                <span>BEST: {highScore}</span>
-              </div>
-              <button
-                onClick={() => {
-                  sounds.playTap();
-                  onClose();
-                }}
-                className="p-1.5 rounded-lg border border-charcoal-border text-charcoal-faded hover:text-white hover:bg-charcoal"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-
-          {/* Canvas Box */}
-          <div className="relative rounded-2xl overflow-hidden border border-charcoal-border bg-[#1E2320] w-full flex justify-center">
-            
-            {/* Top HUD Overlay */}
-            {gameState === 'playing' && (
-              <div className="absolute top-3 left-4 right-4 flex items-center justify-between font-mono text-xs z-10 pointer-events-none">
-                <div className="flex items-center gap-3">
-                  <span className="text-white font-bold">SCORE: <span className="text-amber">{score}</span></span>
-                  {hasShield && (
-                    <span className="px-2 py-0.5 rounded bg-amber/20 text-amber font-bold flex items-center gap-1">
-                      <Shield className="w-3 h-3" /> MCP SHIELD
-                    </span>
-                  )}
-                </div>
-                <div className="flex gap-1">
-                  {[...Array(3)].map((_, i) => (
-                    <span
-                      key={i}
-                      className={`text-sm ${i < lives ? 'text-red-400' : 'text-charcoal-border'}`}
-                    >
-                      ♥
-                    </span>
-                  ))}
+          <motion.div
+            layout
+            initial={{ opacity: 0, y: 40, scale: 0.94 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 30, scale: 0.96 }}
+            transition={{ duration: 0.6, ease: EXPO_IN_OUT, layout: { duration: 0.5, ease: EXPO_IN_OUT } }}
+            style={{ borderRadius: expanded ? 0 : 24 }}
+            className={`relative w-full bg-[#F7F2EB] shadow-2xl ${
+              expanded
+                ? 'h-[100dvh] flex flex-col p-3 sm:p-5 pb-[max(0.75rem,env(safe-area-inset-bottom))]'
+                : 'max-w-[600px] max-h-[96vh] overflow-y-auto border border-[#E3DACD] p-4 sm:p-6'
+            }`}
+          >
+            {/* Header */}
+            <motion.div layout="position" className={`flex items-center justify-between gap-3 border-b border-[#E3DACD] shrink-0 ${expanded ? 'pb-3 mb-3' : 'pb-4 mb-4'}`}>
+              <div className="flex items-center gap-3 min-w-0">
+                <DhirajLogo variant="light" className="w-9 h-9 shrink-0" />
+                <div className="min-w-0">
+                  <h3 className="font-extrabold text-base sm:text-lg text-charcoal tracking-tight leading-tight truncate">Agentic Token Defender</h3>
+                  <p className={`text-[11px] font-mono text-charcoal-muted truncate ${expanded ? 'hidden sm:block' : ''}`}>Keep the pipeline clean. Catch data, zap bugs.</p>
                 </div>
               </div>
-            )}
-
-            <canvas
-              ref={canvasRef}
-              width={520}
-              height={460}
-              onMouseMove={handleCanvasMouseMove}
-              onTouchMove={handleCanvasTouchMove}
-              onClick={fireLaser}
-              className="cursor-crosshair w-full max-w-[520px] h-[400px] sm:h-[440px] block"
-            />
-
-            {/* Ready Screen Overlay */}
-            {gameState === 'ready' && (
-              <div className="absolute inset-0 bg-charcoal/90 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center">
-                <div className="w-12 h-12 rounded-2xl bg-amber/20 border border-amber/40 text-amber flex items-center justify-center mb-3">
-                  <Zap className="w-6 h-6 fill-amber" />
+              <div className="flex items-center gap-2 shrink-0">
+                <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber/15 border border-amber/30 text-[11px] font-mono font-bold text-charcoal">
+                  <Trophy className="w-3.5 h-3.5 text-amber-dark" />
+                  <span>BEST {highScore.toLocaleString()}</span>
                 </div>
-                <h4 className="text-xl sm:text-2xl font-extrabold text-white mb-2">
-                  Agentic Token Defender
-                </h4>
-                <p className="text-xs text-charcoal-faded max-w-sm mb-6 leading-relaxed">
-                  Steer your agent drone to collect green <strong className="text-emerald-400">Verified Tokens</strong> (+100) and golden <strong className="text-amber">Shields</strong> (+250). Zap or dodge red <strong className="text-red-400">Bug Obstacles</strong>!
-                </p>
-
-                <div className="flex flex-wrap justify-center gap-2 sm:gap-4 text-[11px] font-mono text-charcoal-faded mb-6 bg-charcoal/70 px-4 py-2.5 rounded-xl border border-charcoal-border">
-                  <span className="hidden sm:inline">Desktop: ← / → Move • Spacebar Fire</span>
-                  <span>Mobile: Touch & Drag to Move • Tap to Fire</span>
-                </div>
-
                 <button
-                  onClick={startGame}
-                  className="px-7 py-3 rounded-xl bg-amber text-charcoal-deep font-bold text-xs sm:text-sm flex items-center gap-2 hover:bg-amber-light transition-all active:scale-95 shadow-glow-amber"
+                  onClick={toggleExpanded}
+                  className="p-2 rounded-full border border-[#E3DACD] text-charcoal-muted hover:text-charcoal hover:border-charcoal transition-colors"
+                  aria-label={expanded ? 'Exit full screen' : 'Full screen'}
+                  title={expanded ? 'Exit full screen' : 'Full screen'}
                 >
-                  <Play className="w-4 h-4 fill-charcoal-deep" />
-                  <span>Start Game</span>
+                  {expanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+                </button>
+                <button
+                  onClick={close}
+                  className="p-2 rounded-full border border-[#E3DACD] text-charcoal-muted hover:text-charcoal hover:border-charcoal transition-colors"
+                  aria-label="Close game"
+                >
+                  <X className="w-4 h-4" />
                 </button>
               </div>
-            )}
+            </motion.div>
 
-            {/* Game Over Overlay */}
-            {gameState === 'gameover' && (
-              <div className="absolute inset-0 bg-charcoal/90 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center">
-                <div className="text-3xl mb-1">💥</div>
-                <h4 className="text-xl font-extrabold text-white mb-1">
-                  Pipeline Complete!
-                </h4>
-                <p className="text-xs text-charcoal-faded mb-4">
-                  Bug detected in verification layer. Great run!
-                </p>
+            {/* The screen. Full screen: as large as fits, never wider than 520:460 or taller than 520:1100 */}
+            <div className={expanded ? 'flex-1 min-h-0 flex items-center justify-center [container-type:size]' : ''}>
+            <div
+              ref={screenRef}
+              style={
+                expanded
+                  ? {
+                      width: `min(100cqw, calc(100cqh * ${W} / ${H}))`,
+                      height: `min(100cqh, calc(min(100cqw, 100cqh * ${W} / ${H}) * ${MAX_FIELD_H} / ${W}))`,
+                    }
+                  : undefined
+              }
+              className={`relative rounded-2xl overflow-hidden bg-[#1C201D] border border-charcoal-border select-none touch-none ${expanded ? '' : 'w-full aspect-[26/23]'}`}
+            >
+              <canvas
+                ref={canvasRef}
+                onPointerMove={onPointerMove}
+                onPointerDown={onPointerDown}
+                onPointerUp={onPointerUp}
+                onPointerLeave={onPointerLeave}
+                className="absolute inset-0 w-full h-full cursor-crosshair"
+              />
 
-                <div className="p-4 rounded-xl bg-charcoal border border-charcoal-border mb-6 w-52">
-                  <span className="text-[10px] font-mono text-charcoal-faded block">FINAL SCORE</span>
-                  <span className="text-2xl font-bold font-mono text-amber">{score}</span>
-                </div>
-
-                <div className="flex gap-3">
-                  <button
-                    onClick={startGame}
-                    className="px-5 py-2.5 rounded-xl bg-amber text-charcoal-deep font-bold text-xs flex items-center gap-2 hover:bg-amber-light active:scale-95"
+              {/* HUD */}
+              <AnimatePresence>
+                {showHud && hud && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.4, ease: EXPO_OUT }}
+                    className="absolute top-0 inset-x-0 p-3 sm:p-4 flex items-start justify-between pointer-events-none font-mono"
                   >
-                    <RotateCcw className="w-4 h-4" />
-                    <span>Play Again</span>
-                  </button>
-                  <button
-                    onClick={onClose}
-                    className="px-4 py-2.5 rounded-xl border border-charcoal-border text-white text-xs hover:bg-charcoal active:scale-95"
+                    <div>
+                      <span className="block text-[10px] tracking-widest text-[#F7F2EB]/50">SCORE</span>
+                      <motion.span
+                        key={hud.score}
+                        initial={{ scale: 1.25 }}
+                        animate={{ scale: 1 }}
+                        transition={{ duration: 0.3, ease: BACK_OUT }}
+                        className="block origin-left text-lg sm:text-xl font-bold text-[#F7F2EB] tabular-nums"
+                      >
+                        {hud.score.toLocaleString()}
+                      </motion.span>
+                      <AnimatePresence>
+                        {multiplier > 1 && (
+                          <motion.span
+                            key={multiplier}
+                            initial={{ scale: 0, rotate: -12 }}
+                            animate={{ scale: 1, rotate: 0 }}
+                            exit={{ scale: 0, opacity: 0 }}
+                            transition={{ duration: 0.4, ease: BACK_OUT }}
+                            className="inline-block mt-1 px-2 py-0.5 rounded-full bg-amber text-charcoal-deep text-[11px] font-extrabold"
+                          >
+                            COMBO ×{multiplier}
+                          </motion.span>
+                        )}
+                      </AnimatePresence>
+                    </div>
+
+                    <div className="flex flex-col items-end gap-1.5">
+                      <span className="text-[10px] tracking-widest text-[#F7F2EB]/50">
+                        LAYER {String(hud.layer).padStart(2, '0')}
+                      </span>
+                      {/* Lives are amber balls; a lost one drops away */}
+                      <div className="flex gap-1.5" aria-label={`${hud.lives} lives`}>
+                        {[0, 1, 2].map((i) => (
+                          <motion.span
+                            key={i}
+                            animate={i < hud.lives ? { scale: 1, opacity: 1, y: 0 } : { scale: 0.5, opacity: 0.25, y: 4 }}
+                            transition={{ duration: 0.45, ease: BACK_OUT }}
+                            className="w-3 h-3 rounded-full bg-amber"
+                          />
+                        ))}
+                      </div>
+                      <AnimatePresence>
+                        {hud.shield > 0 && (
+                          <motion.div
+                            initial={{ opacity: 0, scaleX: 0 }}
+                            animate={{ opacity: 1, scaleX: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="origin-right flex items-center gap-1.5 text-[10px] font-bold text-amber"
+                          >
+                            <span>MCP SHIELD</span>
+                            <span className="w-14 h-1 rounded-full bg-[#F7F2EB]/15 overflow-hidden">
+                              <span className="block h-full bg-amber origin-left" style={{ transform: `scaleX(${hud.shield / 6})` }} />
+                            </span>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Pause button while playing */}
+              {phase === 'playing' && (
+                <button
+                  onClick={() => {
+                    sounds.playTap();
+                    setPhase('paused');
+                  }}
+                  className="absolute bottom-3 right-3 p-2 rounded-full bg-[#F7F2EB]/10 border border-[#F7F2EB]/15 text-[#F7F2EB]/70 hover:text-[#F7F2EB] transition-colors"
+                  aria-label="Pause"
+                >
+                  <Pause className="w-3.5 h-3.5" />
+                </button>
+              )}
+
+              {/* Layer banner */}
+              <AnimatePresence>
+                {banner !== null && (
+                  <motion.div
+                    key={banner}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0, transition: { duration: 0.3 } }}
+                    className="absolute inset-x-0 top-[38%] flex flex-col items-center pointer-events-none"
                   >
-                    Close
-                  </button>
-                </div>
+                    <div className="overflow-hidden">
+                      <motion.p
+                        initial={{ y: '104%' }}
+                        animate={{ y: '0%' }}
+                        transition={{ duration: 0.8, ease: EXPO_OUT }}
+                        className="font-mono text-[11px] tracking-[0.3em] text-amber"
+                      >
+                        LAYER {String(banner).padStart(2, '0')}
+                      </motion.p>
+                    </div>
+                    <div className="overflow-hidden">
+                      <motion.p
+                        initial={{ y: '104%' }}
+                        animate={{ y: '0%' }}
+                        transition={{ duration: 0.8, ease: EXPO_OUT, delay: 0.08 }}
+                        className="text-2xl sm:text-3xl font-extrabold text-[#F7F2EB] tracking-tight"
+                      >
+                        {LAYER_NAMES[Math.min(banner, LAYER_NAMES.length) - 1]}
+                      </motion.p>
+                    </div>
+                    <motion.span
+                      initial={{ scaleX: 0 }}
+                      animate={{ scaleX: 1 }}
+                      transition={{ duration: 0.9, ease: EXPO_IN_OUT, delay: 0.15 }}
+                      className="mt-2 w-24 h-px bg-amber/70"
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Countdown */}
+              <AnimatePresence mode="wait">
+                {phase === 'countdown' && (
+                  <motion.div
+                    key={countdown}
+                    initial={{ scale: 1.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.6, opacity: 0, transition: { duration: 0.2 } }}
+                    transition={{ duration: 0.45, ease: BACK_OUT }}
+                    className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                  >
+                    <span className={`font-extrabold tracking-tight ${countdown === 0 ? 'text-amber text-5xl sm:text-6xl' : 'text-[#F7F2EB] text-6xl sm:text-7xl'}`}>
+                      {countdown === 0 ? 'GO' : countdown}
+                    </span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Start, pause and game-over screens */}
+              <AnimatePresence mode="wait">
+                {phase === 'ready' && (
+                  <Overlay key="ready">
+                    <p className="hidden sm:block font-mono text-[10px] tracking-[0.3em] text-amber mb-2">MINI-GAME</p>
+                    <MaskedWords as="h4" text="Defend the pipeline" className="text-xl sm:text-3xl font-extrabold text-[#F7F2EB] tracking-tight mb-3 sm:mb-4" />
+                    {/* Phones: a row of four icons; larger screens: a 2×2 legend with notes */}
+                    <div className="grid grid-cols-4 sm:grid-cols-2 gap-1.5 sm:gap-3 w-full max-w-sm mb-4 sm:mb-5">
+                      {LEGEND.map((item, i) => (
+                        <motion.div
+                          key={item.kind}
+                          initial={{ opacity: 0, y: 14 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.6, ease: EXPO_OUT, delay: 0.25 + i * 0.07 }}
+                          className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 p-1.5 sm:p-2 rounded-xl bg-[#F7F2EB]/[0.06] border border-[#F7F2EB]/10 text-center sm:text-left"
+                        >
+                          <SpriteIcon kind={item.kind} />
+                          <div className="min-w-0">
+                            <span className="block text-[10px] sm:text-xs font-bold text-[#F7F2EB] leading-tight">{item.name}</span>
+                            <span className="hidden sm:block text-[10px] font-mono text-[#F7F2EB]/55 truncate">{item.note}</span>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                    <PrimaryButton onClick={startGame} icon={<Play className="w-4 h-4 fill-charcoal-deep" />} label="Start game" />
+                    <p className="mt-3 sm:mt-4 text-[10px] font-mono text-[#F7F2EB]/45 leading-relaxed">
+                      <span className="hidden sm:inline">← → or A D to move · Space to fire · P to pause</span>
+                      <span className="sm:hidden">Drag to steer · hold to fire</span>
+                    </p>
+                  </Overlay>
+                )}
+
+                {phase === 'paused' && (
+                  <Overlay key="paused">
+                    <MaskedWords as="h4" text="Paused" className="text-3xl font-extrabold text-[#F7F2EB] tracking-tight mb-5" />
+                    <div className="flex gap-3">
+                      <PrimaryButton
+                        onClick={() => {
+                          sounds.playTap();
+                          setPhase('playing');
+                        }}
+                        icon={<Play className="w-4 h-4 fill-charcoal-deep" />}
+                        label="Resume"
+                      />
+                      <GhostButton onClick={startGame} label="Restart" />
+                    </div>
+                  </Overlay>
+                )}
+
+                {phase === 'gameover' && hud && (
+                  <Overlay key="gameover">
+                    <p className="font-mono text-[10px] tracking-[0.3em] text-amber mb-1 sm:mb-2">PIPELINE HALTED</p>
+                    <MaskedWords as="h4" text="Run complete" className="text-xl sm:text-3xl font-extrabold text-[#F7F2EB] tracking-tight mb-2 sm:mb-3" />
+                    <div className="relative mb-3 sm:mb-4">
+                      <CountUpText text={hud.score.toLocaleString('en-US')} className="block text-4xl sm:text-6xl font-extrabold text-amber tracking-tight tabular-nums" />
+                      <AnimatePresence>
+                        {newBest && (
+                          <motion.span
+                            initial={{ scale: 0, rotate: -20 }}
+                            animate={{ scale: 1, rotate: -6 }}
+                            transition={{ duration: 0.55, ease: BACK_OUT, delay: 1.2 }}
+                            className="absolute -top-3 -right-10 sm:-right-14 px-2 py-0.5 rounded-full bg-[#F7F2EB] text-charcoal-deep text-[10px] font-extrabold font-mono"
+                          >
+                            NEW BEST
+                          </motion.span>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                    <div className="grid grid-cols-4 gap-1.5 sm:gap-2 w-full max-w-sm mb-4 sm:mb-6">
+                      {[
+                        ['Tokens', hud.tokens],
+                        ['Bugs', hud.zapped],
+                        ['Combo', hud.bestCombo],
+                        ['Layer', hud.layer],
+                      ].map(([label, value], i) => (
+                        <motion.div
+                          key={label}
+                          initial={{ opacity: 0, y: 12 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.6, ease: EXPO_OUT, delay: 0.4 + i * 0.07 }}
+                          className="p-2 rounded-xl bg-[#F7F2EB]/[0.06] border border-[#F7F2EB]/10"
+                        >
+                          <span className="block text-[9px] font-mono tracking-wider text-[#F7F2EB]/50 uppercase">{label}</span>
+                          <span className="block text-sm font-bold font-mono text-[#F7F2EB]">{value}</span>
+                        </motion.div>
+                      ))}
+                    </div>
+                    <div className="flex gap-3">
+                      <PrimaryButton onClick={startGame} icon={<RotateCcw className="w-4 h-4" />} label="Play again" />
+                      <GhostButton onClick={close} label="Close" />
+                    </div>
+                  </Overlay>
+                )}
+              </AnimatePresence>
+            </div>
+            </div>
+
+            {/* Touch controls while playing */}
+            {phase === 'playing' && (
+              <div className="mt-3 flex items-center gap-2 sm:hidden shrink-0">
+                <TouchKey label="◀" ariaLabel="Move left" {...hold('left')} />
+                <TouchKey label="▶" ariaLabel="Move right" {...hold('right')} />
+                <button
+                  {...hold('fire')}
+                  className="flex-1 h-12 rounded-xl bg-amber text-charcoal-deep font-bold text-xs tracking-wider active:scale-95 transition-transform select-none touch-none"
+                >
+                  HOLD TO FIRE
+                </button>
               </div>
             )}
-          </div>
-
-          {/* Mobile Tactile Action Bar (Only visible when playing on mobile) */}
-          {gameState === 'playing' && (
-            <div className="w-full mt-3 flex items-center justify-between gap-2.5 sm:hidden">
-              <div className="flex gap-2">
-                <button
-                  onTouchStart={(e) => { e.preventDefault(); keysRef.current['ArrowLeft'] = true; }}
-                  onTouchEnd={(e) => { e.preventDefault(); keysRef.current['ArrowLeft'] = false; }}
-                  onMouseDown={() => { keysRef.current['ArrowLeft'] = true; }}
-                  onMouseUp={() => { keysRef.current['ArrowLeft'] = false; }}
-                  className="w-14 h-12 rounded-xl bg-white/10 active:bg-amber/30 border border-white/20 text-white font-bold flex items-center justify-center select-none text-base"
-                  aria-label="Move Left"
-                >
-                  ◀
-                </button>
-                <button
-                  onTouchStart={(e) => { e.preventDefault(); keysRef.current['ArrowRight'] = true; }}
-                  onTouchEnd={(e) => { e.preventDefault(); keysRef.current['ArrowRight'] = false; }}
-                  onMouseDown={() => { keysRef.current['ArrowRight'] = true; }}
-                  onMouseUp={() => { keysRef.current['ArrowRight'] = false; }}
-                  className="w-14 h-12 rounded-xl bg-white/10 active:bg-amber/30 border border-white/20 text-white font-bold flex items-center justify-center select-none text-base"
-                  aria-label="Move Right"
-                >
-                  ▶
-                </button>
-              </div>
-              <button
-                onClick={fireLaser}
-                onTouchStart={(e) => { e.preventDefault(); fireLaser(); }}
-                className="flex-1 h-12 rounded-xl bg-amber text-charcoal font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm active:scale-95 select-none"
-              >
-                <Zap className="w-4 h-4 fill-charcoal" />
-                <span>FIRE LASER</span>
-              </button>
-            </div>
-          )}
-
-          {/* Footer Controls Info */}
-          <div className="w-full mt-3 flex items-center justify-between text-[11px] font-mono text-charcoal-faded">
-            <span className="hidden sm:inline">Desktop: Arrow Keys + Spacebar</span>
-            <span>Mobile: Touch buttons or drag on screen to move</span>
-          </div>
-
+          </motion.div>
         </motion.div>
-      </div>
-    </AnimatePresence>
   );
 };
+
+const Overlay: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0, transition: { duration: 0.25 } }}
+    transition={{ duration: 0.35 }}
+    className="absolute inset-0 bg-[#1C201D]/80 backdrop-blur-[2px] flex flex-col items-center justify-center p-3 sm:p-5 text-center overflow-y-auto"
+  >
+    {children}
+  </motion.div>
+);
+
+const PrimaryButton: React.FC<{ onClick: () => void; icon: React.ReactNode; label: string }> = ({ onClick, icon, label }) => (
+  <motion.button
+    onClick={onClick}
+    whileHover={{ scale: 1.04 }}
+    whileTap={{ scale: 0.95 }}
+    className="px-6 py-3 rounded-full bg-amber text-charcoal-deep font-bold text-xs sm:text-sm flex items-center gap-2 shadow-glow-amber"
+  >
+    {icon}
+    <span>{label}</span>
+  </motion.button>
+);
+
+const GhostButton: React.FC<{ onClick: () => void; label: string }> = ({ onClick, label }) => (
+  <motion.button
+    onClick={onClick}
+    whileHover={{ scale: 1.04 }}
+    whileTap={{ scale: 0.95 }}
+    className="px-5 py-3 rounded-full border border-[#F7F2EB]/25 text-[#F7F2EB] font-semibold text-xs sm:text-sm hover:bg-[#F7F2EB]/10 transition-colors"
+  >
+    {label}
+  </motion.button>
+);
+
+const TouchKey: React.FC<{ label: string; ariaLabel: string } & React.ButtonHTMLAttributes<HTMLButtonElement>> = ({ label, ariaLabel, ...rest }) => (
+  <button
+    {...rest}
+    aria-label={ariaLabel}
+    className="w-14 h-12 rounded-xl bg-charcoal text-[#F7F2EB] font-bold active:bg-charcoal-deep active:scale-95 transition-transform select-none touch-none"
+  >
+    {label}
+  </button>
+);

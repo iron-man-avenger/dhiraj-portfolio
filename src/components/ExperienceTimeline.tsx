@@ -1,31 +1,50 @@
-import React from 'react';
+import React, { useRef } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { workExperience, awards, certifications } from '../data/portfolioData';
+import { MaskedWords, RiseText, SectionRule, Stagger } from './motion/primitives';
+import { EXPO_OUT, staggerItem } from './motion/tokens';
 
 export const ExperienceTimeline: React.FC = () => {
+  // The timeline line draws with the scroll; the amber ball rides its tip
+  const listRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: listRef, offset: ['start 75%', 'end 55%'] });
+  const ballTop = useTransform(scrollYProgress, (p) => `${p * 100}%`);
+
   return (
-    <section id="journey" className="pt-6 sm:pt-8 pb-16 sm:pb-20 bg-[#F7F2EB] border-t border-[#E3DACD]/60 relative">
+    <section id="journey" className="pt-6 sm:pt-8 pb-16 sm:pb-20 bg-[#F7F2EB] relative">
+      <SectionRule />
       <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
         
         {/* Header */}
         <div className="mb-8 sm:mb-10">
-          <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#2B302C] flex items-center gap-2 mb-2">
+          <RiseText className="mb-2" innerClassName="text-xs font-mono font-bold uppercase tracking-widest text-[#2B302C] flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-[#2B302C]" />
             <span>Career & Honors</span>
-          </span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-[#2B302C] tracking-tight font-sans">
-            Work Journey & Recognized Credentials
-          </h2>
-          <p className="text-sm sm:text-base text-charcoal-muted mt-2 max-w-xl font-normal leading-relaxed">
+          </RiseText>
+          <MaskedWords className="text-3xl sm:text-4xl font-extrabold text-[#2B302C] tracking-tight font-sans" text="Work Journey & Recognized Credentials" />
+          <RiseText delay={0.25} className="text-sm sm:text-base text-charcoal-muted mt-2 max-w-xl font-normal leading-relaxed">
             Leading engineering efforts from hospitality financial accounting engines to enterprise multilingual copilots.
-          </p>
+          </RiseText>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
           
           {/* Work Experience Timeline (8 cols): Clean & Typographic */}
-          <div className="lg:col-span-8 divide-y divide-[#E3DACD]/70 border-y border-[#E3DACD]/70">
+          <div ref={listRef} className="lg:col-span-8 relative pl-6 sm:pl-8">
+            <div aria-hidden="true" className="absolute left-0 top-0 bottom-0 w-px bg-[#E3DACD]">
+              <motion.div style={{ scaleY: scrollYProgress }} className="absolute inset-0 origin-top bg-charcoal/50" />
+              <motion.span style={{ top: ballTop }} className="absolute left-1/2 w-3 h-3 -ml-1.5 -mt-1.5 rounded-full bg-amber shadow-glow-amber" />
+            </div>
+            <div className="divide-y divide-[#E3DACD]/70 border-y border-[#E3DACD]/70">
             {workExperience.map((exp, idx) => (
-              <div key={idx} className="py-8 flex flex-col gap-3">
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 36 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '0px 0px -25% 0px' }}
+                transition={{ duration: 0.9, ease: EXPO_OUT }}
+                className="py-8 flex flex-col gap-3"
+              >
                 <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1">
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
@@ -71,8 +90,9 @@ export const ExperienceTimeline: React.FC = () => {
                     </span>
                   ))}
                 </div>
-              </div>
+              </motion.div>
             ))}
+            </div>
           </div>
 
           {/* Right Column: Honors, Certifications & Education (4 cols) */}
@@ -84,12 +104,13 @@ export const ExperienceTimeline: React.FC = () => {
                 <span className="w-1.5 h-1.5 rounded-full bg-[#2B302C]" />
                 <span>Recognitions</span>
               </span>
-              <div className="space-y-4">
+              <Stagger className="space-y-4">
                 {awards.map((award, idx) => {
                   const isTopAward = idx === 0;
                   return (
-                    <div 
+                    <motion.div 
                       key={idx} 
+                      variants={staggerItem}
                       className={`pb-3.5 border-b border-[#E3DACD]/70 transition-all ${
                         isTopAward 
                           ? 'p-5 rounded-2xl bg-[#2B302C] text-white border border-[#39403B] shadow-elevated' 
@@ -116,10 +137,10 @@ export const ExperienceTimeline: React.FC = () => {
                       }`}>
                         {award.description}
                       </p>
-                    </div>
+                    </motion.div>
                   );
                 })}
-              </div>
+              </Stagger>
             </div>
 
             {/* Certifications */}
@@ -128,16 +149,16 @@ export const ExperienceTimeline: React.FC = () => {
                 <span className="w-1.5 h-1.5 rounded-full bg-[#2B302C]" />
                 <span>Certifications</span>
               </span>
-              <div className="space-y-2 text-xs font-mono">
+              <Stagger className="space-y-2 text-xs font-mono" gap={0.05}>
                 {certifications.map((cert, idx) => (
-                  <div key={idx} className="flex items-center justify-between py-1.5 border-b border-[#E3DACD]/50">
+                  <motion.div key={idx} variants={staggerItem} className="flex items-center justify-between py-1.5 border-b border-[#E3DACD]/50">
                     <span className="font-medium text-charcoal">{cert.name}</span>
                     <span className="text-[10px] text-amber-dark bg-amber/10 border border-amber/25 px-2 py-0.5 rounded font-mono font-bold">
                       Active
                     </span>
-                  </div>
+                  </motion.div>
                 ))}
-              </div>
+              </Stagger>
             </div>
 
             {/* Education */}

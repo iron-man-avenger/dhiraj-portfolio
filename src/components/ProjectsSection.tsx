@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { 
   X, 
   ArrowUpRight,
@@ -9,10 +9,13 @@ import { projects } from '../data/portfolioData';
 import type { Project } from '../types';
 import { sounds } from '../utils/soundEffects';
 import { ProjectArchitectureDiagram } from './ProjectArchitectureDiagram';
+import { CountUpText, MaskedWords, RiseText, SectionRule, Stagger } from './motion/primitives';
+import { EXPO_OUT, staggerItem } from './motion/tokens';
 
 export const ProjectsSection: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [activeModalProject, setActiveModalProject] = useState<Project | null>(null);
+  const [modalOrigin, setModalOrigin] = useState({ x: 0, y: 0 });
 
   const categories = ['All', 'Agentic AI', 'Document AI', 'Computer Vision', 'Full-Stack Platform'];
 
@@ -20,8 +23,13 @@ export const ProjectsSection: React.FC = () => {
     ? projects 
     : projects.filter(p => p.category === selectedCategory);
 
-  const handleOpenModal = (project: Project) => {
+  const handleOpenModal = (project: Project, from: HTMLElement) => {
     sounds.playTap();
+    const card = (from.closest('[data-project-card]') ?? from).getBoundingClientRect();
+    setModalOrigin({
+      x: card.left + card.width / 2 - innerWidth / 2,
+      y: card.top + card.height / 2 - innerHeight / 2,
+    });
     setActiveModalProject(project);
   };
 
@@ -31,22 +39,21 @@ export const ProjectsSection: React.FC = () => {
   };
 
   return (
-    <section id="projects" className="pt-6 sm:pt-8 pb-16 sm:pb-20 bg-[#F7F2EB] relative border-t border-[#E3DACD]/60">
+    <section id="projects" className="pt-6 sm:pt-8 pb-16 sm:pb-20 bg-[#F7F2EB] relative">
+      <SectionRule />
       <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
         
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-10 gap-5 sm:gap-6">
           <div>
-            <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#2B302C] flex items-center gap-2 mb-2">
+            <RiseText className="mb-2" innerClassName="text-xs font-mono font-bold uppercase tracking-widest text-[#2B302C] flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-[#2B302C]" />
               <span>Selected Works</span>
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-[#2B302C] tracking-tight font-sans">
-              Flagship Engineering Projects
-            </h2>
-            <p className="text-sm sm:text-base text-charcoal-muted mt-2 max-w-xl font-normal leading-relaxed">
+            </RiseText>
+            <MaskedWords className="text-3xl sm:text-4xl font-extrabold text-[#2B302C] tracking-tight font-sans" text="Flagship Engineering Projects" />
+            <RiseText delay={0.25} className="text-sm sm:text-base text-charcoal-muted mt-2 max-w-xl font-normal leading-relaxed">
               Production systems designed for strict reliability: multi-agent routing, self-correcting logic, and document AI.
-            </p>
+            </RiseText>
           </div>
 
           {/* Minimalist Filter Tabs */}
@@ -58,27 +65,39 @@ export const ProjectsSection: React.FC = () => {
                   sounds.playPillSelect();
                   setSelectedCategory(cat);
                 }}
-                className={`px-3.5 py-1.5 rounded-xl md:rounded-full text-xs font-semibold transition-all duration-200 ${
+                className={`relative px-3.5 py-1.5 rounded-xl md:rounded-full text-xs font-semibold transition-colors duration-200 ${
                   selectedCategory === cat
-                    ? 'bg-amber text-charcoal-deep font-bold shadow-sm'
+                    ? 'text-charcoal-deep font-bold'
                     : 'text-charcoal-muted hover:text-charcoal hover:bg-black/[0.04]'
                 }`}
               >
-                {cat}
+                {selectedCategory === cat && (
+                  <motion.span
+                    layoutId="project-filter"
+                    transition={{ type: 'spring', stiffness: 420, damping: 36 }}
+                    className="absolute inset-0 rounded-xl md:rounded-full bg-amber shadow-sm"
+                  />
+                )}
+                <span className="relative">{cat}</span>
               </button>
             ))}
           </div>
         </div>
 
         {/* Clean, Editorial Projects Grid with Primary Color Accents */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <LayoutGroup>
+        <motion.div layout className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <AnimatePresence mode="popLayout" initial={false}>
           {filteredProjects.map((project, idx) => (
             <motion.div
               key={project.id}
-              initial={{ opacity: 0, y: 15 }}
+              data-project-card
+              layout
+              initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: idx * 0.05 }}
+              exit={{ opacity: 0, scale: 0.94, transition: { duration: 0.25 } }}
+              viewport={{ once: true, margin: '0px 0px -10% 0px' }}
+              transition={{ duration: 0.9, ease: EXPO_OUT, delay: (idx % 2) * 0.08, layout: { duration: 0.6, ease: EXPO_OUT } }}
               className="p-5 sm:p-7 md:p-8 rounded-3xl bg-[#F7F2EB] border border-[#E3DACD] hover:border-amber/50 hover:shadow-lg transition-all duration-300 flex flex-col justify-between group"
             >
               <div>
@@ -122,7 +141,7 @@ export const ProjectsSection: React.FC = () => {
                     <div key={mIdx} className="p-2 rounded-xl bg-[#F7F2EB] border border-[#E5DDCF]/70">
                       <span className="text-[10px] text-charcoal-muted block truncate">{m.label}</span>
                       <strong className="text-xs font-bold text-charcoal group-hover:text-amber-dark transition-colors truncate block">
-                        {m.value}
+                        <CountUpText text={m.value} />
                       </strong>
                     </div>
                   ))}
@@ -131,7 +150,7 @@ export const ProjectsSection: React.FC = () => {
 
               {/* Action Link with Primary Accent Icon Badge */}
               <button
-                onClick={() => handleOpenModal(project)}
+                onClick={(e) => handleOpenModal(project, e.currentTarget)}
                 className="inline-flex items-center gap-2 text-xs font-bold text-charcoal hover:text-amber-dark transition-colors pt-2 self-start group/btn"
               >
                 <span>Examine System Architecture & Case Study</span>
@@ -141,18 +160,28 @@ export const ProjectsSection: React.FC = () => {
               </button>
             </motion.div>
           ))}
-        </div>
-
+          </AnimatePresence>
+        </motion.div>
+        </LayoutGroup>
       </div>
 
       {/* Deep-Dive Case Study Modal (Editorial, Spacious, Zero Garbage Clutter) */}
       <AnimatePresence>
         {activeModalProject && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 md:p-6 bg-charcoal/70 backdrop-blur-md overflow-y-auto">
+          <motion.div
+            key="case-study"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, transition: { duration: 0.35, delay: 0.1 } }}
+            transition={{ duration: 0.3 }}
+            onClick={(e) => e.target === e.currentTarget && handleCloseModal()}
+            className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 md:p-6 bg-charcoal/70 backdrop-blur-md overflow-y-auto"
+          >
             <motion.div
-              initial={{ opacity: 0, scale: 0.96, y: 15 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.96, y: 15 }}
+              initial={{ opacity: 0, scale: 0.4, x: modalOrigin.x, y: modalOrigin.y }}
+              animate={{ opacity: 1, scale: 1, x: 0, y: 0 }}
+              exit={{ opacity: 0, scale: 0.4, x: modalOrigin.x, y: modalOrigin.y }}
+              transition={{ duration: 0.6, ease: [0.87, 0, 0.13, 1] }}
               className="relative w-full max-w-4xl bg-[#F7F2EB] rounded-2xl sm:rounded-3xl border border-[#E3DACD] shadow-2xl p-4 sm:p-7 md:p-10 max-h-[92vh] sm:max-h-[90vh] overflow-y-auto my-auto"
             >
               {/* Close Button */}
@@ -188,9 +217,7 @@ export const ProjectsSection: React.FC = () => {
                     <span className="text-[10px] font-mono uppercase tracking-wider text-charcoal-muted block truncate mb-0.5">
                       {m.label}
                     </span>
-                    <span className="text-xs sm:text-sm md:text-base font-bold text-charcoal font-mono leading-snug block break-words">
-                      {m.value}
-                    </span>
+                    <CountUpText text={m.value} className="text-xs sm:text-sm md:text-base font-bold text-charcoal font-mono leading-snug block break-words" />
                   </div>
                 ))}
               </div>
@@ -203,14 +230,14 @@ export const ProjectsSection: React.FC = () => {
                 <h4 className="text-xs font-mono uppercase tracking-widest text-charcoal-muted font-bold mb-4">
                   Engineering Contributions
                 </h4>
-                <ul className="space-y-3">
+                <Stagger className="space-y-3" gap={0.06}>
                   {activeModalProject.bullets.map((bullet, idx) => (
-                    <li key={idx} className="text-xs sm:text-sm text-charcoal-muted flex items-start gap-3 leading-relaxed">
+                    <motion.div key={idx} variants={staggerItem} className="text-xs sm:text-sm text-charcoal-muted flex items-start gap-3 leading-relaxed">
                       <span className="w-1.5 h-1.5 rounded-full bg-amber mt-2 shrink-0" />
                       <span>{bullet}</span>
-                    </li>
+                    </motion.div>
                   ))}
-                </ul>
+                </Stagger>
               </div>
 
               {/* Hard Lessons / Differentiators */}
@@ -248,7 +275,7 @@ export const ProjectsSection: React.FC = () => {
               </div>
 
             </motion.div>
-          </div>
+          </motion.div>
         )}
       </AnimatePresence>
     </section>

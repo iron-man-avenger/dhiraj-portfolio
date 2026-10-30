@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { motion, useScroll, useSpring, useTransform } from 'framer-motion';
 import { Volume2, VolumeX, Gamepad2, Menu, X } from 'lucide-react';
 import { sounds } from '../utils/soundEffects';
 import { DhirajLogo } from './DhirajLogo';
@@ -7,9 +8,11 @@ interface NavbarProps {
   onOpenArcade: () => void;
   soundMuted: boolean;
   onToggleSound: () => void;
+  /** Hidden while the page-load intro flies its own copy of the logo into this spot */
+  hideLogo?: boolean;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onOpenArcade, soundMuted, onToggleSound }) => {
+export const Navbar: React.FC<NavbarProps> = ({ onOpenArcade, soundMuted, onToggleSound, hideLogo = false }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<string>('OVERVIEW');
 
@@ -22,6 +25,28 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenArcade, soundMuted, onTogg
     { label: 'JOURNEY', href: '#journey' },
   ];
 
+  // Scroll-spy: the link for whichever section crosses the middle of the screen is active
+  useEffect(() => {
+    const labelFor: Record<string, string> = {
+      overview: 'OVERVIEW', projects: 'PROJECTS', simulator: 'SIMULATOR',
+      skills: 'STACK', principles: 'PRINCIPLES', journey: 'JOURNEY',
+    };
+    const observer = new IntersectionObserver(
+      (entries) => entries.forEach((e) => e.isIntersecting && labelFor[e.target.id] && setActiveTab(labelFor[e.target.id])),
+      { rootMargin: '-45% 0px -50% 0px' },
+    );
+    Object.keys(labelFor).forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, []);
+
+  // Reading progress: a hairline along the bottom of the bar, with the amber ball riding its tip
+  const { scrollYProgress } = useScroll();
+  const progress = useSpring(scrollYProgress, { stiffness: 140, damping: 30, mass: 0.4 });
+  const ballLeft = useTransform(progress, (p) => `calc(${p * 100}% - 3px)`);
+
   const handleLinkClick = (label: string) => {
     sounds.playTap();
     setActiveTab(label);
@@ -31,7 +56,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenArcade, soundMuted, onTogg
   return (
     <header className="fixed top-3 sm:top-4 left-0 right-0 z-50 flex justify-center px-3 sm:px-6 pointer-events-none">
       <div className="w-full max-w-7xl pointer-events-auto">
-        <nav className="bg-[#F7F2EB]/95 backdrop-blur-md rounded-2xl px-3.5 sm:px-6 md:px-7 py-2 sm:py-2.5 md:py-3 flex items-center justify-between border border-[#E3DACD] shadow-sm transition-all duration-300">
+        <nav className="relative bg-[#F7F2EB]/95 backdrop-blur-md rounded-2xl px-3.5 sm:px-6 md:px-7 py-2 sm:py-2.5 md:py-3 flex items-center justify-between border border-[#E3DACD] shadow-sm transition-all duration-300">
+          <div aria-hidden="true" className="absolute left-4 right-4 -bottom-px h-px pointer-events-none">
+            <motion.div style={{ scaleX: progress }} className="absolute inset-0 origin-left bg-charcoal/35" />
+            <motion.span style={{ left: ballLeft }} className="absolute top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-amber" />
+          </div>
           
           {/* Left: Brand Logo + Name (Direct, No Box) */}
           <a 
@@ -39,10 +68,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenArcade, soundMuted, onTogg
             onClick={() => handleLinkClick('OVERVIEW')}
             className="flex items-center gap-2.5 sm:gap-3 group"
           >
-            <DhirajLogo 
-              variant="light" 
-              className="w-7 h-7 sm:w-8 sm:h-8 transition-transform duration-200 group-hover:scale-105 shrink-0" 
-            />
+            <span id="nav-logo" className={`shrink-0 ${hideLogo ? 'invisible' : ''}`}>
+              <DhirajLogo 
+                variant="light" 
+                className="block w-7 h-7 sm:w-8 sm:h-8 transition-transform duration-200 group-hover:scale-105" 
+              />
+            </span>
             <span className="font-extrabold text-xs sm:text-sm tracking-wider uppercase text-[#2B302C] font-sans group-hover:text-amber-dark transition-colors whitespace-nowrap">
               DHIRAJ KUMAR
             </span>
@@ -58,13 +89,20 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenArcade, soundMuted, onTogg
                 <a
                   href={link.href}
                   onClick={() => handleLinkClick(link.label)}
-                  className={`transition-colors py-1 ${
+                  className={`relative transition-colors py-1 ${
                     activeTab === link.label 
                       ? 'text-[#2B302C] font-extrabold' 
                       : 'text-[#2B302C]/75 hover:text-amber-dark'
                   }`}
                 >
                   {link.label}
+                  {activeTab === link.label && (
+                    <motion.span
+                      layoutId="nav-marker"
+                      transition={{ type: 'spring', stiffness: 420, damping: 36 }}
+                      className="absolute -bottom-0.5 left-0 right-0 h-[2px] rounded-full bg-amber"
+                    />
+                  )}
                 </a>
               </React.Fragment>
             ))}

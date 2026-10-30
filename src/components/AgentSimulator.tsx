@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Play, 
@@ -14,6 +14,9 @@ import {
   Activity
 } from 'lucide-react';
 import { sounds } from '../utils/soundEffects';
+import { CountUpText, MaskedWords, Reveal, RiseText, SectionRule, TypeText } from './motion/primitives';
+import { BACK_OUT, EXPO_OUT } from './motion/tokens';
+import { PipelineRail } from './motion/PipelineRail';
 
 interface Stage {
   title: string;
@@ -288,21 +291,29 @@ export const AgentSimulator: React.FC = () => {
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [completed, setCompleted] = useState<boolean>(false);
   const [viewMode, setViewMode] = useState<'visual' | 'telemetry'>('visual');
+  const runTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const stopRun = () => {
+    if (runTimer.current) clearInterval(runTimer.current);
+    runTimer.current = null;
+  };
+  useEffect(() => stopRun, []);
 
   const startSimulation = () => {
     sounds.playClick();
+    stopRun();
     setIsRunning(true);
     setCompleted(false);
     setActiveStep(0);
 
     let current = 0;
-    const interval = setInterval(() => {
+    runTimer.current = setInterval(() => {
       current++;
       if (current < selectedScenario.stages.length) {
         sounds.playTap();
         setActiveStep(current);
       } else {
-        clearInterval(interval);
+        stopRun();
         setIsRunning(false);
         setCompleted(true);
         sounds.playSuccess();
@@ -312,6 +323,7 @@ export const AgentSimulator: React.FC = () => {
 
   const handleScenarioChange = (scenario: Scenario) => {
     sounds.playTap();
+    stopRun();
     setSelectedScenario(scenario);
     setActiveStep(-1);
     setIsRunning(false);
@@ -330,22 +342,21 @@ export const AgentSimulator: React.FC = () => {
   };
 
   return (
-    <section id="simulator" className="pt-6 sm:pt-8 pb-16 sm:pb-20 bg-[#F7F2EB] border-t border-[#E3DACD]/60 relative z-0">
+    <section id="simulator" className="pt-6 sm:pt-8 pb-16 sm:pb-20 bg-[#F7F2EB] relative z-0">
+      <SectionRule />
       <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 relative z-10">
         
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 sm:mb-8 gap-5 sm:gap-6">
           <div>
-            <span className="text-xs font-mono font-bold uppercase tracking-widest text-amber-dark flex items-center gap-1.5 mb-2">
+            <RiseText className="mb-2" innerClassName="text-xs font-mono font-bold uppercase tracking-widest text-amber-dark flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5" />
               <span>Interactive Architecture Benchmark</span>
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-charcoal tracking-tight font-sans">
-              Deterministic Verification Simulator
-            </h2>
-            <p className="text-sm sm:text-base text-charcoal-muted mt-2 max-w-2xl font-normal leading-relaxed">
+            </RiseText>
+            <MaskedWords className="text-3xl sm:text-4xl font-extrabold text-charcoal tracking-tight font-sans" text="Deterministic Verification Simulator" />
+            <RiseText delay={0.25} className="text-sm sm:text-base text-charcoal-muted mt-2 max-w-2xl font-normal leading-relaxed">
               Watch production AI queries move through multi-agent routing, SQL AST schema validation, and arithmetic verification. Visual, transparent, zero hallucination.
-            </p>
+            </RiseText>
           </div>
 
           {/* Scenario Selector Pills */}
@@ -356,13 +367,21 @@ export const AgentSimulator: React.FC = () => {
                 <button
                   key={s.id}
                   onClick={() => handleScenarioChange(s)}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 flex items-center gap-1.5 ${
+                  className={`relative px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors duration-200 flex items-center gap-1.5 ${
                     isSelected
-                      ? 'bg-amber text-charcoal-deep font-bold shadow-sm'
+                      ? 'text-charcoal-deep font-bold'
                       : 'text-charcoal-muted hover:text-charcoal hover:bg-black/[0.04]'
                   }`}
                 >
-                  <span>{s.tag}</span>
+                  {/* The amber highlight slides from the old choice to the new one */}
+                  {isSelected && (
+                    <motion.span
+                      layoutId="scenario-pill"
+                      transition={{ type: 'spring', stiffness: 420, damping: 36 }}
+                      className="absolute inset-0 rounded-xl bg-amber shadow-sm"
+                    />
+                  )}
+                  <span className="relative">{s.tag}</span>
                 </button>
               );
             })}
@@ -370,6 +389,7 @@ export const AgentSimulator: React.FC = () => {
         </div>
 
         {/* Main Simulator Card (Warm Glassmorphism & High-Visual Architecture) */}
+        <Reveal>
         <div className="rounded-3xl bg-[#F7F2EB] border border-[#E3DACD] shadow-sm p-4 sm:p-6 md:p-8 backdrop-blur-md transition-all duration-300">
           
           {/* Top Bar: Input Query & Primary Action */}
@@ -385,7 +405,7 @@ export const AgentSimulator: React.FC = () => {
                 </span>
               </div>
               <p className="text-sm sm:text-base font-medium text-charcoal leading-snug">
-                "{selectedScenario.query}"
+                "<TypeText text={selectedScenario.query} />"
               </p>
             </div>
 
@@ -416,6 +436,7 @@ export const AgentSimulator: React.FC = () => {
               <button
                 onClick={() => {
                   sounds.playTap();
+                  stopRun();
                   setActiveStep(-1);
                   setIsRunning(false);
                   setCompleted(false);
@@ -463,6 +484,14 @@ export const AgentSimulator: React.FC = () => {
           {viewMode === 'visual' ? (
             <div className="space-y-6">
               
+              {/* The ball travels stage to stage as the pipeline runs */}
+              <PipelineRail
+                count={selectedScenario.stages.length}
+                position={activeStep}
+                complete={completed}
+                className="hidden lg:block -mb-2"
+              />
+
               {/* Stepper Node Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 relative">
                 {selectedScenario.stages.map((stage, idx) => {
@@ -472,10 +501,10 @@ export const AgentSimulator: React.FC = () => {
 
                   return (
                     <motion.div
-                      key={idx}
-                      initial={{ opacity: 0, y: 10 }}
+                      key={`${selectedScenario.id}-${idx}`}
+                      initial={{ opacity: 0, y: 18 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: idx * 0.05 }}
+                      transition={{ duration: 0.7, ease: EXPO_OUT, delay: idx * 0.06 }}
                       className={`relative p-4 rounded-2xl border transition-all duration-300 flex flex-col justify-between ${
                         isCurrent
                           ? 'border-amber bg-amber/[0.08] shadow-md ring-2 ring-amber/20 scale-[1.02]'
@@ -493,10 +522,15 @@ export const AgentSimulator: React.FC = () => {
                           </span>
 
                           {isPast && (
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 flex items-center gap-1">
+                            <motion.span
+                              initial={{ scale: 0, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              transition={{ duration: 0.45, ease: BACK_OUT }}
+                              className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 flex items-center gap-1"
+                            >
                               <Check className="w-3 h-3 text-emerald-600 stroke-[3]" />
                               <span>OK</span>
-                            </span>
+                            </motion.span>
                           )}
 
                           {isCurrent && (
@@ -540,20 +574,27 @@ export const AgentSimulator: React.FC = () => {
               </div>
 
               {/* Verified Executive Summary Outcome (Shown clearly when complete) */}
-              <AnimatePresence>
+              <AnimatePresence mode="wait" initial={false}>
                 {completed ? (
                   <motion.div
-                    initial={{ opacity: 0, scale: 0.98, y: 10 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.98 }}
+                    key="result"
+                    initial={{ opacity: 0, y: 24 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 12, transition: { duration: 0.2 } }}
+                    transition={{ duration: 0.8, ease: EXPO_OUT }}
                     className="p-6 sm:p-7 rounded-2xl bg-gradient-to-br from-emerald-500/[0.06] via-[#F7F2EB] to-amber/[0.06] border-2 border-emerald-500/30 shadow-sm"
                   >
                     {/* Header Stamp */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-emerald-500/15 gap-2 mb-4">
                       <div className="flex items-center gap-2 text-xs font-bold font-mono text-emerald-800">
-                        <div className="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center">
+                        <motion.div
+                          initial={{ scale: 0, rotate: -40 }}
+                          animate={{ scale: 1, rotate: 0 }}
+                          transition={{ duration: 0.55, ease: BACK_OUT, delay: 0.2 }}
+                          className="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center"
+                        >
                           <ShieldCheck className="w-3.5 h-3.5" />
-                        </div>
+                        </motion.div>
                         <span>[DETERMINISTIC VERIFICATION PASSED]</span>
                         <span>•</span>
                         <span className="font-normal text-charcoal-muted">Zero Hallucination Proof</span>
@@ -571,22 +612,31 @@ export const AgentSimulator: React.FC = () => {
                     {/* KPI Metric Chips */}
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                       {selectedScenario.finalOutput.stats.map((stat, sIdx) => (
-                        <div key={sIdx} className="p-3 rounded-xl bg-[#F7F2EB] border border-[#E3DACD] shadow-2xs">
+                        <motion.div
+                          key={sIdx}
+                          initial={{ opacity: 0, y: 14 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.7, ease: EXPO_OUT, delay: 0.25 + sIdx * 0.07 }}
+                          className="p-3 rounded-xl bg-[#F7F2EB] border border-[#E3DACD] shadow-2xs"
+                        >
                           <span className="text-[10px] font-mono uppercase tracking-wider text-charcoal-muted block mb-0.5">
                             {stat.label}
                           </span>
-                          <span className="text-sm sm:text-base font-bold text-charcoal font-sans">
-                            {stat.value}
-                          </span>
-                        </div>
+                          <CountUpText text={stat.value} className="text-sm sm:text-base font-bold text-charcoal font-sans" />
+                        </motion.div>
                       ))}
                     </div>
                   </motion.div>
                 ) : (
-                  <div className="p-4 rounded-xl bg-[#F7F2EB] border border-dashed border-[#E3DACD] text-center text-xs font-mono text-charcoal-muted flex items-center justify-center gap-2">
+                  <motion.div
+                    key="idle"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0, transition: { duration: 0.15 } }}
+                    className="p-4 rounded-xl bg-[#F7F2EB] border border-dashed border-[#E3DACD] text-center text-xs font-mono text-charcoal-muted flex items-center justify-center gap-2">
                     <Activity className="w-4 h-4 text-amber" />
                     <span>{isRunning ? 'Validating pipeline stages...' : 'Press "Run Pipeline" to visualize data flow and verification proof.'}</span>
-                  </div>
+                  </motion.div>
                 )}
               </AnimatePresence>
 
@@ -617,22 +667,28 @@ export const AgentSimulator: React.FC = () => {
                   >
                     <span className="text-amber">➜</span>
                     <span>
-                      <strong className="text-emerald-400">[{stage.title}]</strong> {stage.dataLog}
+                      <strong className="text-emerald-400">[{stage.title}]</strong> <TypeText text={stage.dataLog} speed={10} />
                     </span>
                   </motion.div>
                 );
               })}
 
               {completed && (
-                <div className="pt-3 border-t border-white/10 text-emerald-400 font-bold flex items-center gap-1.5">
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, ease: EXPO_OUT }}
+                  className="pt-3 border-t border-white/10 text-emerald-400 font-bold flex items-center gap-1.5"
+                >
                   <ShieldCheck className="w-4 h-4" />
                   <span>[VERIFIED] {selectedScenario.verificationVerdict}</span>
-                </div>
+                </motion.div>
               )}
             </div>
           )}
 
         </div>
+        </Reveal>
 
       </div>
     </section>
