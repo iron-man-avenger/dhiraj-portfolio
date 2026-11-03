@@ -17,6 +17,8 @@ import { sounds } from '../utils/soundEffects';
 import { CountUpText, MaskedWords, Reveal, RiseText, SectionRule, TypeText } from './motion/primitives';
 import { BACK_OUT, EXPO_OUT } from './motion/tokens';
 import { PipelineRail } from './motion/PipelineRail';
+import { AsciiArt } from './motion/AsciiArt';
+import { GlassPill } from './GlassPill';
 
 interface Stage {
   title: string;
@@ -374,14 +376,8 @@ export const AgentSimulator: React.FC = () => {
                   }`}
                 >
                   {/* The amber highlight slides from the old choice to the new one */}
-                  {isSelected && (
-                    <motion.span
-                      layoutId="scenario-pill"
-                      transition={{ type: 'spring', stiffness: 420, damping: 36 }}
-                      className="absolute inset-0 rounded-xl bg-amber shadow-sm"
-                    />
-                  )}
-                  <span className="relative">{s.tag}</span>
+                  {isSelected && <GlassPill layoutId="scenario-pill" className="rounded-xl" />}
+                  <span className={isSelected ? 'relative z-[2]' : 'relative'}>{s.tag}</span>
                 </button>
               );
             })}
@@ -651,9 +647,13 @@ export const AgentSimulator: React.FC = () => {
               </div>
 
               {activeStep === -1 && !completed && (
-                <p className="text-gray-500 italic py-4 text-center">
-                  Press "Run Pipeline" above to capture live telemetry logs...
-                </p>
+                <div className="py-3 flex flex-col items-center gap-3">
+                  {/* Idle state: a small network classifying shapes, in quiet ecru */}
+                  <AsciiArt piece="neural-forward-pass" cols={104} maxSize={9} ink="#F7F2EB" className="w-full opacity-50" />
+                  <p className="text-gray-500 italic text-center">
+                    Press "Run Pipeline" above to capture live telemetry logs...
+                  </p>
+                </div>
               )}
 
               {selectedScenario.stages.map((stage, idx) => {

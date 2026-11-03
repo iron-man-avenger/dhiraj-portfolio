@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { engineeringPrinciples } from '../data/portfolioData';
 import { CountUpText, MaskedWords, Reveal, RiseText, SectionRule, Stagger } from './motion/primitives';
 import { VIEWPORT, staggerItem } from './motion/tokens';
+import { AsciiArt } from './motion/AsciiArt';
 
 export const EngineeringLessons: React.FC = () => {
   return (
@@ -39,7 +40,16 @@ export const EngineeringLessons: React.FC = () => {
           
           {/* Left Column (5 cols): Case Autopsy Note with #2B302C Box Background */}
           <Reveal className="lg:col-span-5">
-          <div className="p-8 rounded-3xl bg-[#2B302C] text-white border border-[#39403B] shadow-elevated transition-all duration-300 relative overflow-hidden group">
+          <div className="p-8 rounded-3xl bg-[#2B302C] text-white border border-[#39403B] shadow-elevated transition-all duration-300 relative overflow-hidden group isolate">
+            {/* A loss curve settling into its minimum, barely there behind the text (isolate keeps it above the card fill) */}
+            <AsciiArt
+              piece="gradient-descent"
+              cols={104}
+              maxSize={8}
+              ink="#F7F2EB"
+              speed={0.6}
+              className="absolute inset-x-0 bottom-0 -z-10 opacity-[0.1]"
+            />
             <span className="text-[10px] font-mono uppercase tracking-widest text-amber font-bold block mb-2">
               Production Autopsy
             </span>

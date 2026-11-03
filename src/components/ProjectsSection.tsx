@@ -9,6 +9,7 @@ import { projects } from '../data/portfolioData';
 import type { Project } from '../types';
 import { sounds } from '../utils/soundEffects';
 import { ProjectArchitectureDiagram } from './ProjectArchitectureDiagram';
+import { GlassPill } from './GlassPill';
 import { CountUpText, MaskedWords, RiseText, SectionRule, Stagger } from './motion/primitives';
 import { EXPO_OUT, staggerItem } from './motion/tokens';
 
@@ -71,14 +72,8 @@ export const ProjectsSection: React.FC = () => {
                     : 'text-charcoal-muted hover:text-charcoal hover:bg-black/[0.04]'
                 }`}
               >
-                {selectedCategory === cat && (
-                  <motion.span
-                    layoutId="project-filter"
-                    transition={{ type: 'spring', stiffness: 420, damping: 36 }}
-                    className="absolute inset-0 rounded-xl md:rounded-full bg-amber shadow-sm"
-                  />
-                )}
-                <span className="relative">{cat}</span>
+                {selectedCategory === cat && <GlassPill layoutId="project-filter" className="rounded-xl md:rounded-full" />}
+                <span className={selectedCategory === cat ? 'relative z-[2]' : 'relative'}>{cat}</span>
               </button>
             ))}
           </div>

@@ -141,3 +141,42 @@ Built from the primitives in `src/components/motion/`. Reach for these before wr
   - Pointer: steer by mouse or drag; holding down fires.
   - Phones: on-screen buttons.
   - Hiding the tab pauses the run.
+
+## 10. ASCII accents (approved)
+
+Animated ASCII art from the MIT-licensed [ASCII Magic](https://www.ascii-magic.com/ascii) library, self-hosted:
+- `npm run ascii:sync` copies the player and only the listed pieces into `public/ascii-magic-art/`. Nothing loads from ascii-magic.com.
+- `src/components/motion/AsciiArt.tsx` is the React wrapper. It loads the player once and fits the art to its container's width.
+
+**Rules**
+- **Only on these surfaces.** Each piece has one job:
+  - `neural-forward-pass` is the idle state of the simulator's Logs view. It uses ecru ink at 50% opacity.
+  - `gradient-descent` is a background texture inside the dark Production Autopsy card. It uses ecru ink at 10% opacity, played at 0.6× speed, behind the text.
+  - `page-404` is on `public/404.html`, which Vercel serves for any unknown address. It uses charcoal ink, cropped to the top 12 rows (the big 404 and its stars), because the piece's lower half repeats the label and draws buttons that can't be clicked.
+- **Always one colour** (`mono`), taken from the palette: ecru on dark surfaces, charcoal on ecru. The pieces' own colours (purples, greens, blues) are never shown.
+- **The player ignores alpha in the ink colour.** Use a solid ink and fade the layer with CSS `opacity`.
+- **Never in the hero, the intro or section headings.** It must not compete with the logo or the masked-rise type. ASK ME before adding a piece anywhere else.
+- **Size:** at most 9–10px per character. The art is always decoration next to real text, never the message itself.
+- **Motion:** pieces animate only while on screen, and show a still frame under reduced motion (handled by the player).
+
+## 11. Liquid glass (navbar and selector pills, approved)
+
+The floating navbar refracts the page scrolling underneath it, and the selected-option pill in segmented controls is an amber glass lens, like Apple's Liquid Glass.
+- The refraction is an SVG displacement filter in `backdrop-filter`, ported from the MIT-licensed nikdelvin/liquid-glass, in `src/utils/liquidGlass.ts`.
+- The layer that applies it is `src/components/LiquidGlassLayer.tsx` (navbar) and `src/components/GlassPill.tsx` (selector pills).
+
+**Rules**
+- **Two places only:**
+  - The navbar.
+  - The sliding selection pill of the project filters and the simulator's scenario pills (`GlassPill`). It is shown as the lens slides: the labels it passes over bend at its rim.
+- **Everything else stays solid:** every other button, tab and pill is solid charcoal, ecru or amber, for contrast and the one-accent palette. ASK ME before using glass anywhere else.
+- **Chromium only, with a graceful fallback.** Chrome and Edge render the refraction. Safari (so every iOS browser) and Firefox keep the frosted bar exactly as before: `bg-[#F7F2EB]/95` plus `backdrop-blur-md` with the ecru border.
+- **Values:**
+  - Ecru tint `#F7F2EB` at 70%, so the links always read.
+  - 2px frost.
+  - Refraction depth 10px and strength 46.
+  - Chromatic aberration 0.6, which means no visible colour fringe.
+  - A white rim highlight on top, plus a faint charcoal one at the bottom.
+- **Selector pill values:** amber `#D4A066` at 60% tint, refraction depth 4px and strength 9 (pills are tiny, and the navbar's strength turns the text underneath into noise), chromatic aberration 0.4, and the same rim highlights. The fallback is the solid amber pill.
+- **Selector stacking:** the pill is `z-[1]`, so the other labels are under the glass and bend as it passes. The selected label is `relative z-[2]` on top, so it stays crisp and keeps full contrast.
+- **Don't block the page:** the glass element's parent (`nav`) must not set its own `backdrop-filter`, `filter` or `opacity`, or the layer stops seeing the page.
