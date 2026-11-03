@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useSpring, useTransform } from 'framer-motion';
 import { workExperience, awards, certifications } from '../data/portfolioData';
 import { MaskedWords, RiseText, SectionRule, Stagger } from './motion/primitives';
 import { EXPO_OUT, staggerItem } from './motion/tokens';
@@ -8,7 +8,9 @@ export const ExperienceTimeline: React.FC = () => {
   // The timeline line draws with the scroll; the amber ball rides its tip
   const listRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: listRef, offset: ['start 75%', 'end 55%'] });
-  const ballTop = useTransform(scrollYProgress, (p) => `${p * 100}%`);
+  // A light spring absorbs uneven scroll steps (wheel notches, touch flicks) so the ball glides
+  const progress = useSpring(scrollYProgress, { stiffness: 120, damping: 28, mass: 0.35, restDelta: 0.0005 });
+  const ballTravel = useTransform(progress, (p) => `${p * 100}%`);
 
   return (
     <section id="journey" className="pt-6 sm:pt-8 pb-16 sm:pb-20 bg-[#F7F2EB] relative">
@@ -32,8 +34,11 @@ export const ExperienceTimeline: React.FC = () => {
           {/* Work Experience Timeline (8 cols): Clean & Typographic */}
           <div ref={listRef} className="lg:col-span-8 relative pl-6 sm:pl-8">
             <div aria-hidden="true" className="absolute left-0 top-0 bottom-0 w-px bg-[#E3DACD]">
-              <motion.div style={{ scaleY: scrollYProgress }} className="absolute inset-0 origin-top bg-charcoal/50" />
-              <motion.span style={{ top: ballTop }} className="absolute left-1/2 w-3 h-3 -ml-1.5 -mt-1.5 rounded-full bg-amber shadow-glow-amber" />
+              <motion.div style={{ scaleY: progress }} className="absolute inset-0 origin-top bg-charcoal/50" />
+              {/* The rider spans the whole track and moves by a % of its own height: a transform, so no layout work per frame */}
+              <motion.div style={{ y: ballTravel }} className="absolute inset-0 will-change-transform">
+                <span className="absolute left-1/2 top-0 w-3 h-3 -ml-1.5 -mt-1.5 rounded-full bg-amber shadow-glow-amber" />
+              </motion.div>
             </div>
             <div className="divide-y divide-[#E3DACD]/70 border-y border-[#E3DACD]/70">
             {workExperience.map((exp, idx) => (

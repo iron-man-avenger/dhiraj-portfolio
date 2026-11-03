@@ -47,7 +47,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenArcade, soundMuted, onTogg
   // Reading progress: a hairline along the bottom of the bar, with the amber ball riding its tip
   const { scrollYProgress } = useScroll();
   const progress = useSpring(scrollYProgress, { stiffness: 140, damping: 30, mass: 0.4 });
-  const ballLeft = useTransform(progress, (p) => `calc(${p * 100}% - 3px)`);
+  const ballTravel = useTransform(progress, (p) => `${p * 100}%`);
 
   const handleLinkClick = (label: string) => {
     sounds.playTap();
@@ -74,7 +74,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenArcade, soundMuted, onTogg
           )}
           <div aria-hidden="true" className="absolute left-4 right-4 -bottom-px h-px pointer-events-none">
             <motion.div style={{ scaleX: progress }} className="absolute inset-0 origin-left bg-charcoal/35" />
-            <motion.span style={{ left: ballLeft }} className="absolute top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-amber" />
+            {/* The rider spans the line and moves by a % of its own width: a transform, so no layout work per frame */}
+            <motion.div style={{ x: ballTravel }} className="absolute inset-0 will-change-transform">
+              <span className="absolute left-0 top-1/2 -translate-y-1/2 -ml-[3px] w-1.5 h-1.5 rounded-full bg-amber" />
+            </motion.div>
           </div>
           
           {/* Left: Brand Logo + Name (Direct, No Box) */}
