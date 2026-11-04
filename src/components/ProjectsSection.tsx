@@ -9,7 +9,7 @@ import { projects } from '../data/portfolioData';
 import type { Project } from '../types';
 import { sounds } from '../utils/soundEffects';
 import { ProjectArchitectureDiagram } from './ProjectArchitectureDiagram';
-import { GlassPill } from './GlassPill';
+import { BrandSegmented } from './BrandSegmented';
 import { CountUpText, MaskedWords, RiseText, SectionRule, Stagger } from './motion/primitives';
 import { EXPO_OUT, staggerItem } from './motion/tokens';
 
@@ -45,7 +45,7 @@ export const ProjectsSection: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
         
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-10 gap-5 sm:gap-6">
+        <div className="flex flex-col 2xl:flex-row 2xl:items-end justify-between mb-8 sm:mb-10 gap-5 sm:gap-6">
           <div>
             <RiseText className="mb-2" innerClassName="text-xs font-mono font-bold uppercase tracking-widest text-[#2B302C] flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-[#2B302C]" />
@@ -57,26 +57,18 @@ export const ProjectsSection: React.FC = () => {
             </RiseText>
           </div>
 
-          {/* Minimalist Filter Tabs */}
-          <div className="flex flex-wrap gap-1 p-1 bg-[#F7F2EB] rounded-2xl md:rounded-full border border-[#E3DACD] self-start md:self-auto shadow-sm">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => {
-                  sounds.playPillSelect();
-                  setSelectedCategory(cat);
-                }}
-                className={`relative px-3.5 py-1.5 rounded-xl md:rounded-full text-xs font-semibold transition-colors duration-200 ${
-                  selectedCategory === cat
-                    ? 'text-charcoal-deep font-bold'
-                    : 'text-charcoal-muted hover:text-charcoal hover:bg-black/[0.04]'
-                }`}
-              >
-                {selectedCategory === cat && <GlassPill layoutId="project-filter" className="rounded-xl md:rounded-full" />}
-                <span className={selectedCategory === cat ? 'relative z-[2]' : 'relative'}>{cat}</span>
-              </button>
-            ))}
-          </div>
+          {/* Filter: glisse's iOS 26 segmented control; hold or drag the thumb to lift the glass lens */}
+          <BrandSegmented
+            aria-label="Filter projects by category"
+            items={categories.map((cat) => ({ value: cat, label: cat }))}
+            value={selectedCategory}
+            onValueChange={(cat) => {
+              sounds.playPillSelect();
+              setSelectedCategory(cat);
+            }}
+            segmentWidth={136}
+            className="self-start"
+          />
         </div>
 
         {/* Clean, Editorial Projects Grid with Primary Color Accents */}

@@ -164,12 +164,12 @@ Animated ASCII art from the MIT-licensed [ASCII Magic](https://www.ascii-magic.c
 
 The floating navbar refracts the page scrolling underneath it, and the selected-option pill in segmented controls is an amber glass lens, like Apple's Liquid Glass.
 - The refraction is an SVG displacement filter in `backdrop-filter`, ported from the MIT-licensed nikdelvin/liquid-glass, in `src/utils/liquidGlass.ts`.
-- The layer that applies it is `src/components/LiquidGlassLayer.tsx` (navbar) and `src/components/GlassPill.tsx` (selector pills).
+- The layer that applies it is `src/components/LiquidGlassLayer.tsx` (navbar). The selectors use the MIT-licensed [glisse](https://github.com/0kzh/glisse) library's `SegmentedControl`, wrapped in `src/components/BrandSegmented.tsx`.
 
 **Rules**
 - **Two places only:**
   - The navbar.
-  - The sliding selection pill of the project filters and the simulator's scenario pills (`GlassPill`). It is shown as the lens slides: the labels it passes over bend at its rim.
+  - The project filters and the simulator's scenario selector (glisse `SegmentedControl` via `BrandSegmented`). Press-and-hold or drag the amber thumb and it lifts into a clear glass lens that bends the labels it passes over, as in iOS 26. glisse bends the content itself rather than the backdrop, so this one works in Safari and on iPhone too.
 - **Everything else stays solid:** every other button, tab and pill is solid charcoal, ecru or amber, for contrast and the one-accent palette. ASK ME before using glass anywhere else.
 - **Chromium only, with a graceful fallback.** Chrome and Edge render the refraction. Safari (so every iOS browser) and Firefox keep the frosted bar exactly as before: `bg-[#F7F2EB]/95` plus `backdrop-blur-md` with the ecru border.
 - **Values:**
@@ -178,6 +178,13 @@ The floating navbar refracts the page scrolling underneath it, and the selected-
   - Refraction depth 10px and strength 46.
   - Chromatic aberration 0.6, which means no visible colour fringe.
   - A white rim highlight on top, plus a faint charcoal one at the bottom.
-- **Selector pill values:** amber `#D4A066` at 60% tint, refraction depth 4px and strength 9 (pills are tiny, and the navbar's strength turns the text underneath into noise), chromatic aberration 0.4, and the same rim highlights. The fallback is the solid amber pill.
-- **Selector stacking:** the pill is `z-[1]`, so the other labels are under the glass and bend as it passes. The selected label is `relative z-[2]` on top, so it stays crisp and keeps full contrast.
+- **Selector values (dark track, chosen over a light one because the clear lens vanished on pale ecru):**
+  - Pinned to glisse's dark theme (`data-theme="dark"`), so the OS light or dark setting can't change it.
+  - Palette mapping in `src/index.css` (`.brand-segmented`):
+    - Track charcoal `#2B302C`.
+    - Labels ecru `#F7F2EB` at 12px/600 (700 when selected).
+    - Thumb amber `#D4A066`, with the selected label turning charcoal `#1C201D` on it at rest.
+    - The lifted lens is ecru at 16% with a bright rim (`--lg-lens-shine: 1`, `--lg-rim-shine: 0.6`) and a shadow at 45% black.
+  - Segments are equal width, as on iOS: 136px for the project filter, 124px for the scenarios. Set it with `segmentWidth`; glisse's own 84px default is too narrow for the labels.
+  - On narrow screens the row swipes sideways with its scrollbar hidden, and the chosen segment scrolls into view.
 - **Don't block the page:** the glass element's parent (`nav`) must not set its own `backdrop-filter`, `filter` or `opacity`, or the layer stops seeing the page.

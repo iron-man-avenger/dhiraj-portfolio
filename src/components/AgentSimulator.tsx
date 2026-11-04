@@ -18,7 +18,7 @@ import { CountUpText, MaskedWords, Reveal, RiseText, SectionRule, TypeText } fro
 import { BACK_OUT, EXPO_OUT } from './motion/tokens';
 import { PipelineRail } from './motion/PipelineRail';
 import { AsciiArt } from './motion/AsciiArt';
-import { GlassPill } from './GlassPill';
+import { BrandSegmented } from './BrandSegmented';
 
 interface Stage {
   title: string;
@@ -349,7 +349,7 @@ export const AgentSimulator: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 relative z-10">
         
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 sm:mb-8 gap-5 sm:gap-6">
+        <div className="flex flex-col xl:flex-row xl:items-end justify-between mb-6 sm:mb-8 gap-5 sm:gap-6">
           <div>
             <RiseText className="mb-2" innerClassName="text-xs font-mono font-bold uppercase tracking-widest text-amber-dark flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5" />
@@ -361,27 +361,15 @@ export const AgentSimulator: React.FC = () => {
             </RiseText>
           </div>
 
-          {/* Scenario Selector Pills */}
-          <div className="inline-flex items-center gap-1 p-1.5 bg-[#F7F2EB] rounded-2xl border border-[#E3DACD] shadow-sm max-w-full overflow-x-auto self-start md:self-auto">
-            {scenarios.map((s) => {
-              const isSelected = selectedScenario.id === s.id;
-              return (
-                <button
-                  key={s.id}
-                  onClick={() => handleScenarioChange(s)}
-                  className={`relative px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors duration-200 flex items-center gap-1.5 ${
-                    isSelected
-                      ? 'text-charcoal-deep font-bold'
-                      : 'text-charcoal-muted hover:text-charcoal hover:bg-black/[0.04]'
-                  }`}
-                >
-                  {/* The amber highlight slides from the old choice to the new one */}
-                  {isSelected && <GlassPill layoutId="scenario-pill" className="rounded-xl" />}
-                  <span className={isSelected ? 'relative z-[2]' : 'relative'}>{s.tag}</span>
-                </button>
-              );
-            })}
-          </div>
+          {/* Scenario selector: glisse's iOS 26 segmented control; hold or drag the thumb to lift the glass lens */}
+          <BrandSegmented
+            aria-label="Choose a pipeline scenario"
+            items={scenarios.map((sc) => ({ value: sc.id, label: sc.tag }))}
+            value={selectedScenario.id}
+            onValueChange={(id) => handleScenarioChange(scenarios.find((sc) => sc.id === id)!)}
+            segmentWidth={124}
+            className="self-start xl:self-auto"
+          />
         </div>
 
         {/* Main Simulator Card (Warm Glassmorphism & High-Visual Architecture) */}

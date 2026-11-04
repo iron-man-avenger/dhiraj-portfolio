@@ -81,3 +81,50 @@
   background-image: radial-gradient(rgba(43, 48, 44, 0.08) 1px, transparent 1px);
   background-size: 20px 20px;
 }
+
+/* glisse segmented controls in the site palette (see BrandSegmented.tsx and MOTION.md §11).
+   glisse reads light or dark from --lg-lens-shine (above 0 = dark surface: a bright rim on the lens). */
+
+/* A charcoal track with ecru labels, so the clear lens shows its bright rim and the bend reads as glass */
+.brand-segmented {
+  --lg-segment-track: #2B302C;
+  --lg-segment-thumb: #D4A066;
+  --lg-segment-label: #F7F2EB;
+  --lg-segment-lens: rgba(247, 242, 235, 0.16);
+  --lg-lens-drop: rgba(0, 0, 0, 0.45);
+  --lg-lens-shine: 1;
+  --lg-rim-shine: 0.6;
+  --lg-foreground: #F7F2EB;
+  --lg-muted: rgba(247, 242, 235, 0.7);
+  --lg-ring: rgba(247, 242, 235, 0.6);
+}
+
+/* At rest the selected label sits on the amber thumb, so it turns charcoal; lifted, the thumb fades and it goes back to ecru */
+.brand-segmented .lg-segmented:not([data-lifted]) .lg-tab[data-selected] {
+  color: #1C201D;
+}
+
+/* The row swipes sideways on phones without the site's amber page scrollbar */
+.brand-segmented-scroller {
+  scrollbar-width: none;
+}
+
+.brand-segmented-scroller::-webkit-scrollbar {
+  display: none;
+}
+
+/* glisse sets its segment width on .lg-segmented itself, so a per-instance width has to reach it through our own variable */
+.brand-segmented .lg-segmented {
+  --lg-tab-width: var(--brand-segment-width, 84px);
+  box-shadow: 0 1px 2px rgba(28, 32, 29, 0.18);
+}
+
+.brand-segmented .lg-segmented :is(.lg-tab, .lg-tab-copy) {
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.brand-segmented .lg-segmented :is(.lg-tab, .lg-tab-copy)[data-selected] {
+  font-weight: 700;
+}
