@@ -1,7 +1,11 @@
+import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import { 
   ArrowRight, 
   ShieldCheck
 } from 'lucide-react';
+import { EXPO_OUT } from './motion/tokens';
+import { PipelineRail } from './motion/PipelineRail';
 
 interface ArchitectureFlow {
   title: string;
@@ -321,6 +325,25 @@ export const ProjectArchitectureDiagram: React.FC<ProjectArchitectureDiagramProp
   };
 
   const flow = getFlowData();
+  const stageCount = flow.stages.length;
+
+  // Once the case study has grown open, light the stages in order as the ball travels the rail
+  const [lit, setLit] = useState(-1);
+  useEffect(() => {
+    let step = -1;
+    let timer: ReturnType<typeof setInterval> | undefined;
+    const start = setTimeout(() => {
+      timer = setInterval(() => {
+        step += 1;
+        setLit(step);
+        if (step >= stageCount - 1) clearInterval(timer);
+      }, 480);
+    }, 700);
+    return () => {
+      clearTimeout(start);
+      clearInterval(timer);
+    };
+  }, [projectId, stageCount]);
 
   return (
     <div className="mb-6 sm:mb-8 p-3.5 sm:p-5 md:p-6 rounded-2xl bg-[#F7F2EB] border border-[#E3DACD]">
@@ -342,11 +365,17 @@ export const ProjectArchitectureDiagram: React.FC<ProjectArchitectureDiagramProp
 
       {/* Responsive Pipeline: Full-Width Clean Cards on Mobile, 5-Col Grid on Desktop */}
       <div className="relative">
+        <PipelineRail count={stageCount} columns={5} position={lit} complete={lit >= stageCount - 1} hop={0.45} className="hidden lg:block mb-2" />
         <div className="flex flex-col md:grid md:grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-3.5 relative">
           {flow.stages.map((stage, idx) => (
-            <div 
+            <motion.div 
               key={idx} 
-              className="relative p-3 sm:p-3.5 md:p-4 rounded-xl bg-[#F7F2EB] border border-[#E5DDCF] flex flex-col justify-between hover:border-amber/50 transition-all group shadow-2xs"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, ease: EXPO_OUT, delay: 0.35 + idx * 0.07 }}
+              className={`relative p-3 sm:p-3.5 md:p-4 rounded-xl bg-[#F7F2EB] border flex flex-col justify-between hover:border-amber/50 transition-colors duration-300 group shadow-2xs ${
+                lit >= idx ? 'border-amber/60' : 'border-[#E5DDCF]'
+              }`}
             >
               <div>
                 {/* Step indicator & Tech Badge */}
@@ -375,7 +404,7 @@ export const ProjectArchitectureDiagram: React.FC<ProjectArchitectureDiagramProp
                   {stage.details}
                 </p>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

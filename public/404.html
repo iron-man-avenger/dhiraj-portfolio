@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <title>Page not found · Dhiraj Kumar</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet" />
+    <style>
+      /* Values from MOTION.md: ecru canvas, charcoal ink, one amber accent, masked rises on expo.out */
+      :root {
+        --ecru: #f7f2eb;
+        --charcoal: #2b302c;
+        --deep: #1c201d;
+        --muted: #58615b;
+        --amber: #d4a066;
+        --expo-out: cubic-bezier(0.16, 1, 0.3, 1);
+        --power3-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+      }
+      * { box-sizing: border-box; margin: 0; }
+      body {
+        min-height: 100dvh;
+        background-color: var(--ecru);
+        background-image:
+          linear-gradient(to right, rgba(43, 48, 44, 0.04) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(43, 48, 44, 0.04) 1px, transparent 1px);
+        background-size: 32px 32px;
+        color: var(--charcoal);
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        display: flex;
+        flex-direction: column;
+      }
+      header { padding: 24px 16px; }
+      @media (min-width: 640px) { header { padding: 32px 48px; } }
+      .brand { display: inline-flex; align-items: center; gap: 10px; color: var(--charcoal); text-decoration: none; font: 800 13px 'Plus Jakarta Sans', sans-serif; letter-spacing: 0.08em; }
+      .brand img { width: 30px; height: 30px; }
+      main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px 16px 64px; text-align: center; }
+      /* Cropped to the big 404 and its stars: the piece's own lower half repeats the label and has fake buttons */
+      .art { width: min(100%, 640px); margin-bottom: 20px; overflow: hidden; }
+      ascii-art { display: block; margin-inline: auto; width: fit-content; --ascii-ink: #2b302c; }
+      .label { display: inline-flex; align-items: center; gap: 8px; font: 600 12px 'JetBrains Mono', monospace; color: var(--muted); margin-bottom: 14px; }
+      .label i { width: 8px; height: 8px; border-radius: 50%; background: var(--amber); }
+      h1 { font-weight: 800; font-size: clamp(2rem, 6vw, 3.5rem); line-height: 1.08; letter-spacing: -0.035em; max-width: 14ch; }
+      p { margin-top: 14px; max-width: 46ch; color: var(--muted); font-size: 16px; line-height: 1.6; }
+      .cta { margin-top: 28px; display: inline-flex; align-items: center; gap: 8px; padding: 13px 24px; border-radius: 999px; background: var(--charcoal); color: #fff; font: 600 13px 'Plus Jakarta Sans', sans-serif; text-decoration: none; transition: background 0.2s; }
+      .cta:hover { background: var(--deep); }
+      .cta span { color: var(--amber); transition: transform 0.2s var(--expo-out); }
+      .cta:hover span { transform: translateX(4px); }
+
+      /* Masked rise: each word climbs out of its own clip */
+      .mask { display: inline-block; overflow: hidden; vertical-align: bottom; padding-bottom: 0.1em; margin-bottom: -0.1em; }
+      .rise { display: inline-block; transform: translateY(104%); animation: rise 1.05s var(--expo-out) forwards; animation-delay: calc(0.15s + var(--i, 0) * 0.035s); }
+      .block-rise { opacity: 0; transform: translateY(24px); animation: block 0.9s var(--expo-out) forwards; animation-delay: var(--d, 0.4s); }
+      .rule { width: 96px; height: 1px; background: rgba(43, 48, 44, 0.25); margin: 22px auto 0; transform: scaleX(0); transform-origin: left; animation: draw 1.2s var(--power3-in-out) 0.55s forwards; }
+      @keyframes rise { to { transform: translateY(0); } }
+      @keyframes block { to { opacity: 1; transform: none; } }
+      @keyframes draw { to { transform: scaleX(1); } }
+      @media (prefers-reduced-motion: reduce) {
+        .rise, .block-rise, .rule { animation: none; transform: none; opacity: 1; }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <a class="brand" href="/"><img src="/logo-light.svg" alt="" />DHIRAJ KUMAR</a>
+    </header>
+
+    <main>
+      <div class="art block-rise" style="--d: 0.05s" aria-hidden="true">
+        <ascii-art piece="page-404" mono size="10"></ascii-art>
+      </div>
+
+      <span class="label block-rise" style="--d: 0.1s"><i></i>ERROR 404</span>
+      <h1 id="headline">This page got lost in the noise.</h1>
+      <p class="block-rise" style="--d: 0.45s">The link may be old or mistyped. Everything I build is still on the portfolio.</p>
+      <div class="rule"></div>
+      <a class="cta block-rise" style="--d: 0.6s" href="/">Back to portfolio <span>→</span></a>
+    </main>
+
+    <script>
+      // Split the headline into masked words
+      const h = document.getElementById('headline');
+      h.innerHTML = h.textContent
+        .split(' ')
+        .map((w, i) => `<span class="mask"><span class="rise" style="--i:${i}">${w}</span></span>`)
+        .join(' ');
+
+      // Fit the art to its column: cols × cell width × font size = width (cell width 0.602 from the player),
+      // and show only the top VISIBLE_ROWS rows (one row is one font size tall)
+      const VISIBLE_ROWS = 12;
+      const art = document.querySelector('ascii-art');
+      const fit = () => {
+        const size = Math.min(10, Math.floor((art.parentElement.clientWidth / (84 * 0.602)) * 2) / 2);
+        art.parentElement.style.height = `${size * VISIBLE_ROWS}px`;
+        if (art.getAttribute('size') !== String(size)) art.setAttribute('size', String(size));
+      };
+      fit();
+      new ResizeObserver(fit).observe(art.parentElement);
+    </script>
+    <script type="module" src="/ascii-magic-art/runtime/ascii.js"></script>
+  </body>
+</html>

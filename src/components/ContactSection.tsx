@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Mail, 
   MapPin, 
@@ -12,6 +13,8 @@ import {
 import emailjs from '@emailjs/browser';
 import { personalInfo } from '../data/portfolioData';
 import { sounds } from '../utils/soundEffects';
+import { MaskedWords, Reveal, RiseText, SectionRule } from './motion/primitives';
+import { BACK_OUT, EXPO_OUT } from './motion/tokens';
 
 export const ContactSection: React.FC = () => {
   const [copied, setCopied] = useState(false);
@@ -142,7 +145,8 @@ export const ContactSection: React.FC = () => {
   };
 
   return (
-    <section id="contact" className="pt-6 sm:pt-8 pb-16 sm:pb-20 bg-[#F7F2EB] border-t border-[#E3DACD] relative">
+    <section id="contact" className="pt-6 sm:pt-8 pb-16 sm:pb-20 bg-[#F7F2EB] relative">
+      <SectionRule />
       <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
         
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 items-start">
@@ -150,20 +154,18 @@ export const ContactSection: React.FC = () => {
           {/* Left Column: Direct Contact & Info (5 cols) */}
           <div className="lg:col-span-5 flex flex-col gap-5 sm:gap-6">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber/20 text-charcoal text-xs font-mono font-bold uppercase tracking-wider mb-3">
+              <RiseText className="mb-3" innerClassName="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber/20 text-charcoal text-xs font-mono font-bold uppercase tracking-wider">
                 <Mail className="w-3.5 h-3.5 text-amber-dark" />
                 <span>Let's Build Together</span>
-              </div>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-charcoal tracking-tight font-sans">
-                Initiate a Technical Conversation
-              </h2>
-              <p className="text-sm text-charcoal-muted mt-3 leading-relaxed">
+              </RiseText>
+              <MaskedWords className="text-3xl sm:text-4xl font-extrabold text-charcoal tracking-tight font-sans" text="Initiate a Technical Conversation" />
+              <RiseText delay={0.25} className="text-sm text-charcoal-muted mt-3 leading-relaxed">
                 Whether you’re architecting an enterprise multi-agent system, evaluating document processing pipelines, or looking for an AI engineer who ensures models never fail silently.
-              </p>
+              </RiseText>
             </div>
 
             {/* Quick Email Copy Card - Responsive Mobile Safe */}
-            <div className="p-4 sm:p-5 rounded-2xl bg-[#F7F2EB] border border-[#E3DACD] shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 overflow-hidden">
+            <Reveal delay={0.1} className="p-4 sm:p-5 rounded-2xl bg-[#F7F2EB] border border-[#E3DACD] shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 overflow-hidden">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="w-10 h-10 rounded-xl bg-amber/15 text-amber-dark flex items-center justify-center font-bold shrink-0">
                   <Mail className="w-5 h-5" />
@@ -187,22 +189,34 @@ export const ContactSection: React.FC = () => {
                 className="w-full sm:w-auto justify-center px-3.5 py-2 sm:py-2.5 rounded-xl border border-[#E3DACD] hover:bg-ecru-200 text-charcoal-muted hover:text-charcoal transition-all flex items-center gap-1.5 text-xs font-semibold shrink-0"
                 title="Copy Email to Clipboard"
               >
-                {copied ? (
-                  <>
-                    <Check className="w-4 h-4 text-emerald-600" />
-                    <span className="text-emerald-700">Copied!</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-4 h-4" />
-                    <span>Copy</span>
-                  </>
-                )}
+                {/* "Copied!" rises in and back out */}
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.span
+                    key={copied ? 'copied' : 'copy'}
+                    initial={{ y: 10, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: -10, opacity: 0 }}
+                    transition={{ duration: 0.25, ease: EXPO_OUT }}
+                    className="inline-flex items-center gap-2"
+                  >
+                    {copied ? (
+                      <>
+                        <Check className="w-4 h-4 text-emerald-600" />
+                        <span className="text-emerald-700">Copied!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-4 h-4" />
+                        <span>Copy</span>
+                      </>
+                    )}
+                  </motion.span>
+                </AnimatePresence>
               </button>
-            </div>
+            </Reveal>
 
             {/* Location & Languages */}
-            <div className="grid grid-cols-2 gap-3">
+            <Reveal delay={0.18} className="grid grid-cols-2 gap-3">
               <div className="p-4 rounded-2xl bg-[#F7F2EB] border border-[#E3DACD]">
                 <div className="flex items-center gap-2 text-charcoal-muted mb-1 text-xs">
                   <MapPin className="w-4 h-4 text-amber-dark" />
@@ -222,10 +236,10 @@ export const ContactSection: React.FC = () => {
                   {personalInfo.languages.join(', ')}
                 </span>
               </div>
-            </div>
+            </Reveal>
 
             {/* Social Links */}
-            <div className="pt-2">
+            <Reveal delay={0.26} className="pt-2">
               <span className="text-xs font-mono font-bold text-charcoal-muted uppercase tracking-wider block mb-3">
                 Professional Networks
               </span>
@@ -258,12 +272,12 @@ export const ContactSection: React.FC = () => {
                   <ArrowUpRight className="w-3.5 h-3.5 text-charcoal-muted" />
                 </a>
               </div>
-            </div>
+            </Reveal>
 
           </div>
 
           {/* Right Column: Contact Message Form (7 cols) */}
-          <div className="lg:col-span-7">
+          <Reveal delay={0.15} className="lg:col-span-7">
             <div className="p-5 sm:p-7 md:p-8 rounded-3xl bg-[#F7F2EB] border border-[#E3DACD] shadow-elevated">
               
               <div className="flex items-center justify-between pb-4 border-b border-[#EAE2D5] mb-6">
@@ -280,9 +294,22 @@ export const ContactSection: React.FC = () => {
 
               {submitted ? (
                 <div className="py-12 flex flex-col items-center text-center">
-                  <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4 border border-emerald-200">
-                    <Check className="w-7 h-7" />
-                  </div>
+                  {/* The badge pops, then its check draws itself */}
+                  <motion.div
+                    initial={{ scale: 0.6, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ duration: 0.5, ease: BACK_OUT }}
+                    className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4 border border-emerald-200"
+                  >
+                    <svg viewBox="0 0 24 24" className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+                      <motion.path
+                        d="M5 12.5l4.5 4.5L19 7.5"
+                        initial={{ pathLength: 0 }}
+                        animate={{ pathLength: 1 }}
+                        transition={{ duration: 0.55, ease: EXPO_OUT, delay: 0.25 }}
+                      />
+                    </svg>
+                  </motion.div>
                   <h4 className="text-lg font-bold text-charcoal">
                     Message Sent Directly to Dhiraj!
                   </h4>
@@ -484,7 +511,7 @@ export const ContactSection: React.FC = () => {
               )}
 
             </div>
-          </div>
+          </Reveal>
 
         </div>
 
