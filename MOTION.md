@@ -169,7 +169,7 @@ The floating navbar refracts the page scrolling underneath it, and the selected-
 **Rules**
 - **Two places only:**
   - The navbar.
-  - The project filters and the simulator's scenario selector (glisse `SegmentedControl` via `BrandSegmented`). Press-and-hold or drag the amber thumb and it lifts into a clear glass lens that bends the labels it passes over, as in iOS 26. glisse bends the content itself rather than the backdrop, so this one works in Safari and on iPhone too.
+  - The project filters, the simulator's scenario selector and its Visual Flow / Logs toggle (glisse `SegmentedControl` via `BrandSegmented`). Press-and-hold or drag the amber thumb and it lifts into a clear glass lens that bends the labels it passes over, as in iOS 26. glisse bends the content itself rather than the backdrop, so this one works in Safari and on iPhone too.
 - **Everything else stays solid:** every other button, tab and pill is solid charcoal, ecru or amber, for contrast and the one-accent palette. ASK ME before using glass anywhere else.
 - **Chromium only, with a graceful fallback.** Chrome and Edge render the refraction. Safari (so every iOS browser) and Firefox keep the frosted bar exactly as before: `bg-[#F7F2EB]/95` plus `backdrop-blur-md` with the ecru border.
 - **Values:**
@@ -185,6 +185,7 @@ The floating navbar refracts the page scrolling underneath it, and the selected-
     - Labels ecru `#F7F2EB` at 12px/600 (700 when selected).
     - Thumb amber `#D4A066`, with the selected label turning charcoal `#1C201D` on it at rest.
     - The lifted lens is ecru at 16% with a bright rim (`--lg-lens-shine: 1`, `--lg-rim-shine: 0.6`) and a shadow at 45% black.
-  - Segments are equal width, as on iOS: 136px for the project filter, 124px for the scenarios. Set it with `segmentWidth`; glisse's own 84px default is too narrow for the labels.
+  - Segments are equal width, as on iOS: 136px for the project filter, 124px for the scenarios, 92px for Visual Flow / Logs. Set it with `segmentWidth`; glisse's own 84px default is too narrow for the labels.
   - On narrow screens the row swipes sideways with its scrollbar hidden, and the chosen segment scrolls into view.
+  - **Never clip the lifted lens.** It grows 12px wider and 8px taller on each side, and its shadow reaches 18px below it. Below `md` the scroller is padded to fit all of that (`px-6 py-8`). From `md` up nothing scrolls, so overflow stays visible.
 - **Don't block the page:** the glass element's parent (`nav`) must not set its own `backdrop-filter`, `filter` or `opacity`, or the layer stops seeing the page.

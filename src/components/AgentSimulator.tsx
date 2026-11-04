@@ -432,35 +432,21 @@ export const AgentSimulator: React.FC = () => {
                 <RotateCcw className="w-3.5 h-3.5" />
               </button>
 
-              {/* View Mode Toggle Button */}
-              <div className="hidden sm:inline-flex items-center p-0.5 bg-[#F7F2EB] rounded-full border border-[#E3DACD] text-[11px] font-mono ml-1">
-                <button
-                  onClick={() => {
-                    sounds.playPillSelect();
-                    setViewMode('visual');
-                  }}
-                  className={`px-3 py-1 rounded-full transition-all font-semibold ${
-                    viewMode === 'visual'
-                      ? 'bg-[#F7F2EB] text-charcoal shadow-2xs font-bold border border-[#E3DACD]'
-                      : 'text-charcoal-muted hover:text-charcoal'
-                  }`}
-                >
-                  Visual Flow
-                </button>
-                <button
-                  onClick={() => {
-                    sounds.playPillSelect();
-                    setViewMode('telemetry');
-                  }}
-                  className={`px-3 py-1 rounded-full transition-all font-semibold ${
-                    viewMode === 'telemetry'
-                      ? 'bg-[#F7F2EB] text-charcoal shadow-2xs font-bold border border-[#E3DACD]'
-                      : 'text-charcoal-muted hover:text-charcoal'
-                  }`}
-                >
-                  Logs
-                </button>
-              </div>
+              {/* View mode: the same glass segmented control as the scenario selector */}
+              <BrandSegmented
+                aria-label="Pipeline view"
+                items={[
+                  { value: 'visual', label: 'Visual Flow' },
+                  { value: 'telemetry', label: 'Logs' },
+                ]}
+                value={viewMode}
+                onValueChange={(mode) => {
+                  sounds.playPillSelect();
+                  setViewMode(mode as 'visual' | 'telemetry');
+                }}
+                segmentWidth={92}
+                className="hidden sm:block ml-1"
+              />
             </div>
           </div>
 

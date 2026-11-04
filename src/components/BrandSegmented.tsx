@@ -28,8 +28,13 @@ export const BrandSegmented: React.FC<BrandSegmentedProps> = ({ items, value, on
   }, [value]);
 
   return (
-    // Scrolls sideways when the row is wider than the screen, with no scrollbar; the padding keeps the lifted lens unclipped
-    <div ref={scrollerRef} className={`brand-segmented-scroller max-w-full overflow-x-auto -mx-4 px-4 -my-3 py-3 ${className}`}>
+    // Phones: the row scrolls sideways (no scrollbar), and a scroller clips, so it is padded with room for the
+    // lifted lens (12px wider and 8px taller each side) and its shadow (7px down, 11px blur).
+    // From md up every row fits, so nothing scrolls or clips at all.
+    <div
+      ref={scrollerRef}
+      className={`brand-segmented-scroller max-w-full overflow-x-auto -mx-6 px-6 -my-5 py-8 md:overflow-visible md:m-0 md:p-0 ${className}`}
+    >
       <div
         data-theme="dark"
         className="brand-segmented inline-block"
