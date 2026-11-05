@@ -33,6 +33,8 @@ interface Scenario {
   id: string;
   name: string;
   tag: string;
+  /** Tag for phones, where the scenario segments share the screen width */
+  shortTag: string;
   query: string;
   routerTarget: string;
   verificationVerdict: string;
@@ -50,6 +52,7 @@ export const AgentSimulator: React.FC = () => {
       id: 'pnl-query',
       name: '1. NLP-to-SQL (Financial P&L)',
       tag: 'Multi-Agent SQL',
+      shortTag: 'SQL Agents',
       query: 'Show last quarter’s beverage variance vs budget for site #4, breaking down wine and draft beer.',
       routerTarget: 'Accounting (P&L Specialist) + Sales Coordinator',
       verificationVerdict: '3/3 Verification Stages Passed (AST Valid, Invariants Reconciled, Zero Grain Mismatch)',
@@ -110,6 +113,7 @@ export const AgentSimulator: React.FC = () => {
       id: 'invoice-ocr',
       name: '2. Papertrail: Invoice Extraction',
       tag: 'Papertrail IDP',
+      shortTag: 'Papertrail',
       query: 'Ingest Spanish multi-page supplier invoice (PDF) with handwritten delivery surcharge.',
       routerTarget: 'Document Intelligence + GPT-4o Vision + Arithmetic Engine',
       verificationVerdict: 'Arithmetic Reconciliation Caught $45.00 Tax Discrepancy -> Repaired in Code',
@@ -170,6 +174,7 @@ export const AgentSimulator: React.FC = () => {
       id: 'bar-vision',
       name: '3. Bar Vision: Video Inventory',
       tag: 'Bar Vision CV',
+      shortTag: 'Bar Vision',
       query: 'Process 45s handheld phone video of back-bar liquor bottles with motion blur.',
       routerTarget: 'OWLv2 Open-Vocabulary Detection + Optical Flow RANSAC',
       verificationVerdict: 'Spatial Trajectory Recovery Eliminated 35% Cross-Frame Duplicates',
@@ -230,6 +235,7 @@ export const AgentSimulator: React.FC = () => {
       id: 'pharma-ocr',
       name: '4. PharmaAI: Agreement to Invoice',
       tag: 'PharmaAI OCR',
+      shortTag: 'PharmaAI',
       query: 'Ingest signed 12-page Clinical Research Agreement (Pharmaris Canada) with 50% milestone advance.',
       routerTarget: 'Azure Document Intelligence + GPT-4o + GST/LUT Invariant Engine',
       verificationVerdict: 'Derived 50% Advance ($1,575 USD) • Applied 0% Export LUT • Routed to USD SWIFT',
@@ -364,7 +370,7 @@ export const AgentSimulator: React.FC = () => {
           {/* Scenario selector: glisse's iOS 26 segmented control; hold or drag the thumb to lift the glass lens */}
           <BrandSegmented
             aria-label="Choose a pipeline scenario"
-            items={scenarios.map((sc) => ({ value: sc.id, label: sc.tag }))}
+            items={scenarios.map((sc) => ({ value: sc.id, label: sc.tag, shortLabel: sc.shortTag }))}
             value={selectedScenario.id}
             onValueChange={(id) => handleScenarioChange(scenarios.find((sc) => sc.id === id)!)}
             segmentWidth={124}

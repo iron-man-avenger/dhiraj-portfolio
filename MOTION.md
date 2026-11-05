@@ -186,6 +186,9 @@ The floating navbar refracts the page scrolling underneath it, and the selected-
     - Thumb amber `#D4A066`, with the selected label turning charcoal `#1C201D` on it at rest.
     - The lifted lens is ecru at 16% with a bright rim (`--lg-lens-shine: 1`, `--lg-rim-shine: 0.6`) and a shadow at 45% black.
   - Segments are equal width, as on iOS: 136px for the project filter, 124px for the scenarios, 92px for Visual Flow / Logs. Set it with `segmentWidth`; glisse's own 84px default is too narrow for the labels.
-  - On narrow screens the row swipes sideways with its scrollbar hidden, and the chosen segment scrolls into view.
-  - **Never clip the lifted lens.** It grows 12px wider and 8px taller on each side, and its shadow reaches 18px below it. Below `md` the scroller is padded to fit all of that (`px-6 py-8`). From `md` up nothing scrolls, so overflow stays visible.
+  - **The rows never scroll.** glisse claims horizontal swipes for dragging the lens, so a scrolling row can't be swiped on a phone. Instead, when a row doesn't fit, the segments shrink to share the available width, switch to short labels and drop to 11px:
+    - Projects: All, Agentic, Document, Vision, Full-Stack.
+    - Scenarios: SQL Agents, Papertrail, Bar Vision, PharmaAI.
+    - This works down to a 320px screen.
+  - **Never clip the lifted lens.** It grows 12px wider and 8px taller on each side, and its shadow reaches 18px below it, so no ancestor of a selector may have `overflow` other than visible.
 - **Don't block the page:** the glass element's parent (`nav`) must not set its own `backdrop-filter`, `filter` or `opacity`, or the layer stops seeing the page.

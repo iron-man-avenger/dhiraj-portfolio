@@ -104,15 +104,6 @@
   color: #1C201D;
 }
 
-/* The row swipes sideways on phones without the site's amber page scrollbar */
-.brand-segmented-scroller {
-  scrollbar-width: none;
-}
-
-.brand-segmented-scroller::-webkit-scrollbar {
-  display: none;
-}
-
 /* glisse sets its segment width on .lg-segmented itself, so a per-instance width has to reach it through our own variable */
 .brand-segmented .lg-segmented {
   --lg-tab-width: var(--brand-segment-width, 84px);
@@ -127,4 +118,9 @@
 
 .brand-segmented .lg-segmented :is(.lg-tab, .lg-tab-copy)[data-selected] {
   font-weight: 700;
+}
+
+/* Narrow screens: segments shrink to share the width, so their (short) labels drop a size */
+.brand-segmented--compact .lg-segmented :is(.lg-tab, .lg-tab-copy) {
+  font-size: 11px;
 }

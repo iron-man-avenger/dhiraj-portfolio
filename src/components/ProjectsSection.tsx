@@ -19,6 +19,13 @@ export const ProjectsSection: React.FC = () => {
   const [modalOrigin, setModalOrigin] = useState({ x: 0, y: 0 });
 
   const categories = ['All', 'Agentic AI', 'Document AI', 'Computer Vision', 'Full-Stack Platform'];
+  // Labels for phones, where the five segments share the screen width
+  const shortCategory: Record<string, string> = {
+    'Agentic AI': 'Agentic',
+    'Document AI': 'Document',
+    'Computer Vision': 'Vision',
+    'Full-Stack Platform': 'Full-Stack',
+  };
 
   const filteredProjects = selectedCategory === 'All' 
     ? projects 
@@ -60,7 +67,7 @@ export const ProjectsSection: React.FC = () => {
           {/* Filter: glisse's iOS 26 segmented control; hold or drag the thumb to lift the glass lens */}
           <BrandSegmented
             aria-label="Filter projects by category"
-            items={categories.map((cat) => ({ value: cat, label: cat }))}
+            items={categories.map((cat) => ({ value: cat, label: cat, shortLabel: shortCategory[cat] }))}
             value={selectedCategory}
             onValueChange={(cat) => {
               sounds.playPillSelect();

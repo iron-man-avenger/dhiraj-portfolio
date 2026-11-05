@@ -1,12 +1,18 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { SegmentedControl } from 'glisse';
-import type { SegmentedControlItem } from 'glisse';
+
+export interface BrandSegment {
+  value: string;
+  label: string;
+  /** Shorter label used when the segments have to shrink to fit a narrow screen */
+  shortLabel?: string;
+}
 
 interface BrandSegmentedProps {
-  items: SegmentedControlItem[];
+  items: BrandSegment[];
   value: string;
   onValueChange: (value: string) => void;
-  /** Width of every segment in px (glisse segments are equal width, as on iOS); fit the longest label */
+  /** Widest a segment gets, in px (glisse segments are equal width, as on iOS); fit the longest label */
   segmentWidth: number;
   'aria-label': string;
   className?: string;
@@ -17,30 +23,40 @@ interface BrandSegmentedProps {
  * Press-and-hold or drag the thumb and it lifts into a clear glass lens with a bright rim that refracts the
  * labels, in every browser (glisse bends the content itself, not the backdrop). The dark track is what makes
  * the lens visible: on a pale track it vanished. Pinned to glisse's dark theme so the OS setting can't change it.
+ *
+ * It never scrolls: glisse claims horizontal swipes for dragging the lens, so a scrolling row could not be
+ * swiped. On a narrow screen the segments shrink to share the available width and switch to short labels.
  */
 export const BrandSegmented: React.FC<BrandSegmentedProps> = ({ items, value, onValueChange, segmentWidth, className = '', ...rest }) => {
-  const scrollerRef = useRef<HTMLDivElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const [available, setAvailable] = useState<number | null>(null);
 
-  // On a narrow screen the row scrolls; bring a newly chosen segment fully into view
+  // The room to fit into is the parent's width, so the control never decides its own size
   useEffect(() => {
-    const selected = scrollerRef.current?.querySelector<HTMLElement>('.lg-tab[data-selected]');
-    selected?.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
-  }, [value]);
+    const parent = rootRef.current?.parentElement;
+    if (!parent) return;
+    const measure = () => {
+      const style = getComputedStyle(parent);
+      setAvailable(parent.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight));
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(parent);
+    return () => observer.disconnect();
+  }, []);
+
+  const width = available === null ? segmentWidth : Math.min(segmentWidth, Math.floor(available / items.length));
+  const compact = width < segmentWidth;
+  const glisseItems = items.map((item) => ({ value: item.value, label: compact && item.shortLabel ? item.shortLabel : item.label }));
 
   return (
-    // Phones: the row scrolls sideways (no scrollbar), and a scroller clips, so it is padded with room for the
-    // lifted lens (12px wider and 8px taller each side) and its shadow (7px down, 11px blur).
-    // From md up every row fits, so nothing scrolls or clips at all.
-    <div
-      ref={scrollerRef}
-      className={`brand-segmented-scroller max-w-full overflow-x-auto -mx-6 px-6 -my-5 py-8 md:overflow-visible md:m-0 md:p-0 ${className}`}
-    >
+    <div ref={rootRef} className={`max-w-full ${className}`}>
       <div
         data-theme="dark"
-        className="brand-segmented inline-block"
-        style={{ '--brand-segment-width': `${segmentWidth}px` } as React.CSSProperties}
+        className={`brand-segmented inline-block ${compact ? 'brand-segmented--compact' : ''}`}
+        style={{ '--brand-segment-width': `${width}px` } as React.CSSProperties}
       >
-        <SegmentedControl items={items} value={value} onValueChange={onValueChange} aria-label={rest['aria-label']} />
+        <SegmentedControl items={glisseItems} value={value} onValueChange={onValueChange} aria-label={rest['aria-label']} />
       </div>
     </div>
   );
