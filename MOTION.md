@@ -102,6 +102,7 @@ Built from the primitives in `src/components/motion/`. Reach for these before wr
   - It rides the tip of the Journey timeline, which is drawn by the scroll position itself (the only scroll-scrubbed motion besides the hero parallax).
 - **Scroll-linked riders glide.** The balls on the navbar progress line and the Journey timeline follow the scroll through a light spring (Journey: stiffness 120, damping 28, mass 0.35; navbar: 140, 30, 0.4). They move only by `transform`: each ball sits in a full-length rider layer that is translated by a percentage of its own size. Never move them with `top` or `left`, which forces a layout pass on every frame and stutters.
 - **Numbers count up** from zero on arrival (1.6s, `expo.out`). Only the digits change; the surrounding words stay put.
+- **Filtered cards move, they never resize.** When the project filter changes, cards animate `layout="position"` only. A full layout animation scales the card between its old and new size, and that stretches and squashes the text inside, badly on phones, where card heights change most. A leaving card may shrink evenly (exit scale 0.94); nothing may scale unevenly.
 - **Case studies grow out of the card that opened them** (0.6s, `expo.inOut`) and shrink back into it on close.
 - **Typing:** queries and log lines type out at about 18ms (logs 10ms) per character, capped at about 1.4s per line, with an amber caret.
 - **Reduced motion:** `MotionConfig reducedMotion="user"` in `App.tsx` drops all movement. Count-ups and typing show their final text at once.

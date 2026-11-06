@@ -80,13 +80,14 @@ export const ProjectsSection: React.FC = () => {
 
         {/* Clean, Editorial Projects Grid with Primary Color Accents */}
         <LayoutGroup>
-        <motion.div layout className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Cards animate their position only: animating size scales the card, which stretches and squashes its text */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <AnimatePresence mode="popLayout" initial={false}>
           {filteredProjects.map((project, idx) => (
             <motion.div
               key={project.id}
               data-project-card
-              layout
+              layout="position"
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.94, transition: { duration: 0.25 } }}
@@ -155,7 +156,7 @@ export const ProjectsSection: React.FC = () => {
             </motion.div>
           ))}
           </AnimatePresence>
-        </motion.div>
+        </div>
         </LayoutGroup>
       </div>
 
