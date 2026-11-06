@@ -20,8 +20,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenArcade, soundMuted, onTogg
 
   const navLinks = [
     { label: 'OVERVIEW', href: '#overview' },
-    { label: 'PROJECTS', href: '#projects' },
     { label: 'SIMULATOR', href: '#simulator' },
+    { label: 'PROJECTS', href: '#projects' },
     { label: 'STACK', href: '#skills' },
     { label: 'PRINCIPLES', href: '#principles' },
     { label: 'JOURNEY', href: '#journey' },
