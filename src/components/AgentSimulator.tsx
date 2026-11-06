@@ -380,7 +380,8 @@ export const AgentSimulator: React.FC = () => {
 
         {/* Main Simulator Card (Warm Glassmorphism & High-Visual Architecture) */}
         <Reveal>
-        <div className="rounded-3xl bg-[#F7F2EB] border border-[#E3DACD] shadow-sm p-4 sm:p-6 md:p-8 backdrop-blur-md transition-all duration-300">
+        {/* Solid card: a backdrop blur here was invisible behind the opaque fill but still redrawn on every scroll frame */}
+        <div className="rounded-3xl bg-[#F7F2EB] border border-[#E3DACD] shadow-sm p-4 sm:p-6 md:p-8">
           
           {/* Top Bar: Input Query & Primary Action */}
           <div className="flex flex-col md:flex-row md:items-center justify-between pb-6 mb-8 border-b border-[#E3DACD]/80 gap-5">

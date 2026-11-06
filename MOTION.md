@@ -86,6 +86,17 @@ Built from the primitives in `src/components/motion/`. Reach for these before wr
 - `PipelineRail.tsx`: the ball travelling a row of stages.
 - `DrawnLogo.tsx`: the logo drawing itself.
 
+**Smooth scrolling (from the Awwwards scrolling references: its-tomo.dev and grail-app.com use Lenis, madebyigor.com uses GSAP ScrollSmoother)**
+- **Lenis 1.3.27 smooths wheel and trackpad scrolling** (`src/utils/smoothScroll.ts`: `lerp 0.1`, `syncTouch: false`, `anchors: true`). Touch scrolling stays native, because a phone's own scroll is already its smoothest. Visitors who prefer reduced motion get native scrolling.
+- Never set `scroll-behavior: smooth` anywhere (neither CSS nor the `scroll-smooth` class); it fights Lenis. In-page `#links` glide through Lenis and land on the sections' `scroll-margin-top`.
+- Anything that locks the page sets `overflow: hidden` on `<html>`, and Lenis pauses automatically. Anything with its own scroll area (a modal) needs `data-lenis-prevent`.
+- **Phones get smoothness by doing less per frame:**
+  - No `backdrop-filter` on large or opaque surfaces.
+  - No SVG refraction on touch devices.
+  - Moving decorations that carry filters or shadows get `will-change: transform`, so they're drawn once and only moved.
+  - No bulk count-ups on touch devices.
+  - `overflow-x: clip`, not `hidden`, on `<html>` and `<body>`.
+
 **Rules**
 - Scroll reveals play **once**, when the element is about 12% inside the viewport (`VIEWPORT`). Nothing replays on scroll-up.
 - **Section openings:**
@@ -172,6 +183,7 @@ The floating navbar refracts the page scrolling underneath it, and the selected-
   - The navbar.
   - The project filters, the simulator's scenario selector and its Visual Flow / Logs toggle (glisse `SegmentedControl` via `BrandSegmented`). Press-and-hold or drag the amber thumb and it lifts into a clear glass lens that bends the labels it passes over, as in iOS 26. glisse bends the content itself rather than the backdrop, so this one works in Safari and on iPhone too.
 - **Everything else stays solid:** every other button, tab and pill is solid charcoal, ecru or amber, for contrast and the one-accent palette. ASK ME before using glass anywhere else.
+- **Chromium desktops only, with a graceful fallback.** Touch devices also get the fallback: the refraction is redrawn on every scroll frame, which a 120Hz phone scroll can't afford.
 - **Chromium only, with a graceful fallback.** Chrome and Edge render the refraction. Safari (so every iOS browser) and Firefox keep the frosted bar exactly as before: `bg-[#F7F2EB]/95` plus `backdrop-blur-md` with the ecru border.
 - **Values:**
   - Ecru tint `#F7F2EB` at 70%, so the links always read.

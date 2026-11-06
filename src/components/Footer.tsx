@@ -2,13 +2,14 @@ import React from 'react';
 import { ArrowUp } from 'lucide-react';
 import { personalInfo } from '../data/portfolioData';
 import { sounds } from '../utils/soundEffects';
+import { scrollToTop as glideToTop } from '../utils/smoothScroll';
 import { DhirajLogo } from './DhirajLogo';
 import { DrawnLogo } from './motion/DrawnLogo';
 
 export const Footer: React.FC = () => {
   const scrollToTop = () => {
     sounds.playTap();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    glideToTop();
   };
 
   return (

@@ -13,6 +13,10 @@ import { BrandSegmented } from './BrandSegmented';
 import { CountUpText, MaskedWords, RiseText, SectionRule, Stagger } from './motion/primitives';
 import { EXPO_OUT, staggerItem } from './motion/tokens';
 
+// On touch devices the card metrics show their final values: some 30 numbers counting at once
+// re-measure text on every frame, right while the cards scroll into view
+const countCardMetrics = typeof window !== 'undefined' && window.matchMedia('(pointer: fine)').matches;
+
 export const ProjectsSection: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [activeModalProject, setActiveModalProject] = useState<Project | null>(null);
@@ -136,7 +140,7 @@ export const ProjectsSection: React.FC = () => {
                     <div key={mIdx} className="p-2 rounded-xl bg-[#F7F2EB] border border-[#E5DDCF]/70">
                       <span className="text-[10px] text-charcoal-muted block truncate">{m.label}</span>
                       <strong className="text-xs font-bold text-charcoal group-hover:text-amber-dark transition-colors truncate block">
-                        <CountUpText text={m.value} />
+                        {countCardMetrics ? <CountUpText text={m.value} /> : m.value}
                       </strong>
                     </div>
                   ))}
@@ -170,6 +174,7 @@ export const ProjectsSection: React.FC = () => {
             exit={{ opacity: 0, transition: { duration: 0.35, delay: 0.1 } }}
             transition={{ duration: 0.3 }}
             onClick={(e) => e.target === e.currentTarget && handleCloseModal()}
+            data-lenis-prevent
             className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 md:p-6 bg-charcoal/70 backdrop-blur-md overflow-y-auto"
           >
             <motion.div

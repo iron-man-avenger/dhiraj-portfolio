@@ -73,7 +73,8 @@ export const displacementFilter = (o: DisplacementOptions) => {
 
 /**
  * Only Chromium browsers apply SVG filters in backdrop-filter; Safari (so every iOS browser)
- * and Firefox keep the plain frosted blur.
+ * and Firefox keep the plain frosted blur. Touch devices keep it too: the refraction is redrawn on
+ * every scroll frame, which a phone's 120Hz scroll can't afford (MOTION.md §11).
  */
 export const supportsLiquidGlass = (() => {
   if (typeof document === 'undefined') return false;
@@ -82,5 +83,6 @@ export const supportsLiquidGlass = (() => {
   const value = probe.style.backdropFilter;
   const parses = value === 'url(#probe)' || value === 'url("#probe")';
   // Firefox parses the value but does not render it; only Chromium draws the refraction
-  return parses && /Chrome\//.test(navigator.userAgent) && !/Firefox\//.test(navigator.userAgent);
+  const chromium = /Chrome\//.test(navigator.userAgent) && !/Firefox\//.test(navigator.userAgent);
+  return parses && chromium && window.matchMedia('(pointer: fine)').matches;
 })();

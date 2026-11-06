@@ -71,7 +71,8 @@ export const Hero: React.FC<HeroProps> = ({ onOpenArcade, revealed = true }) => 
         {/* Right Watermark Logo: Large-Scale & Light-Shade, Shifted Down & Right as before (Responsive Mobile Safe) */}
         <div className="absolute -right-4 sm:-right-10 md:right-[-8%] lg:right-[-12%] xl:right-[-15%] top-1/2 -translate-y-[35%] w-[260px] sm:w-[420px] md:w-[620px] lg:w-[720px] xl:w-[800px] aspect-square pointer-events-none select-none z-0 opacity-15 sm:opacity-20 md:opacity-25 transition-all duration-500">
           {/* Parallax layer: its own element, so the wrapper's Tailwind translate stays intact */}
-          <motion.div style={{ y: watermarkY, rotate: watermarkRotate }} className="absolute inset-0">
+          {/* will-change: its own GPU layer, so the shadows and glow are drawn once and only moved while scrolling */}
+          <motion.div style={{ y: watermarkY, rotate: watermarkRotate }} className="absolute inset-0 will-change-transform">
             {/* Subtle Ambient Radial Lighting */}
             <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-amber/[0.15] via-[#F7F2EB]/40 to-transparent blur-3xl" />
 

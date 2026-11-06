@@ -13,6 +13,7 @@ import { Footer } from './components/Footer';
 import { ArcadeGame } from './components/ArcadeGame';
 import { IntroLoader } from './components/IntroLoader';
 import { sounds } from './utils/soundEffects';
+import { startSmoothScroll } from './utils/smoothScroll';
 
 // Skip the intro for reduced-motion visitors and deep links straight to a section
 const shouldPlayIntro = () =>
@@ -24,6 +25,9 @@ export function App() {
   const [heroRevealed, setHeroRevealed] = useState(() => !introActive);
   const handleIntroReveal = useCallback(() => setHeroRevealed(true), []);
   const handleIntroDone = useCallback(() => setIntroActive(false), []);
+
+  // Lenis smooths wheel and trackpad scrolling; touch stays native
+  useEffect(() => startSmoothScroll(), []);
 
   // The browser jumps to a #section before React has drawn it, so jump once the page exists
   useEffect(() => {

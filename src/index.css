@@ -3,9 +3,12 @@
 @tailwind utilities;
 
 @layer base {
+  /* Smooth scrolling comes from Lenis (src/utils/smoothScroll.ts), which needs scroll-behavior left at auto.
+     overflow-x: clip, not hidden: hidden makes the page a scroll container, which some phones (iOS especially)
+     scroll less smoothly. Browsers without clip keep the hidden line above it. */
   html {
-    scroll-behavior: smooth;
     overflow-x: hidden;
+    overflow-x: clip;
     max-width: 100vw;
   }
 
@@ -19,6 +22,7 @@
     color: #2B302C;
     font-family: 'Plus Jakarta Sans', sans-serif;
     overflow-x: hidden;
+    overflow-x: clip;
     max-width: 100vw;
   }
 
